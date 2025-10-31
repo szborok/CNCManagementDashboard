@@ -1,17 +1,32 @@
-import React from "react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import {
-  LayoutDashboard,
   Grid3X3,
-  Search,
   Wrench,
   Settings,
   LogOut,
-  Activity,
-  Database,
+  X,
+  Menu,
+  Plus,
+  Circle,
+  Lock,
+  Zap,
+  Clock,
+  History,
+  Search,
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
+  Building2,
+  FileJson,
+  Upload,
+  Archive,
+  FolderOpen,
+  Target,
 } from "lucide-react";
+import { AppView } from "../App";
+import { useState } from "react";
 
 interface User {
   id: string;
@@ -19,37 +34,55 @@ interface User {
   username: string;
   isAdmin: boolean;
   avatar?: string;
+  company?: {
+    name: string;
+    logo?: string;
+  };
 }
 
 interface SidebarProps {
-  currentUser: User;
+  user: User;
   currentView: string;
   onViewChange: (view: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
   onLogout: () => void;
 }
 
-const navigationItems = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-  },
-  { id: "plates", label: "Clamping Plates", icon: Grid3X3, href: "/plates" },
-  { id: "scanner", label: "JSON Scanner", icon: Search, href: "/scanner" },
-  { id: "tools", label: "Tool Manager", icon: Wrench, href: "/tools" },
+const healthStatusItems = [
+  { id: 'new-plates', label: 'New Plates', icon: Plus },
+  { id: 'used-plates', label: 'Used Plates', icon: Circle },
+  { id: 'locked-plates', label: 'Locked Plates', icon: Lock },
 ] as const;
 
-const adminItems = [
-  { id: "settings", label: "Settings", icon: Settings, href: "/settings" },
+const occupancyStatusItems = [
+  { id: 'free-plates', label: 'Free Plates', icon: Circle },
+  { id: 'in-use-plates', label: 'In Use Plates', icon: Zap },
+] as const;
+
+const myPlatesItems = [
+  { id: 'ongoing-work', label: 'Ongoing Work', icon: Clock },
+  { id: 'history', label: 'History', icon: History },
 ] as const;
 
 export default function Sidebar({
-  currentUser,
+  user,
   currentView,
   onViewChange,
+  isOpen,
+  onToggle,
   onLogout,
 }: SidebarProps) {
+  const [expandedApps, setExpandedApps] = useState<string[]>(['analyzer', 'plates']);
+
+  const toggleApp = (appId: string) => {
+    setExpandedApps(prev => 
+      prev.includes(appId) 
+        ? prev.filter(id => id !== appId)
+        : [...prev, appId]
+    );
+  };
+
   return (
     <>
       {/* Mobile overlay */}
@@ -81,17 +114,25 @@ export default function Sidebar({
         flex flex-col
       `}
       >
-        {/* Header */}
-        <div className="p-4">
+        {/* Header - Company Info */}
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center flex-shrink-0">
-              <Wrench className="w-5 h-5 text-sidebar-primary-foreground" />
+            {/* Company Logo */}
+            <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+              {user.company?.logo ? (
+                <img src={user.company.logo} alt="Company Logo" className="w-8 h-8 rounded" />
+              ) : (
+                <Building2 className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+              )}
             </div>
             {isOpen && (
               <div className="min-w-0">
-                <h2 className="text-sidebar-foreground truncate">
-                  Clamping Plates Manager
+                <h2 className="text-lg font-semibold text-sidebar-foreground truncate">
+                  {user.company?.name || 'Your Company'}
                 </h2>
+                <p className="text-xs text-sidebar-muted-foreground">
+                  CNC Management System
+                </p>
               </div>
             )}
           </div>
@@ -100,7 +141,7 @@ export default function Sidebar({
         <Separator className="bg-sidebar-border" />
 
         {/* Navigation */}
-        <div className="flex-1 p-4 space-y-6 overflow-y-auto">
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto">
           {/* Dashboard */}
           <div>
             <Button
@@ -115,101 +156,210 @@ export default function Sidebar({
             </Button>
           </div>
 
-          {/* All Plates */}
-          <div>
+          <Separator className="bg-sidebar-border" />
+
+          {/* Apps Section */}
+          {isOpen && (
+            <h3 className="text-xs text-muted-foreground uppercase tracking-wide px-3">
+              Applications
+            </h3>
+          )}
+
+          {/* JSON File Analyzer App */}
+          <div className="space-y-1">
             <Button
-              variant={currentView === "all-plates" ? "default" : "ghost"}
-              className={`w-full justify-start ${
+              variant="ghost"
+              className={`w-full justify-between ${
                 !isOpen && "lg:justify-center"
               }`}
-              onClick={() => onViewChange("all-plates")}
+              onClick={() => toggleApp('analyzer')}
             >
-              <Grid3X3 className="h-4 w-4" />
-              {isOpen && <span className="ml-3">All Plates</span>}
+              <div className="flex items-center">
+                <FileJson className="h-4 w-4" />
+                {isOpen && <span className="ml-3">JSON File Analyzer</span>}
+              </div>
+              {isOpen && (
+                expandedApps.includes('analyzer') ? 
+                <ChevronDown className="h-4 w-4" /> : 
+                <ChevronRight className="h-4 w-4" />
+              )}
             </Button>
+            
+            {isOpen && expandedApps.includes('analyzer') && (
+              <div className="ml-6 space-y-1">
+                <Button
+                  variant={currentView === "my-auto-results" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("my-auto-results")}
+                >
+                  <Archive className="h-3 w-3 mr-2" />
+                  My Auto Results
+                </Button>
+                <Button
+                  variant={currentView === "my-manual-results" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("my-manual-results")}
+                >
+                  <Search className="h-3 w-3 mr-2" />
+                  My Manual Results
+                </Button>
+                <Button
+                  variant={currentView === "manual-upload" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("manual-upload")}
+                >
+                  <Upload className="h-3 w-3 mr-2" />
+                  Manual Upload
+                </Button>
+              </div>
+            )}
           </div>
 
-          {/* Plate Health Section */}
-          <div className="space-y-3">
-            {isOpen && (
-              <h3 className="text-xs text-muted-foreground uppercase tracking-wide px-3">
-                Plate Health
-              </h3>
+          {/* Matrix Tools Manager App */}
+          <div className="space-y-1">
+            <Button
+              variant="ghost"
+              className={`w-full justify-between ${
+                !isOpen && "lg:justify-center"
+              }`}
+              onClick={() => toggleApp('tools')}
+            >
+              <div className="flex items-center">
+                <BarChart3 className="h-4 w-4" />
+                {isOpen && <span className="ml-3">Matrix Tools Manager</span>}
+              </div>
+              {isOpen && (
+                expandedApps.includes('tools') ? 
+                <ChevronDown className="h-4 w-4" /> : 
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
+            
+            {isOpen && expandedApps.includes('tools') && (
+              <div className="ml-6 space-y-1">
+                <Button
+                  variant={currentView === "available-tools" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("available-tools")}
+                >
+                  <Target className="h-3 w-3 mr-2" />
+                  Currently Available
+                </Button>
+                <Button
+                  variant={currentView === "projects-by-tools" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("projects-by-tools")}
+                >
+                  <FolderOpen className="h-3 w-3 mr-2" />
+                  Projects by Tools
+                </Button>
+                <Button
+                  variant={currentView === "tools-by-projects" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("tools-by-projects")}
+                >
+                  <Archive className="h-3 w-3 mr-2" />
+                  Tools by Projects
+                </Button>
+              </div>
             )}
-            <Separator className="bg-sidebar-border" />
-            <div className="space-y-1">
-              {healthStatusItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Button
-                    key={item.id}
-                    variant={currentView === item.id ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      !isOpen && "lg:justify-center"
-                    }`}
-                    onClick={() => onViewChange(item.id as AppView)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {isOpen && <span className="ml-3">{item.label}</span>}
-                  </Button>
-                );
-              })}
-            </div>
           </div>
 
-          {/* Plate Occupancy Section */}
-          <div className="space-y-3">
-            {isOpen && (
-              <h3 className="text-xs text-muted-foreground uppercase tracking-wide px-3">
-                Plate Occupancy
-              </h3>
+          {/* Plates Manager App */}
+          <div className="space-y-1">
+            <Button
+              variant="ghost"
+              className={`w-full justify-between ${
+                !isOpen && "lg:justify-center"
+              }`}
+              onClick={() => toggleApp('plates')}
+            >
+              <div className="flex items-center">
+                <Wrench className="h-4 w-4" />
+                {isOpen && <span className="ml-3">Plates Manager</span>}
+              </div>
+              {isOpen && (
+                expandedApps.includes('plates') ? 
+                <ChevronDown className="h-4 w-4" /> : 
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </Button>
+            
+            {isOpen && expandedApps.includes('plates') && (
+              <div className="ml-6 space-y-1">
+                <Button
+                  variant={currentView === "all-plates" ? "default" : "ghost"}
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("all-plates")}
+                >
+                  All Plates
+                </Button>
+                
+                <div className="space-y-1 mt-2">
+                  <div className="text-xs text-muted-foreground px-2 py-1">Health Status</div>
+                  {healthStatusItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Button
+                        key={item.id}
+                        variant={currentView === item.id ? "default" : "ghost"}
+                        size="sm"
+                        className="w-full justify-start pl-4"
+                        onClick={() => onViewChange(item.id as AppView)}
+                      >
+                        <Icon className="h-3 w-3 mr-2" />
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <div className="space-y-1 mt-2">
+                  <div className="text-xs text-muted-foreground px-2 py-1">Occupancy</div>
+                  {occupancyStatusItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Button
+                        key={item.id}
+                        variant={currentView === item.id ? "default" : "ghost"}
+                        size="sm"
+                        className="w-full justify-start pl-4"
+                        onClick={() => onViewChange(item.id as AppView)}
+                      >
+                        <Icon className="h-3 w-3 mr-2" />
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <div className="space-y-1 mt-2">
+                  <div className="text-xs text-muted-foreground px-2 py-1">My Plates</div>
+                  {myPlatesItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Button
+                        key={item.id}
+                        variant={currentView === item.id ? "default" : "ghost"}
+                        size="sm"
+                        className="w-full justify-start pl-4"
+                        onClick={() => onViewChange(item.id as AppView)}
+                      >
+                        <Icon className="h-3 w-3 mr-2" />
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
             )}
-            <Separator className="bg-sidebar-border" />
-            <div className="space-y-1">
-              {occupancyStatusItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Button
-                    key={item.id}
-                    variant={currentView === item.id ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      !isOpen && "lg:justify-center"
-                    }`}
-                    onClick={() => onViewChange(item.id as AppView)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {isOpen && <span className="ml-3">{item.label}</span>}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* My Plates Section */}
-          <div className="space-y-3">
-            {isOpen && (
-              <h3 className="text-xs text-muted-foreground uppercase tracking-wide px-3">
-                My Plates
-              </h3>
-            )}
-            <div className="space-y-1">
-              {myPlatesItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Button
-                    key={item.id}
-                    variant={currentView === item.id ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      !isOpen && "lg:justify-center"
-                    }`}
-                    onClick={() => onViewChange(item.id as AppView)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {isOpen && <span className="ml-3">{item.label}</span>}
-                  </Button>
-                );
-              })}
-            </div>
           </div>
         </div>
 
@@ -236,45 +386,44 @@ export default function Sidebar({
                   </p>
                 </div>
               </div>
-
-              <Separator className="bg-sidebar-border" />
-
-              <div className="space-y-1">
-                <Button
-                  variant={currentView === "settings" ? "default" : "ghost"}
-                  className="w-full justify-start"
-                  size="sm"
-                  onClick={() => onViewChange("settings")}
-                >
-                  <Settings className="h-4 w-4" />
-                  <span className="ml-3">Settings</span>
-                </Button>
+              
+              <div className="flex space-x-2">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-destructive hover:text-destructive"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => onViewChange("settings")}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+                
+                <Button
+                  variant="ghost" 
                   size="sm"
                   onClick={onLogout}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span className="ml-3">Log Out</span>
                 </Button>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
               <Button
-                variant={currentView === "settings" ? "default" : "ghost"}
+                variant="ghost"
                 size="icon"
-                className="w-full"
                 onClick={() => onViewChange("settings")}
+                className="w-full"
               >
                 <Settings className="h-4 w-4" />
               </Button>
+              
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-full text-destructive hover:text-destructive"
                 onClick={onLogout}
+                className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <LogOut className="h-4 w-4" />
               </Button>

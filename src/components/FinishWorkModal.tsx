@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { CheckCircle, Upload, X } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { CheckCircle, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface FinishWorkModalProps {
   isOpen: boolean;

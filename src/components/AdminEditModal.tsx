@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -7,22 +7,22 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
 import { Shield, Save, X } from 'lucide-react';
-import { User as UserType, Plate } from '../App';
-import { toast } from 'sonner@2.0.3';
+import { LegacyUser, Plate } from '../App';
+import { toast } from "sonner";
 
 interface AdminEditModalProps {
   plate: Plate;
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (plate: Plate) => void;
-  user: UserType;
+  user: LegacyUser;
 }
 
 export default function AdminEditModal({ plate, isOpen, onClose, onUpdate, user }: AdminEditModalProps) {
   const [formData, setFormData] = useState({
     name: plate.name || '',
     shelf: plate.shelf,
-    status: plate.status,
+    health: plate.health,
     notes: plate.notes || ''
   });
   const [newPreviewImage, setNewPreviewImage] = useState<File | null>(null);
@@ -33,7 +33,7 @@ export default function AdminEditModal({ plate, isOpen, onClose, onUpdate, user 
       ...plate,
       name: formData.name || undefined,
       shelf: formData.shelf,
-      status: formData.status,
+      health: formData.health,
       notes: formData.notes || undefined,
       lastModifiedBy: user.name,
       lastModifiedDate: new Date(),
@@ -58,7 +58,7 @@ export default function AdminEditModal({ plate, isOpen, onClose, onUpdate, user 
     const changes: string[] = [];
     if (formData.name !== (plate.name || '')) changes.push('name');
     if (formData.shelf !== plate.shelf) changes.push('shelf');
-    if (formData.status !== plate.status) changes.push('status');
+    if (formData.health !== plate.health) changes.push('health');
     if (formData.notes !== (plate.notes || '')) changes.push('notes');
     if (newPreviewImage) changes.push('preview image');
     if (newXTFile) changes.push('X_T file');
@@ -69,7 +69,7 @@ export default function AdminEditModal({ plate, isOpen, onClose, onUpdate, user 
     setFormData({
       name: plate.name || '',
       shelf: plate.shelf,
-      status: plate.status,
+      health: plate.health,
       notes: plate.notes || ''
     });
     setNewPreviewImage(null);
@@ -128,12 +128,12 @@ export default function AdminEditModal({ plate, isOpen, onClose, onUpdate, user 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="health">Health Status</Label>
               <Select
-                value={formData.status}
+                value={formData.health}
                 onValueChange={(value) => setFormData(prev => ({ 
                   ...prev, 
-                  status: value as Plate['status']
+                  health: value as Plate['health']
                 }))}
               >
                 <SelectTrigger>
@@ -142,7 +142,7 @@ export default function AdminEditModal({ plate, isOpen, onClose, onUpdate, user 
                 <SelectContent>
                   <SelectItem value="new">🟢 New</SelectItem>
                   <SelectItem value="used">🔵 Used</SelectItem>
-                  <SelectItem value="free">🟠 Free</SelectItem>
+                  <SelectItem value="locked">� Locked</SelectItem>
                   <SelectItem value="locked">🔴 Locked</SelectItem>
                   {/* Note: 'in-use' status cannot be set directly by admin */}
                 </SelectContent>

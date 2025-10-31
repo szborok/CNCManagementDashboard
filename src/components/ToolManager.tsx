@@ -21,7 +21,7 @@ interface ToolManagerProps {
   currentUser: any;
 }
 
-const ToolManager: React.FC<ToolManagerProps> = ({ currentUser }) => {
+const ToolManager: React.FC<ToolManagerProps> = ({ currentUser: _currentUser }) => {
   // Mock data - this will be replaced with API calls
   const mockTools: Tool[] = [
     {
@@ -153,7 +153,7 @@ const ToolManager: React.FC<ToolManagerProps> = ({ currentUser }) => {
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{criticalTools}</div>
             <p className="text-xs text-muted-foreground">
-              >90% usage
+              {'>'} 90% usage
             </p>
           </CardContent>
         </Card>

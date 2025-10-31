@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -17,15 +17,15 @@ import {
   MapPin,
   Box
 } from 'lucide-react';
-import { User as UserType, Plate } from '../App';
-import { toast } from 'sonner@2.0.3';
+import { LegacyUser, Plate } from '../App';
+import { toast } from "sonner";
 import StopWorkModal from './StopWorkModal';
 import AdminEditModal from './AdminEditModal';
 import FinishWorkModal from './FinishWorkModal';
 
 interface PlateDetailModalProps {
   plate: Plate;
-  user: UserType;
+  user: LegacyUser;
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (plate: Plate) => void;
@@ -133,7 +133,7 @@ export default function PlateDetailModal({ plate, user, isOpen, onClose, onUpdat
     setTimeout(() => onClose(), 500);
   };
 
-  const handleFinishWork = (xtFile: File, previewImage: File, notes?: string) => {
+  const handleFinishWork = (_xtFile: File, _previewImage: File, notes?: string) => {
     const updatedPlate = {
       ...plate,
       health: 'used' as const,

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -43,17 +42,6 @@ export default function Settings({
   onFontSizeChange,
   onHighContrastChange,
 }: SettingsProps) {
-  const getThemeIcon = () => {
-    switch (theme) {
-      case "light":
-        return <Sun className="h-4 w-4" />;
-      case "dark":
-        return <Moon className="h-4 w-4" />;
-      default:
-        return <Monitor className="h-4 w-4" />;
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div>
@@ -190,40 +178,6 @@ export default function Settings({
                 Adjust the base font size throughout the
                 application for better readability.
               </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Preview Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Preview</CardTitle>
-            <CardDescription>
-              See how your settings affect the appearance of the
-              application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-              <div>
-                <h3>Sample Heading</h3>
-                <p>
-                  This is a preview of how text will appear with
-                  your current settings. The font size is set to{" "}
-                  {fontSize}, theme is {theme}
-                  {highContrast &&
-                    ", and high contrast mode is enabled"}
-                  .
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <div className="px-3 py-1 bg-primary text-primary-foreground rounded">
-                  Primary Button
-                </div>
-                <div className="px-3 py-1 border border-border rounded">
-                  Secondary Button
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
