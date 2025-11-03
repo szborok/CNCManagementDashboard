@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -19,12 +19,12 @@ import {
   SelectValue,
 } from './ui/select';
 import { Search, Filter, SortAsc, SortDesc } from 'lucide-react';
-import { User as UserType, Plate } from '../App';
+import { LegacyUser, Plate } from '../App';
 import PlateDetailModal from './PlateDetailModal';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface PlatesTableProps {
-  user: UserType;
+  user: LegacyUser;
   filter?: 'new-health' | 'used-health' | 'locked-health' | 'free-occupancy' | 'in-use-occupancy' | 'ongoing-work' | 'history';
 }
 
@@ -249,15 +249,6 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
     if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
     return 0;
   });
-
-  const toggleSort = (column: typeof sortBy) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
 
   const getPageTitle = () => {
     switch (filter) {

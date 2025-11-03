@@ -87,6 +87,52 @@ interface DashboardProps {
 - ✅ Added cross-application activity feed
 - ✅ Integrated system status monitoring
 
+### AdminSettings.tsx (NEW!)
+**Purpose**: Comprehensive administrative configuration panel with feature parity to SetupWizard
+
+**Key Features**:
+- Company Information management with feature toggles
+- Conditional module configuration cards (JSON Analyzer, Matrix Tools, Plates Manager)
+- Enhanced file browser functionality with validation
+- Auto/Manual mode selection matching SetupWizard
+- Storage path configuration with conditional display
+- Feature enablement controls
+
+**Component Structure**:
+```typescript
+interface AdminSettingsProps {
+  user: UserType;
+}
+
+// Configuration structure matches SetupWizard
+const setupConfig = {
+  companyInfo: { name, logo, enableDarkMode, enableNotifications },
+  modules: { jsonAnalyzer, matrixTools, platesManager },
+  authentication: { type, userManagement },
+  storage: { dataPath, logsPath, backupPath },
+  features: { autoBackup, systemNotifications, advancedAnalytics }
+}
+```
+
+**Layout Organization**:
+- Company Information section with feature toggles
+- Conditional module configuration cards based on enablement
+- Storage configuration with Auto/Manual mode buttons
+- Feature management controls
+
+**Integration Points**:
+- useSetupConfig hook for state management
+- Conditional UI based on feature toggles
+- Enhanced file browser with proper validation
+- Consistent styling with SetupWizard components
+
+**Recent Changes**:
+- ✅ Complete redesign for feature parity with SetupWizard
+- ✅ Added conditional UI display based on module enablement
+- ✅ Enhanced file browser functionality
+- ✅ Implemented Auto/Manual mode button styling
+- ✅ Added comprehensive configuration management
+
 ### Sidebar.tsx
 **Purpose**: Main navigation with company branding and dropdown structure
 
@@ -122,6 +168,7 @@ interface SidebarProps {
 - ✅ Implemented dropdown navigation structure
 - ✅ Created organized app sections
 - ✅ Added proper active state indicators
+- ✅ **NEW**: Vertical layout for admin settings and logout buttons
 
 ### Settings.tsx
 **Purpose**: User preferences and accessibility controls
@@ -144,6 +191,37 @@ interface SettingsProps {
 - ✅ Removed preview section
 - ✅ Simplified to core functionality
 - ✅ Cleaned up unused code
+
+### SetupWizard.tsx
+**Purpose**: First-time setup wizard for new installations with comprehensive configuration
+
+**Key Features**:
+- 6-step configuration process
+- Company branding setup
+- Module selection and configuration
+- Authentication configuration
+- Storage path setup
+- Feature activation controls
+
+**Configuration Steps**:
+1. Company Information
+2. Module Configuration
+3. Authentication Setup
+4. Storage Configuration
+5. Additional Features
+6. Review & Complete
+
+**Integration**:
+- useSetupConfig hook for state management
+- Auto/Manual mode button patterns
+- Conditional UI based on feature selection
+- Template downloads and data import
+
+**Recent Changes**:
+- ✅ Removed "Setup Complete!" section from Additional Features step
+- ✅ Enhanced Auto/Manual mode button styling
+- ✅ Improved conditional UI display
+- ✅ Better integration with AdminSettings
 
 ## 🔄 Authentication Flow
 

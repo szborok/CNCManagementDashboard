@@ -2,6 +2,94 @@
 
 All notable changes to the CNC Management Dashboard project.
 
+## [2.1.1] - 2025-11-12
+
+### 🔧 Admin Settings Enhancement
+- **IMPROVED**: Complete AdminSettings component redesign for better administrative control
+- **NEW**: Feature parity between AdminSettings and SetupWizard configurations
+- **NEW**: Conditional UI display based on feature enablement status
+- **NEW**: Enhanced file browser functionality with improved path handling
+- **IMPROVED**: Vertical sidebar layout for better space utilization
+- **FIXED**: File input reset functionality for better user experience
+
+### 🎨 UI/UX Improvements
+- **IMPROVED**: Sidebar layout changed from horizontal to vertical button stacking
+- **NEW**: Admin Settings and Logout buttons properly aligned under each other
+- **IMPROVED**: SetupWizard cleanup - removed unnecessary "Setup Complete!" section
+- **NEW**: Auto/Manual mode selection with consistent button styling across components
+
+### 📋 Configuration Management
+- **NEW**: Company Information section with feature toggles
+- **NEW**: Conditional module configuration cards (JSON Analyzer, Matrix Tools, Plates Manager)
+- **IMPROVED**: Enhanced storage path configuration with better validation
+- **NEW**: Feature enablement controls matching SetupWizard capabilities
+
+### 🛠️ Technical Improvements
+- **IMPROVED**: AdminSettings component architecture with better state management
+- **NEW**: Comprehensive gap analysis documentation (ADMINSETTINGS_SETUPWIZARD_ANALYSIS.md)
+- **IMPROVED**: File handling with proper validation and error management
+- **FIXED**: Component restoration procedures for safer development
+
+## [2.1.0] - 2025-11-03
+
+### 🆕 Major Feature: Setup Wizard
+- **NEW**: Comprehensive first-time setup wizard for new installations
+- **NEW**: Step-by-step configuration for company branding, modules, and data paths
+- **NEW**: Employee data import system with CSV and JSON support
+- **NEW**: Template generation for employee data and configuration
+- **NEW**: Data migration tools for existing users transitioning from other systems
+- **NEW**: Configuration management with export/import capabilities
+
+### 🔧 Setup & Configuration Features
+- **Company Branding Setup**: Configure company name and logo during initial setup
+- **Module Configuration**: Choose between integrated or standalone modes for each application
+- **Authentication Options**: Support for file-based, database, or LDAP authentication
+- **Storage Path Configuration**: Customizable paths for data, logs, and backups
+- **Feature Toggle System**: Enable/disable features like dark mode, notifications, auto-backup
+
+### 📊 Data Management Improvements
+- **CSV Import Support**: Bulk import employees from CSV files with template generation
+- **JSON Data Validation**: Comprehensive validation for imported data
+- **Template Downloads**: Pre-configured templates for employees, plates, and tools
+- **Migration Tools**: Import existing data from other manufacturing systems
+- **Configuration Export**: Backup and share configuration settings
+
+### 🛠️ Technical Enhancements
+- **Setup Detection**: Automatic detection of first-time installations
+- **Configuration Persistence**: Settings stored in localStorage with fallback options
+- **Data Import Service**: Robust import system with error handling and validation
+- **Setup State Management**: Clean separation between setup and application states
+
+### 📁 File Structure Additions
+```
+config/
+├── employees.template.json     # Sample employee data structure
+data/
+├── plates.template.json        # Sample plate data structure
+├── matrix_tools.template.json  # Sample tool data structure
+src/
+├── hooks/
+│   └── useSetupConfig.ts       # Setup configuration management
+├── services/
+│   └── DataImporter.ts         # Data import and validation
+└── components/
+    └── SetupWizard.tsx         # Multi-step setup interface
+```
+
+### 📚 Documentation Updates
+- **SETUP_GUIDE.md**: Comprehensive setup guide for new users
+- **Updated README.md**: Integration of setup wizard information
+- **Enhanced ARCHITECTURE.md**: Setup system architecture documentation
+
+### 🎯 User Experience Improvements
+- **Guided Onboarding**: Step-by-step setup process for new users
+- **Visual Progress Indicators**: Clear progress tracking through setup steps
+- **Contextual Help**: Inline guidance and examples for each configuration option
+- **Error Handling**: Comprehensive error messages and recovery options
+- **Template System**: Easy-to-use templates for common configurations
+
+---
+
 ## [2.0.0] - 2025-10-31
 
 ### 🎨 Major UI Redesign

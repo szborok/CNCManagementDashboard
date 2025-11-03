@@ -24,7 +24,7 @@ interface ScannerResultsProps {
   currentUser: any;
 }
 
-const ScannerResults: React.FC<ScannerResultsProps> = ({ currentUser }) => {
+const ScannerResults: React.FC<ScannerResultsProps> = ({ currentUser: _currentUser }) => {
   // Mock data - this will be replaced with API calls
   const mockResults: ScanResult[] = [
     {

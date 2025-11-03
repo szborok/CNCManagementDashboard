@@ -2,7 +2,58 @@
 
 A comprehensive manufacturing management system built with React, TypeScript, and Tailwind CSS. This dashboard integrates multiple manufacturing applications to provide a unified view of operations.
 
+## 🆕 New in Version 2.1 - Setup Wizard
+
+**First-time users** are now greeted with an intuitive setup wizard that guides you through:
+- Company branding configuration
+- Module selection and configuration
+- Employee data import/setup
+- Storage path configuration
+- Feature activation
+
+Perfect for users cloning this repository who want to set it up for their own environment!
+
 ## 🚀 Features
+
+### 🔧 Setup Wizard (NEW!)
+- **First-time Configuration**: Comprehensive wizard for new installations
+- **Module Selection**: Choose which applications to enable
+- **Data Import**: Import existing employee, plate, and tool data
+- **Path Configuration**: Set up storage locations for data, logs, and backups
+- **Authentication Setup**: Choose between file-based, database, or LDAP authentication
+
+### For New Installations
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/szborok/CNCManagementDashboard.git
+   cd CNCManagementDashboard
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the application**
+   ```bash
+   npm run dev
+   ```
+
+4. **Follow the Setup Wizard**
+   - On first launch, you'll see a comprehensive setup wizard
+   - Configure your company information, modules, and data paths
+   - Import existing employee data or create new accounts
+   - The wizard will guide you through each step
+
+5. **Access the Dashboard**
+   - After setup completion, use the configured login credentials
+   - Default admin: `admin` / `admin123`
+   - Default operator: `operator` / `operator123`
+
+### For Existing Users
+If you've already configured the system, you'll go directly to the login page.
+
+**To reconfigure**: Clear browser localStorage and refresh the page to restart the setup wizard.
 
 ### Multi-Application Integration
 - **JSON File Analyzer**: Automated processing and analysis of manufacturing JSON files
@@ -54,6 +105,13 @@ src/
 ```
 
 ## 🔄 Recent Major Updates
+
+### Admin Settings Enhancement (November 2025)
+- **Complete AdminSettings Redesign**: Reorganized with feature toggles and conditional UI
+- **SetupWizard Integration**: AdminSettings now matches SetupWizard configuration options
+- **Vertical Sidebar Layout**: Admin settings and logout buttons stacked vertically
+- **Enhanced File Management**: Improved file browser functionality and path handling
+- **Feature Parity**: Complete alignment between AdminSettings and SetupWizard capabilities
 
 ### UI Redesign (October 2025)
 - **Removed all gradient colors** for professional appearance
@@ -133,6 +191,12 @@ Password: operator123
 - **Purpose**: User preferences and accessibility controls
 - **Features**: Theme selection, font sizing, high contrast mode
 - **Access**: Available to all authenticated users
+
+### AdminSettings.tsx (NEW!)
+- **Purpose**: Administrative configuration panel with comprehensive controls
+- **Features**: Company Information toggles, conditional module configuration, enhanced file management
+- **Integration**: Feature parity with SetupWizard, Auto/Manual mode selection
+- **Access**: Admin-only with role-based restrictions
 
 ## 🔗 Integration Points
 
@@ -223,6 +287,6 @@ Private project for BRK Manufacturing
 
 ---
 
-**Last Updated**: October 31, 2025
-**Version**: 2.0.0
+**Last Updated**: November 12, 2025
+**Version**: 2.1.0
 **Maintainer**: AI Development Team

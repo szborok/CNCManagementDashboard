@@ -387,24 +387,39 @@ export default function Sidebar({
                 </div>
               </div>
               
-              <div className="flex space-x-2">
+              <div className="space-y-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1"
+                  className="w-full justify-start"
                   onClick={() => onViewChange("settings")}
                 >
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Button>
                 
+                {user.isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => onViewChange("admin-settings")}
+                  >
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                    </svg>
+                    Admin Settings
+                  </Button>
+                )}
+                
                 <Button
                   variant="ghost" 
                   size="sm"
                   onClick={onLogout}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
                 </Button>
               </div>
             </div>
@@ -418,6 +433,19 @@ export default function Sidebar({
               >
                 <Settings className="h-4 w-4" />
               </Button>
+              
+              {user.isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onViewChange("admin-settings")}
+                  className="w-full"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                  </svg>
+                </Button>
+              )}
               
               <Button
                 variant="ghost"

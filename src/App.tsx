@@ -5,12 +5,15 @@ import {
   Route,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useSetupConfig } from "./hooks/useSetupConfig";
 import Dashboard from "./components/Dashboard";
 import PlatesTable from "./components/PlatesTable";
 import ScannerResults from "./components/ScannerResults";
 import ToolManager from "./components/ToolManager";
 import Settings from "./components/Settings";
+import AdminSettings from "./components/AdminSettings";
 import Sidebar from "./components/Sidebar";
+import SetupWizard from "./components/SetupWizard";
 import ProtectedRoute, { 
   AdminRoute
 } from "./components/ProtectedRoute";
@@ -207,6 +210,7 @@ export type AppView =
   | "scanner-results"
   | "tool-manager"
   | "settings"
+  | "admin-settings"
   // JSON File Analyzer views
   | "my-auto-results"
   | "my-manual-results" 
@@ -507,6 +511,28 @@ function AppContent() {
               />
             </ProtectedRoute>
           )}
+          
+          {currentView === "admin-settings" && (
+            <AdminRoute>
+              <AdminSettings
+                theme={theme}
+                fontSize={fontSize}
+                highContrast={highContrast}
+                onThemeChange={(newTheme) => {
+                  setTheme(newTheme);
+                  localStorage.setItem("theme", newTheme);
+                }}
+                onFontSizeChange={(newSize) => {
+                  setFontSize(newSize);
+                  localStorage.setItem("fontSize", newSize);
+                }}
+                onHighContrastChange={(enabled) => {
+                  setHighContrast(enabled);
+                  localStorage.setItem("highContrast", enabled.toString());
+                }}
+              />
+            </AdminRoute>
+          )}
         </div>
       </main>
 
@@ -522,11 +548,37 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<WorkingLoginPage />} />
-          <Route path="/*" element={<AppContent />} />
+          <Route path="/*" element={<AppWithSetup />} />
         </Routes>
       </Router>
     </AuthProvider>
   );
+}
+
+function AppWithSetup() {
+  const { config, isLoading, saveConfig, isFirstTimeSetup } = useSetupConfig();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isFirstTimeSetup) {
+    return (
+      <SetupWizard 
+        initialConfig={config}
+        onComplete={saveConfig}
+      />
+    );
+  }
+
+  return <AppContent />;
 }
 
 export { type User } from "./services/AuthService";
