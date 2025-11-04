@@ -1403,15 +1403,7 @@ function AuthenticationStep({
     ? SetupValidation.validateEmployeeFile(config.authentication.employeeFile)
     : { isValid: config.authentication.method !== "file" }; // Required only for file method
 
-  const databaseValidation = config.authentication.databaseConnection
-    ? SetupValidation.validateDatabaseConnection(
-        config.authentication.databaseConnection
-      )
-    : { isValid: config.authentication.method !== "database" }; // Required only for database method
-
-  const ldapValidation = config.authentication.ldapServer
-    ? SetupValidation.validateLDAPServer(config.authentication.ldapServer)
-    : { isValid: config.authentication.method !== "ldap" }; // Required only for LDAP method
+  // Note: Database and LDAP validations removed as they were unused
 
   const updateAuth = (updates: Partial<SetupConfig["authentication"]>) => {
     updateConfig({
@@ -1598,26 +1590,10 @@ function StorageStep({
     "mono"
   );
 
-  // Directory path validations
-  const basePathValidation = config.storage.basePath
-    ? SetupValidation.validateDirectoryPath(config.storage.basePath)
-    : { isValid: true }; // Optional field
-
-  const logsPathValidation = config.storage.logsPath
-    ? SetupValidation.validateDirectoryPath(config.storage.logsPath)
-    : { isValid: false, error: "Logs directory is required" };
-
-  const backupPathValidation = config.storage.backupPath
-    ? SetupValidation.validateDirectoryPath(config.storage.backupPath)
-    : { isValid: false, error: "Backup directory is required" };
-
-  const tempPathValidation = config.storage.tempPath
-    ? SetupValidation.validateDirectoryPath(config.storage.tempPath)
-    : { isValid: false, error: "Temporary directory is required" };
-
-  const outputPathValidation = config.storage.outputPath
-    ? SetupValidation.validateDirectoryPath(config.storage.outputPath)
-    : { isValid: false, error: "Output directory is required" };
+  // Note: Directory path validations removed as they were unused
+  // If validation UI is needed later, these can be restored:
+  // - basePathValidation, logsPathValidation, backupPathValidation,
+  // - tempPathValidation, outputPathValidation
 
   // Show folder selection limitation notice when component mounts
   useEffect(() => {
