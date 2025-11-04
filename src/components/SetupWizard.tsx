@@ -137,6 +137,88 @@ export default function SetupWizard({
     }
   };
 
+  const handleNextClick = () => {
+    if (currentStepValid) {
+      nextStep();
+    } else {
+      // Show user what's missing instead of proceeding
+      showValidationErrors(currentStep);
+    }
+  };
+
+  const showValidationErrors = (step: number) => {
+    let errorMessage = "Please complete the following:\n\n";
+
+    switch (step) {
+      case 1: // Company step
+        if (!SetupValidation.validateCompanyName(config.companyName).isValid) {
+          errorMessage += "• Company name is required (minimum 2 characters)\n";
+        }
+        if (!config.companyLogo || config.companyLogo.trim() === "") {
+          errorMessage += "• Company logo is required\n";
+        }
+        break;
+
+      case 2: // Modules step
+        if (
+          !config.modules.jsonAnalyzer.enabled &&
+          !config.modules.matrixTools.enabled &&
+          !config.modules.platesManager.enabled
+        ) {
+          errorMessage += "• At least one module must be enabled\n";
+        }
+        break;
+
+      case 3: // Authentication step
+        if (config.authentication.method === "file") {
+          if (!config.authentication.employeeFile) {
+            errorMessage +=
+              "• Employee file is required for file-based authentication\n";
+          } else if (
+            !SetupValidation.validateEmployeeFile(
+              config.authentication.employeeFile
+            ).isValid
+          ) {
+            errorMessage += "• Employee file must be CSV or JSON format\n";
+          }
+        } else if (config.authentication.method === "ldap") {
+          if (!config.authentication.ldapServer) {
+            errorMessage += "• LDAP server address is required\n";
+          } else if (
+            !SetupValidation.validateLDAPServer(
+              config.authentication.ldapServer
+            ).isValid
+          ) {
+            errorMessage +=
+              "• LDAP server format is invalid (use ldap://server or ldaps://server)\n";
+          }
+        } else if (config.authentication.method === "database") {
+          if (!config.authentication.databaseConnection) {
+            errorMessage += "• Database connection string is required\n";
+          } else if (
+            !SetupValidation.validateDatabaseConnection(
+              config.authentication.databaseConnection
+            ).isValid
+          ) {
+            errorMessage += "• Database connection string format is invalid\n";
+          }
+        }
+        break;
+
+      case 4: // Storage step
+        if (
+          config.storage.basePath &&
+          !SetupValidation.validateDirectoryPath(config.storage.basePath)
+            .isValid
+        ) {
+          errorMessage += "• Storage path is invalid\n";
+        }
+        break;
+    }
+
+    alert(errorMessage);
+  };
+
   const prevStep = () => {
     if (currentStep > 0) {
       const newStep = currentStep - 1;
@@ -144,6 +226,81 @@ export default function SetupWizard({
       // Progress is automatically saved via useEffect
     }
   };
+
+  // Validation function for each step
+  const isStepValid = (step: number): boolean => {
+    switch (step) {
+      case 0: // Introduction step - always valid
+        return true;
+
+      case 1: // Company step
+        const companyNameValid = SetupValidation.validateCompanyName(
+          config.companyName
+        ).isValid;
+        const logoValid = !!(
+          config.companyLogo && config.companyLogo.trim() !== ""
+        );
+        return companyNameValid && logoValid;
+
+      case 2: // Modules step
+        // At least one module should be enabled
+        const modulesValid =
+          config.modules.jsonAnalyzer.enabled ||
+          config.modules.matrixTools.enabled ||
+          config.modules.platesManager.enabled;
+
+        // Debug logging
+        console.log("🔍 Modules validation:", {
+          jsonAnalyzer: config.modules.jsonAnalyzer.enabled,
+          matrixTools: config.modules.matrixTools.enabled,
+          platesManager: config.modules.platesManager.enabled,
+          isValid: modulesValid,
+        });
+
+        return modulesValid;
+
+      case 3: // Authentication step
+        if (config.authentication.method === "file") {
+          return (
+            !!config.authentication.employeeFile &&
+            SetupValidation.validateEmployeeFile(
+              config.authentication.employeeFile
+            ).isValid
+          );
+        } else if (config.authentication.method === "ldap") {
+          return (
+            !!config.authentication.ldapServer &&
+            SetupValidation.validateLDAPServer(config.authentication.ldapServer)
+              .isValid
+          );
+        } else if (config.authentication.method === "database") {
+          return (
+            !!config.authentication.databaseConnection &&
+            SetupValidation.validateDatabaseConnection(
+              config.authentication.databaseConnection
+            ).isValid
+          );
+        }
+        return true; // For 'none' type or other methods
+
+      case 4: // Storage step
+        // For storage, we check if the base path is provided and valid
+        if (config.storage.basePath) {
+          return SetupValidation.validateDirectoryPath(config.storage.basePath)
+            .isValid;
+        }
+        return true; // Base path is optional, other paths can be auto-generated
+
+      case 5: // Features step
+        // Features step is always valid as features are optional
+        return true;
+
+      default:
+        return true;
+    }
+  };
+
+  const currentStepValid = isStepValid(currentStep);
 
   const clearWizardProgress = () => {
     try {
@@ -231,7 +388,7 @@ export default function SetupWizard({
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               CNC Management Dashboard Setup
             </h1>
-            {/* Reset Progress Button - positioned absolutely to the right */}
+            {/* Start Over Button - only show on pages after first */}
             {currentStep > 0 && (
               <Button
                 variant="outline"
@@ -363,7 +520,10 @@ export default function SetupWizard({
             </div>
 
             {currentStep < steps.length - 1 ? (
-              <Button onClick={nextStep} className="flex items-center gap-2">
+              <Button
+                onClick={handleNextClick}
+                className="flex items-center gap-2"
+              >
                 {currentStep === steps.length - 2 ? "Validate Setup" : "Next"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -417,8 +577,165 @@ function IntroductionStep({
       alert("Failed to download test data. Please try again.");
     }
   };
+
+  const handleDownloadEmployeeSample = () => {
+    try {
+      // Create sample employee data
+      const sampleEmployees = [
+        {
+          id: "EMP001",
+          name: "John Smith",
+          department: "Manufacturing",
+          role: "CNC Operator",
+          shift: "Day",
+          accessLevel: "operator",
+          email: "john.smith@company.com",
+          phone: "(555) 123-4567",
+          startDate: "2023-01-15",
+          certifications: ["CNC Level 2", "Safety Training"],
+          isActive: true,
+        },
+        {
+          id: "EMP002",
+          name: "Sarah Johnson",
+          department: "Manufacturing",
+          role: "Production Supervisor",
+          shift: "Day",
+          accessLevel: "supervisor",
+          email: "sarah.johnson@company.com",
+          phone: "(555) 234-5678",
+          startDate: "2022-08-10",
+          certifications: [
+            "CNC Level 3",
+            "Leadership Training",
+            "Quality Control",
+          ],
+          isActive: true,
+        },
+        {
+          id: "EMP003",
+          name: "Mike Davis",
+          department: "Manufacturing",
+          role: "CNC Operator",
+          shift: "Night",
+          accessLevel: "operator",
+          email: "mike.davis@company.com",
+          phone: "(555) 345-6789",
+          startDate: "2023-03-22",
+          certifications: ["CNC Level 1", "Safety Training"],
+          isActive: true,
+        },
+        {
+          id: "EMP004",
+          name: "Lisa Chen",
+          department: "Quality Control",
+          role: "QC Inspector",
+          shift: "Day",
+          accessLevel: "inspector",
+          email: "lisa.chen@company.com",
+          phone: "(555) 456-7890",
+          startDate: "2022-11-05",
+          certifications: ["Quality Control Level 2", "Measurement Systems"],
+          isActive: true,
+        },
+        {
+          id: "EMP005",
+          name: "David Wilson",
+          department: "Engineering",
+          role: "Manufacturing Engineer",
+          shift: "Day",
+          accessLevel: "admin",
+          email: "david.wilson@company.com",
+          phone: "(555) 567-8901",
+          startDate: "2021-06-12",
+          certifications: [
+            "Engineering Degree",
+            "Lean Manufacturing",
+            "Six Sigma",
+          ],
+          isActive: true,
+        },
+      ];
+
+      // Convert to CSV format
+      const headers = [
+        "id",
+        "name",
+        "department",
+        "role",
+        "shift",
+        "accessLevel",
+        "email",
+        "phone",
+        "startDate",
+        "certifications",
+        "isActive",
+      ];
+      const csvContent = [
+        headers.join(","),
+        ...sampleEmployees.map((emp) =>
+          [
+            emp.id,
+            `"${emp.name}"`,
+            emp.department,
+            `"${emp.role}"`,
+            emp.shift,
+            emp.accessLevel,
+            emp.email,
+            emp.phone,
+            emp.startDate,
+            `"${emp.certifications.join("; ")}"`,
+            emp.isActive,
+          ].join(",")
+        ),
+      ].join("\n");
+
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "employee_sample_data.csv");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      alert(
+        "Success!\n\nEmployee sample data downloaded as 'employee_sample_data.csv'\n\nThis file contains 5 sample employees with various roles and departments that you can use to test the system."
+      );
+    } catch (error) {
+      console.error("Error generating employee sample:", error);
+      alert("Failed to generate employee sample data. Please try again.");
+    }
+  };
   return (
     <div className="space-y-6">
+      {/* Debug button to clear localStorage */}
+      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              Debug Mode
+            </p>
+            <p className="text-xs text-yellow-700 dark:text-yellow-300">
+              Clear cached data if experiencing validation issues
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
+            className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+          >
+            Clear Cache & Reload
+          </Button>
+        </div>
+      </div>
+
       <div className="text-center space-y-4">
         <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
           <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -538,56 +855,78 @@ function IntroductionStep({
         <CardHeader>
           <CardTitle className="text-green-900 dark:text-green-100 flex items-center gap-2">
             <Download className="h-5 w-5" />
-            Try It Out - Download Test Data
+            Try It Out - Download Demo Files
           </CardTitle>
           <CardDescription className="text-green-700 dark:text-green-300">
-            New to the system? Download sample data to explore all features
+            New to the system? Download demo files to explore all features
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <p className="text-sm text-green-700 dark:text-green-300">
               If you're evaluating the system or just getting started, you can
-              download our comprehensive test data packages to explore all
+              download our comprehensive demo file packages to explore all
               features without needing your own data files.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20"
+                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
                 onClick={() => handleDownloadTestData("JSONScanner")}
               >
-                <FileJson className="h-4 w-4 mr-2" />
-                JSON Analyzer Samples
+                <FileJson className="h-5 w-5" />
+                <div className="text-center">
+                  <div className="font-medium">JSON Analyzer</div>
+                  <div className="text-xs">Demo Files</div>
+                </div>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20"
+                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
                 onClick={() => handleDownloadTestData("tool_manager")}
               >
-                <FileSpreadsheet className="h-4 w-4 mr-2" />
-                Tool Manager Samples
+                <FileSpreadsheet className="h-5 w-5" />
+                <div className="text-center">
+                  <div className="font-medium">Tool Manager</div>
+                  <div className="text-xs">Demo Files</div>
+                </div>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20"
+                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
                 onClick={() => handleDownloadTestData("clamping_plates")}
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Plate Manager Samples
+                <Settings className="h-5 w-5" />
+                <div className="text-center">
+                  <div className="font-medium">Plate Manager</div>
+                  <div className="text-xs">Demo Files</div>
+                </div>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
+                onClick={() => handleDownloadEmployeeSample()}
+              >
+                <Users className="h-5 w-5" />
+                <div className="text-center">
+                  <div className="font-medium">Employee</div>
+                  <div className="text-xs">Demo File</div>
+                </div>
               </Button>
             </div>
 
             <div className="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
-              <p className="font-medium mb-1">Test data includes:</p>
+              <p className="font-medium mb-1">Demo files include:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Real CAD project structures with JSON files</li>
                 <li>Sample Excel tool matrices and inventory files</li>
                 <li>Clamping plate data and usage examples</li>
+                <li>Employee data with various roles and departments</li>
                 <li>Complete workflow demonstrations</li>
               </ul>
             </div>
@@ -605,21 +944,6 @@ function IntroductionStep({
             <p className="text-yellow-700 dark:text-yellow-300">
               The setup will take about 5-10 minutes. You can always modify
               these settings later through the admin panel.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-        <div className="flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm">
-            <p className="font-medium text-green-800 dark:text-green-200 mb-1">
-              Auto-Save Protection
-            </p>
-            <p className="text-green-700 dark:text-green-300">
-              Your progress is automatically saved. You can safely refresh the
-              browser or close this tab and continue where you left off.
             </p>
           </div>
         </div>
@@ -680,9 +1004,13 @@ function CompanyStep({
       if (file) {
         const validation = SetupValidation.validateImageFile(file.name);
         if (validation.isValid) {
-          // For demo purposes, we'll just use the file name
-          // In a real implementation, you'd upload the file and get a URL
-          updateConfig({ companyLogo: `./assets/${file.name}` });
+          // Convert file to data URL for immediate display and storage
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUrl = event.target?.result as string;
+            updateConfig({ companyLogo: dataUrl });
+          };
+          reader.readAsDataURL(file);
         } else {
           alert(validation.error || "Invalid image file");
         }
@@ -695,12 +1023,70 @@ function CompanyStep({
   const companyNameValidation = SetupValidation.validateCompanyName(
     config.companyName
   );
-  const logoValidation = config.companyLogo
-    ? SetupValidation.validateImageFile(config.companyLogo)
-    : { isValid: true }; // Logo is optional
+  const logoValidation: { isValid: boolean; error?: string; warning?: string } =
+    config.companyLogo && config.companyLogo.trim() !== ""
+      ? { isValid: true } // If we have a logo (data URL), it's valid
+      : { isValid: false, error: "Company logo is required" };
 
   return (
     <div className="space-y-6">
+      {/* Continue Previous Setup Section */}
+      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            Continue Previous Setup
+          </CardTitle>
+          <CardDescription>
+            Already completed this setup before? If you reinstalled the app or
+            moved to a new location, you can continue where you left off by
+            uploading your previous configuration.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = ".json";
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      try {
+                        const loadedConfig = JSON.parse(
+                          event.target?.result as string
+                        );
+                        updateConfig(loadedConfig);
+                        alert(
+                          "Configuration loaded successfully! Your previous setup has been restored."
+                        );
+                      } catch (error) {
+                        alert(
+                          "Invalid configuration file. Please select a valid JSON file exported from this setup wizard."
+                        );
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                };
+                input.click();
+              }}
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Previous Config
+            </Button>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Supports .json files exported from this setup wizard
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Company Information Card */}
       <Card>
         <CardHeader>
@@ -741,38 +1127,69 @@ function CompanyStep({
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="companyLogo">Company Logo (Optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="companyLogo"
-                  value={config.companyLogo || ""}
-                  onChange={(e) =>
-                    updateConfig({ companyLogo: e.target.value })
-                  }
-                  placeholder="e.g., ./assets/logo.png"
-                  className={`flex-1 ${
-                    config.companyLogo && !logoValidation.isValid
-                      ? "border-red-300 focus:border-red-500"
-                      : config.companyLogo && logoValidation.isValid
-                      ? "border-green-300 focus:border-green-500"
-                      : ""
-                  }`}
-                  onDoubleClick={(e) => {
-                    e.currentTarget.select();
-                  }}
-                  onFocus={(e) => {
-                    setTimeout(() => e.target.select(), 0);
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogoFileSelect}
-                  className="flex-shrink-0"
-                >
-                  <FolderOpen className="h-4 w-4" />
-                </Button>
+              <Label htmlFor="companyLogo">Company Logo</Label>
+              <div className="space-y-3">
+                {/* Logo Preview */}
+                {config.companyLogo && (
+                  <div className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <img
+                      src={config.companyLogo}
+                      alt="Company Logo Preview"
+                      className="w-16 h-16 object-contain border border-gray-300 dark:border-gray-600 rounded"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Logo Selected
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Upload file or paste URL below to change
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateConfig({ companyLogo: "" })}
+                      className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+
+                {/* Logo URL Input Field and Upload Button */}
+                <div className="flex gap-2">
+                  <Input
+                    id="companyLogo"
+                    value={config.companyLogo || ""}
+                    onChange={(e) =>
+                      updateConfig({ companyLogo: e.target.value })
+                    }
+                    placeholder="Paste image URL or use upload button"
+                    className={`flex-1 ${
+                      config.companyLogo && !logoValidation.isValid
+                        ? "border-red-300 focus:border-red-500"
+                        : config.companyLogo && logoValidation.isValid
+                        ? "border-green-300 focus:border-green-500"
+                        : ""
+                    }`}
+                    onDoubleClick={(e) => {
+                      e.currentTarget.select();
+                    }}
+                    onFocus={(e) => {
+                      setTimeout(() => e.target.select(), 0);
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleLogoFileSelect}
+                    className="flex items-center gap-2 flex-shrink-0"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1">
                 {config.companyLogo && (
@@ -783,8 +1200,8 @@ function CompanyStep({
                   />
                 )}
                 <p className="text-xs text-gray-400">
-                  {SetupValidation.getFileTypeDescription("image")}. Click the
-                  folder icon to browse.
+                  {SetupValidation.getFileTypeDescription("image")}. You can
+                  upload a file or paste an image URL.
                 </p>
               </div>
             </div>

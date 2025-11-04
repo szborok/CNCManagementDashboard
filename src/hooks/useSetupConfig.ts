@@ -82,13 +82,13 @@ const defaultConfig: SetupConfig = {
   },
   modules: {
     jsonAnalyzer: {
-      enabled: true,
+      enabled: false,
       mode: "auto",
       dataPath: "",
       autoProcessing: true,
     },
     matrixTools: {
-      enabled: true,
+      enabled: false,
       mode: "auto",
       dataPath: "",
       inventoryFile: "",
@@ -102,7 +102,7 @@ const defaultConfig: SetupConfig = {
       },
     },
     platesManager: {
-      enabled: true,
+      enabled: false,
       mode: "auto",
       dataPath: "",
       plateDatabase: "",

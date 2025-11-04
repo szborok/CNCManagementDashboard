@@ -321,6 +321,59 @@ export default function AdminSettings({
         </CardContent>
       </Card>
 
+      {/* JSON Results Viewer */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileJson className="h-5 w-5" />
+            JSON Results Viewer
+          </CardTitle>
+          <CardDescription>
+            View all processed JSON files and their analysis results
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium">Processing Results</h4>
+              <p className="text-sm text-muted-foreground">
+                View detailed results from JSON Scanner processing
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                // TODO: Open JSON results modal/page
+                alert(
+                  "JSON Results Viewer will show:\n\n• All processed JSON files\n• Processing timestamps\n• Extracted data summaries\n• Validation results\n• Error logs\n\nThis feature will be implemented next."
+                );
+              }}
+              className="flex items-center gap-2"
+            >
+              <FileJson className="h-4 w-4" />
+              View JSON Results
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">--</div>
+              <div className="text-sm text-muted-foreground">
+                Files Processed
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">--</div>
+              <div className="text-sm text-muted-foreground">Successful</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-red-600">--</div>
+              <div className="text-sm text-muted-foreground">Errors</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* 1. Company Information (matches SetupWizard step 1) */}
       <Card>
         <CardHeader>
