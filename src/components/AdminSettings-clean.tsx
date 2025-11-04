@@ -1,11 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
-import { Badge } from './ui/badge';
-import { 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
+import { Badge } from "./ui/badge";
+import {
   Settings,
   Play,
   Pause,
@@ -19,9 +25,9 @@ import {
   Database,
   Users,
   CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
-import { useSetupConfig } from '../hooks/useSetupConfig';
+  AlertCircle,
+} from "lucide-react";
+import { useSetupConfig } from "../hooks/useSetupConfig";
 
 interface AdminSettingsProps {
   theme: "auto" | "light" | "dark";
@@ -39,24 +45,29 @@ interface ModuleProcessingState {
 }
 
 export default function AdminSettings({
-  theme,
-  fontSize,
-  highContrast,
-  onThemeChange,
-  onFontSizeChange,
-  onHighContrastChange,
+  theme: _theme,
+  fontSize: _fontSize,
+  highContrast: _highContrast,
+  onThemeChange: _onThemeChange,
+  onFontSizeChange: _onFontSizeChange,
+  onHighContrastChange: _onHighContrastChange,
 }: AdminSettingsProps) {
   const { config, saveConfig } = useSetupConfig();
   const [localConfig, setLocalConfig] = useState(config);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [storageStrategy, setStorageStrategy] = useState<'mono' | 'individual'>('mono');
-  const [processingStates, setProcessingStates] = useState<ModuleProcessingState>({
-    jsonScanner: true,
-    toolManager: true,
-    clampingPlateManager: true
-  });
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle"
+  );
+  const [storageStrategy, setStorageStrategy] = useState<"mono" | "individual">(
+    "mono"
+  );
+  const [processingStates, setProcessingStates] =
+    useState<ModuleProcessingState>({
+      jsonScanner: true,
+      toolManager: true,
+      clampingPlateManager: true,
+    });
 
   useEffect(() => {
     setLocalConfig(config);
@@ -64,7 +75,7 @@ export default function AdminSettings({
 
   useEffect(() => {
     // Load processing states from localStorage
-    const savedStates = localStorage.getItem('moduleProcessingStates');
+    const savedStates = localStorage.getItem("moduleProcessingStates");
     if (savedStates) {
       setProcessingStates(JSON.parse(savedStates));
     }
@@ -79,20 +90,20 @@ export default function AdminSettings({
   const handleSaveConfiguration = async () => {
     try {
       setIsSaving(true);
-      setSaveStatus('idle');
-      
+      setSaveStatus("idle");
+
       const success = await saveConfig(localConfig);
-      
+
       if (success) {
         setHasChanges(false);
-        setSaveStatus('success');
-        setTimeout(() => setSaveStatus('idle'), 3000);
+        setSaveStatus("success");
+        setTimeout(() => setSaveStatus("idle"), 3000);
       } else {
-        setSaveStatus('error');
+        setSaveStatus("error");
       }
     } catch (error) {
-      console.error('Failed to save configuration:', error);
-      setSaveStatus('error');
+      console.error("Failed to save configuration:", error);
+      setSaveStatus("error");
     } finally {
       setIsSaving(false);
     }
@@ -101,31 +112,31 @@ export default function AdminSettings({
   const toggleModuleProcessing = (module: keyof ModuleProcessingState) => {
     const newStates = {
       ...processingStates,
-      [module]: !processingStates[module]
+      [module]: !processingStates[module],
     };
     setProcessingStates(newStates);
-    localStorage.setItem('moduleProcessingStates', JSON.stringify(newStates));
+    localStorage.setItem("moduleProcessingStates", JSON.stringify(newStates));
   };
 
   const handleFileSelect = (type: string) => {
-    const input = document.createElement('input');
-    input.type = 'file';
+    const input = document.createElement("input");
+    input.type = "file";
     input.webkitdirectory = true;
     input.onchange = (e) => {
       const target = e.target as HTMLInputElement;
       if (target.files && target.files.length > 0) {
-        const folderPath = target.files[0].webkitRelativePath.split('/')[0];
-        if (type === 'jsonAnalyzerPath') {
+        const folderPath = target.files[0].webkitRelativePath.split("/")[0];
+        if (type === "jsonAnalyzerPath") {
           updateLocalConfig({
             modules: {
               ...localConfig.modules,
               jsonAnalyzer: {
                 ...localConfig.modules.jsonAnalyzer,
-                dataPath: folderPath
-              }
-            }
+                dataPath: folderPath,
+              },
+            },
           });
-        } else if (type === 'toolManagerExcelPath') {
+        } else if (type === "toolManagerExcelPath") {
           updateLocalConfig({
             modules: {
               ...localConfig.modules,
@@ -133,10 +144,10 @@ export default function AdminSettings({
                 ...localConfig.modules.matrixTools,
                 paths: {
                   ...localConfig.modules.matrixTools.paths,
-                  excelInputPath: folderPath
-                }
-              }
-            }
+                  excelInputPath: folderPath,
+                },
+              },
+            },
           });
         }
       }
@@ -149,7 +160,8 @@ export default function AdminSettings({
       <div>
         <h1 className="text-3xl font-bold">Admin Settings</h1>
         <p className="text-muted-foreground">
-          Manage system configuration, auto-processing controls, and application preferences
+          Manage system configuration, auto-processing controls, and application
+          preferences
         </p>
       </div>
 
@@ -161,7 +173,8 @@ export default function AdminSettings({
             Auto-Processing Controls
           </CardTitle>
           <CardDescription>
-            Control which modules are automatically processing data in the background
+            Control which modules are automatically processing data in the
+            background
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -173,22 +186,25 @@ export default function AdminSettings({
                 <div>
                   <h4 className="font-medium">JSON Scanner</h4>
                   <p className="text-sm text-muted-foreground">
-                    {localConfig.modules.jsonAnalyzer.mode === 'auto' 
-                      ? 'Automatically processes JSON files from configured path'
-                      : 'Manual processing mode - no auto-processing'
-                    }
+                    {localConfig.modules.jsonAnalyzer.mode === "auto"
+                      ? "Automatically processes JSON files from configured path"
+                      : "Manual processing mode - no auto-processing"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant={processingStates.jsonScanner ? 'default' : 'secondary'}>
-                  {processingStates.jsonScanner ? 'Running' : 'Stopped'}
+                <Badge
+                  variant={
+                    processingStates.jsonScanner ? "default" : "secondary"
+                  }
+                >
+                  {processingStates.jsonScanner ? "Running" : "Stopped"}
                 </Badge>
-                {localConfig.modules.jsonAnalyzer.mode === 'auto' && (
+                {localConfig.modules.jsonAnalyzer.mode === "auto" && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleModuleProcessing('jsonScanner')}
+                    onClick={() => toggleModuleProcessing("jsonScanner")}
                     className="flex items-center gap-1"
                   >
                     {processingStates.jsonScanner ? (
@@ -216,22 +232,25 @@ export default function AdminSettings({
                 <div>
                   <h4 className="font-medium">Tool Manager</h4>
                   <p className="text-sm text-muted-foreground">
-                    {localConfig.modules.matrixTools.mode === 'auto' 
-                      ? 'Automatically processes Excel files and tool inventory'
-                      : 'Manual processing mode - no auto-processing'
-                    }
+                    {localConfig.modules.matrixTools.mode === "auto"
+                      ? "Automatically processes Excel files and tool inventory"
+                      : "Manual processing mode - no auto-processing"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant={processingStates.toolManager ? 'default' : 'secondary'}>
-                  {processingStates.toolManager ? 'Running' : 'Stopped'}
+                <Badge
+                  variant={
+                    processingStates.toolManager ? "default" : "secondary"
+                  }
+                >
+                  {processingStates.toolManager ? "Running" : "Stopped"}
                 </Badge>
-                {localConfig.modules.matrixTools.mode === 'auto' && (
+                {localConfig.modules.matrixTools.mode === "auto" && (
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleModuleProcessing('toolManager')}
+                    onClick={() => toggleModuleProcessing("toolManager")}
                     className="flex items-center gap-1"
                   >
                     {processingStates.toolManager ? (
@@ -264,13 +283,21 @@ export default function AdminSettings({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant={processingStates.clampingPlateManager ? 'default' : 'secondary'}>
-                  {processingStates.clampingPlateManager ? 'Running' : 'Stopped'}
+                <Badge
+                  variant={
+                    processingStates.clampingPlateManager
+                      ? "default"
+                      : "secondary"
+                  }
+                >
+                  {processingStates.clampingPlateManager
+                    ? "Running"
+                    : "Stopped"}
                 </Badge>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => toggleModuleProcessing('clampingPlateManager')}
+                  onClick={() => toggleModuleProcessing("clampingPlateManager")}
                   className="flex items-center gap-1"
                 >
                   {processingStates.clampingPlateManager ? (
@@ -298,9 +325,7 @@ export default function AdminSettings({
             <Building2 className="h-5 w-5" />
             Company Information
           </CardTitle>
-          <CardDescription>
-            Basic company details and branding
-          </CardDescription>
+          <CardDescription>Basic company details and branding</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -309,7 +334,9 @@ export default function AdminSettings({
               <Input
                 id="company-name"
                 value={localConfig.companyName}
-                onChange={(e) => updateLocalConfig({ companyName: e.target.value })}
+                onChange={(e) =>
+                  updateLocalConfig({ companyName: e.target.value })
+                }
                 placeholder="Enter your company name"
               />
             </div>
@@ -317,8 +344,10 @@ export default function AdminSettings({
               <Label htmlFor="company-logo">Company Logo Path</Label>
               <Input
                 id="company-logo"
-                value={localConfig.companyLogo || ''}
-                onChange={(e) => updateLocalConfig({ companyLogo: e.target.value })}
+                value={localConfig.companyLogo || ""}
+                onChange={(e) =>
+                  updateLocalConfig({ companyLogo: e.target.value })
+                }
                 placeholder="./assets/logo.png"
               />
             </div>
@@ -348,16 +377,18 @@ export default function AdminSettings({
                     JSON Scanner
                   </h5>
                   <Switch
-                    checked={localConfig.modules.jsonAnalyzer.mode === 'auto'}
-                    onCheckedChange={(checked) => updateLocalConfig({
-                      modules: {
-                        ...localConfig.modules,
-                        jsonAnalyzer: {
-                          ...localConfig.modules.jsonAnalyzer,
-                          mode: checked ? 'auto' : 'manual'
-                        }
-                      }
-                    })}
+                    checked={localConfig.modules.jsonAnalyzer.mode === "auto"}
+                    onCheckedChange={(checked) =>
+                      updateLocalConfig({
+                        modules: {
+                          ...localConfig.modules,
+                          jsonAnalyzer: {
+                            ...localConfig.modules.jsonAnalyzer,
+                            mode: checked ? "auto" : "manual",
+                          },
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div>
@@ -366,20 +397,22 @@ export default function AdminSettings({
                     <Input
                       id="json-path"
                       value={localConfig.modules.jsonAnalyzer.dataPath}
-                      onChange={(e) => updateLocalConfig({
-                        modules: {
-                          ...localConfig.modules,
-                          jsonAnalyzer: {
-                            ...localConfig.modules.jsonAnalyzer,
-                            dataPath: e.target.value
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        updateLocalConfig({
+                          modules: {
+                            ...localConfig.modules,
+                            jsonAnalyzer: {
+                              ...localConfig.modules.jsonAnalyzer,
+                              dataPath: e.target.value,
+                            },
+                          },
+                        })
+                      }
                     />
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleFileSelect('jsonAnalyzerPath')}
+                      onClick={() => handleFileSelect("jsonAnalyzerPath")}
                     >
                       <FolderOpen className="h-4 w-4" />
                     </Button>
@@ -397,16 +430,18 @@ export default function AdminSettings({
                     Tool Manager
                   </h5>
                   <Switch
-                    checked={localConfig.modules.matrixTools.mode === 'auto'}
-                    onCheckedChange={(checked) => updateLocalConfig({
-                      modules: {
-                        ...localConfig.modules,
-                        matrixTools: {
-                          ...localConfig.modules.matrixTools,
-                          mode: checked ? 'auto' : 'manual'
-                        }
-                      }
-                    })}
+                    checked={localConfig.modules.matrixTools.mode === "auto"}
+                    onCheckedChange={(checked) =>
+                      updateLocalConfig({
+                        modules: {
+                          ...localConfig.modules,
+                          matrixTools: {
+                            ...localConfig.modules.matrixTools,
+                            mode: checked ? "auto" : "manual",
+                          },
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div>
@@ -414,127 +449,148 @@ export default function AdminSettings({
                   <div className="flex gap-2">
                     <Input
                       id="excel-path"
-                      value={localConfig.modules.matrixTools.paths.excelInputPath}
-                      onChange={(e) => updateLocalConfig({
-                        modules: {
-                          ...localConfig.modules,
-                          matrixTools: {
-                            ...localConfig.modules.matrixTools,
-                            paths: {
-                              ...localConfig.modules.matrixTools.paths,
-                              excelInputPath: e.target.value
-                            }
-                          }
-                        }
-                      })}
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleFileSelect('toolManagerExcelPath')}
-                    >
-                      <FolderOpen className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Advanced Tool Manager Settings */}
-                <div className="space-y-3 mt-4 pt-3 border-t">
-                  <h6 className="text-sm font-medium text-gray-700">Advanced Settings</h6>
-                  
-                  <div>
-                    <Label htmlFor="json-input-path">JSON Input Path</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="json-input-path"
-                        value={localConfig.modules.matrixTools.paths.jsonInputPath}
-                        onChange={(e) => updateLocalConfig({
+                      value={
+                        localConfig.modules.matrixTools.paths.excelInputPath
+                      }
+                      onChange={(e) =>
+                        updateLocalConfig({
                           modules: {
                             ...localConfig.modules,
                             matrixTools: {
                               ...localConfig.modules.matrixTools,
                               paths: {
                                 ...localConfig.modules.matrixTools.paths,
-                                jsonInputPath: e.target.value
-                              }
-                            }
-                          }
-                        })}
+                                excelInputPath: e.target.value,
+                              },
+                            },
+                          },
+                        })
+                      }
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleFileSelect("toolManagerExcelPath")}
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Advanced Tool Manager Settings */}
+                <div className="space-y-3 mt-4 pt-3 border-t">
+                  <h6 className="text-sm font-medium text-gray-700">
+                    Advanced Settings
+                  </h6>
+
+                  <div>
+                    <Label htmlFor="json-input-path">JSON Input Path</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="json-input-path"
+                        value={
+                          localConfig.modules.matrixTools.paths.jsonInputPath
+                        }
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            modules: {
+                              ...localConfig.modules,
+                              matrixTools: {
+                                ...localConfig.modules.matrixTools,
+                                paths: {
+                                  ...localConfig.modules.matrixTools.paths,
+                                  jsonInputPath: e.target.value,
+                                },
+                              },
+                            },
+                          })
+                        }
                         placeholder="./data/json-output"
                       />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleFileSelect('toolManagerJsonPath')}
+                        onClick={() => handleFileSelect("toolManagerJsonPath")}
                       >
                         <FolderOpen className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="inventory-file">Inventory File Path</Label>
                     <div className="flex gap-2">
                       <Input
                         id="inventory-file"
                         value={localConfig.modules.matrixTools.inventoryFile}
-                        onChange={(e) => updateLocalConfig({
-                          modules: {
-                            ...localConfig.modules,
-                            matrixTools: {
-                              ...localConfig.modules.matrixTools,
-                              inventoryFile: e.target.value
-                            }
-                          }
-                        })}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            modules: {
+                              ...localConfig.modules,
+                              matrixTools: {
+                                ...localConfig.modules.matrixTools,
+                                inventoryFile: e.target.value,
+                              },
+                            },
+                          })
+                        }
                         placeholder="./inventory/tools.xlsx"
                       />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleFileSelect('toolManagerInventory')}
+                        onClick={() => handleFileSelect("toolManagerInventory")}
                       >
                         <FolderOpen className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Features</Label>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Excel Processing</span>
                       <Switch
-                        checked={localConfig.modules.matrixTools.features.excelProcessing}
-                        onCheckedChange={(checked) => updateLocalConfig({
-                          modules: {
-                            ...localConfig.modules,
-                            matrixTools: {
-                              ...localConfig.modules.matrixTools,
-                              features: {
-                                ...localConfig.modules.matrixTools.features,
-                                excelProcessing: checked
-                              }
-                            }
-                          }
-                        })}
+                        checked={
+                          localConfig.modules.matrixTools.features
+                            .excelProcessing
+                        }
+                        onCheckedChange={(checked) =>
+                          updateLocalConfig({
+                            modules: {
+                              ...localConfig.modules,
+                              matrixTools: {
+                                ...localConfig.modules.matrixTools,
+                                features: {
+                                  ...localConfig.modules.matrixTools.features,
+                                  excelProcessing: checked,
+                                },
+                              },
+                            },
+                          })
+                        }
                       />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">JSON Scanning</span>
                       <Switch
-                        checked={localConfig.modules.matrixTools.features.jsonScanning}
-                        onCheckedChange={(checked) => updateLocalConfig({
-                          modules: {
-                            ...localConfig.modules,
-                            matrixTools: {
-                              ...localConfig.modules.matrixTools,
-                              features: {
-                                ...localConfig.modules.matrixTools.features,
-                                jsonScanning: checked
-                              }
-                            }
-                          }
-                        })}
+                        checked={
+                          localConfig.modules.matrixTools.features.jsonScanning
+                        }
+                        onCheckedChange={(checked) =>
+                          updateLocalConfig({
+                            modules: {
+                              ...localConfig.modules,
+                              matrixTools: {
+                                ...localConfig.modules.matrixTools,
+                                features: {
+                                  ...localConfig.modules.matrixTools.features,
+                                  jsonScanning: checked,
+                                },
+                              },
+                            },
+                          })
+                        }
                       />
                     </div>
                   </div>
@@ -551,16 +607,18 @@ export default function AdminSettings({
                     Clamping Plates Manager
                   </h5>
                   <Switch
-                    checked={localConfig.modules.platesManager.mode === 'auto'}
-                    onCheckedChange={(checked) => updateLocalConfig({
-                      modules: {
-                        ...localConfig.modules,
-                        platesManager: {
-                          ...localConfig.modules.platesManager,
-                          mode: checked ? 'auto' : 'manual'
-                        }
-                      }
-                    })}
+                    checked={localConfig.modules.platesManager.mode === "auto"}
+                    onCheckedChange={(checked) =>
+                      updateLocalConfig({
+                        modules: {
+                          ...localConfig.modules,
+                          platesManager: {
+                            ...localConfig.modules.platesManager,
+                            mode: checked ? "auto" : "manual",
+                          },
+                        },
+                      })
+                    }
                   />
                 </div>
                 <div>
@@ -569,21 +627,23 @@ export default function AdminSettings({
                     <Input
                       id="plates-data-path"
                       value={localConfig.modules.platesManager.dataPath}
-                      onChange={(e) => updateLocalConfig({
-                        modules: {
-                          ...localConfig.modules,
-                          platesManager: {
-                            ...localConfig.modules.platesManager,
-                            dataPath: e.target.value
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        updateLocalConfig({
+                          modules: {
+                            ...localConfig.modules,
+                            platesManager: {
+                              ...localConfig.modules.platesManager,
+                              dataPath: e.target.value,
+                            },
+                          },
+                        })
+                      }
                       placeholder="./data/plates"
                     />
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleFileSelect('platesManagerPath')}
+                      onClick={() => handleFileSelect("platesManagerPath")}
                     >
                       <FolderOpen className="h-4 w-4" />
                     </Button>
@@ -595,21 +655,23 @@ export default function AdminSettings({
                     <Input
                       id="plates-database"
                       value={localConfig.modules.platesManager.plateDatabase}
-                      onChange={(e) => updateLocalConfig({
-                        modules: {
-                          ...localConfig.modules,
-                          platesManager: {
-                            ...localConfig.modules.platesManager,
-                            plateDatabase: e.target.value
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        updateLocalConfig({
+                          modules: {
+                            ...localConfig.modules,
+                            platesManager: {
+                              ...localConfig.modules.platesManager,
+                              plateDatabase: e.target.value,
+                            },
+                          },
+                        })
+                      }
                       placeholder="./database/plates.db"
                     />
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleFileSelect('platesDatabase')}
+                      onClick={() => handleFileSelect("platesDatabase")}
                     >
                       <FolderOpen className="h-4 w-4" />
                     </Button>
@@ -639,12 +701,14 @@ export default function AdminSettings({
               <select
                 id="auth-method"
                 value={localConfig.authentication.method}
-                onChange={(e) => updateLocalConfig({
-                  authentication: { 
-                    ...localConfig.authentication, 
-                    method: e.target.value as 'file' | 'database' | 'ldap' 
-                  }
-                })}
+                onChange={(e) =>
+                  updateLocalConfig({
+                    authentication: {
+                      ...localConfig.authentication,
+                      method: e.target.value as "file" | "database" | "ldap",
+                    },
+                  })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="file">File-based Authentication</option>
@@ -653,43 +717,60 @@ export default function AdminSettings({
               </select>
             </div>
 
-            {localConfig.authentication.method === 'file' && (
+            {localConfig.authentication.method === "file" && (
               <div>
                 <Label htmlFor="employee-file">Employee File Path</Label>
                 <Input
                   id="employee-file"
-                  value={localConfig.authentication.employeeFile || ''}
-                  onChange={(e) => updateLocalConfig({
-                    authentication: { ...localConfig.authentication, employeeFile: e.target.value }
-                  })}
+                  value={localConfig.authentication.employeeFile || ""}
+                  onChange={(e) =>
+                    updateLocalConfig({
+                      authentication: {
+                        ...localConfig.authentication,
+                        employeeFile: e.target.value,
+                      },
+                    })
+                  }
                   placeholder="./data/employees.txt"
                 />
               </div>
             )}
 
-            {localConfig.authentication.method === 'database' && (
+            {localConfig.authentication.method === "database" && (
               <div>
-                <Label htmlFor="db-connection">Database Connection String</Label>
+                <Label htmlFor="db-connection">
+                  Database Connection String
+                </Label>
                 <Input
                   id="db-connection"
-                  value={localConfig.authentication.databaseConnection || ''}
-                  onChange={(e) => updateLocalConfig({
-                    authentication: { ...localConfig.authentication, databaseConnection: e.target.value }
-                  })}
+                  value={localConfig.authentication.databaseConnection || ""}
+                  onChange={(e) =>
+                    updateLocalConfig({
+                      authentication: {
+                        ...localConfig.authentication,
+                        databaseConnection: e.target.value,
+                      },
+                    })
+                  }
                   placeholder="Server=localhost;Database=CNCUsers;Trusted_Connection=true;"
                 />
               </div>
             )}
 
-            {localConfig.authentication.method === 'ldap' && (
+            {localConfig.authentication.method === "ldap" && (
               <div>
                 <Label htmlFor="ldap-server">LDAP Server</Label>
                 <Input
                   id="ldap-server"
-                  value={localConfig.authentication.ldapServer || ''}
-                  onChange={(e) => updateLocalConfig({
-                    authentication: { ...localConfig.authentication, ldapServer: e.target.value }
-                  })}
+                  value={localConfig.authentication.ldapServer || ""}
+                  onChange={(e) =>
+                    updateLocalConfig({
+                      authentication: {
+                        ...localConfig.authentication,
+                        ldapServer: e.target.value,
+                      },
+                    })
+                  }
                   placeholder="ldap://company.com"
                 />
               </div>
@@ -713,47 +794,60 @@ export default function AdminSettings({
           <div className="space-y-6">
             {/* Storage Strategy */}
             <div className="space-y-4">
-              <Label className="text-base font-medium">Storage Organization Strategy</Label>
+              <Label className="text-base font-medium">
+                Storage Organization Strategy
+              </Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div 
+                <div
                   className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    storageStrategy === 'mono' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                    storageStrategy === "mono"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => setStorageStrategy('mono')}
+                  onClick={() => setStorageStrategy("mono")}
                 >
                   <h5 className="font-medium mb-2">Mono Folder Strategy</h5>
-                  <p className="text-sm text-gray-600">All data stored in a single base folder structure</p>
+                  <p className="text-sm text-gray-600">
+                    All data stored in a single base folder structure
+                  </p>
                 </div>
-                
-                <div 
+
+                <div
                   className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    storageStrategy === 'individual' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-gray-300'
+                    storageStrategy === "individual"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => setStorageStrategy('individual')}
+                  onClick={() => setStorageStrategy("individual")}
                 >
-                  <h5 className="font-medium mb-2">Individual Folders Strategy</h5>
-                  <p className="text-sm text-gray-600">Separate folders for each module and data type</p>
+                  <h5 className="font-medium mb-2">
+                    Individual Folders Strategy
+                  </h5>
+                  <p className="text-sm text-gray-600">
+                    Separate folders for each module and data type
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Storage Paths - conditionally shown based on strategy */}
             <div className="space-y-4">
-              {storageStrategy === 'mono' ? (
+              {storageStrategy === "mono" ? (
                 // Mono strategy paths
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="base-path">Base Path</Label>
                     <Input
                       id="base-path"
-                      value={localConfig.storage.basePath || ''}
-                      onChange={(e) => updateLocalConfig({
-                        storage: { ...localConfig.storage, basePath: e.target.value }
-                      })}
+                      value={localConfig.storage.basePath || ""}
+                      onChange={(e) =>
+                        updateLocalConfig({
+                          storage: {
+                            ...localConfig.storage,
+                            basePath: e.target.value,
+                          },
+                        })
+                      }
                       placeholder="./data"
                     />
                   </div>
@@ -763,9 +857,14 @@ export default function AdminSettings({
                       <Input
                         id="logs-path"
                         value={localConfig.storage.logsPath}
-                        onChange={(e) => updateLocalConfig({
-                          storage: { ...localConfig.storage, logsPath: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            storage: {
+                              ...localConfig.storage,
+                              logsPath: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="./logs"
                       />
                     </div>
@@ -774,9 +873,14 @@ export default function AdminSettings({
                       <Input
                         id="backup-path"
                         value={localConfig.storage.backupPath}
-                        onChange={(e) => updateLocalConfig({
-                          storage: { ...localConfig.storage, backupPath: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            storage: {
+                              ...localConfig.storage,
+                              backupPath: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="./backups"
                       />
                     </div>
@@ -790,10 +894,15 @@ export default function AdminSettings({
                       <Label htmlFor="temp-path">Temporary Files Path</Label>
                       <Input
                         id="temp-path"
-                        value={localConfig.storage.tempPath || ''}
-                        onChange={(e) => updateLocalConfig({
-                          storage: { ...localConfig.storage, tempPath: e.target.value }
-                        })}
+                        value={localConfig.storage.tempPath || ""}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            storage: {
+                              ...localConfig.storage,
+                              tempPath: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="./temp"
                       />
                     </div>
@@ -801,10 +910,15 @@ export default function AdminSettings({
                       <Label htmlFor="output-path">Output Files Path</Label>
                       <Input
                         id="output-path"
-                        value={localConfig.storage.outputPath || ''}
-                        onChange={(e) => updateLocalConfig({
-                          storage: { ...localConfig.storage, outputPath: e.target.value }
-                        })}
+                        value={localConfig.storage.outputPath || ""}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            storage: {
+                              ...localConfig.storage,
+                              outputPath: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="./output"
                       />
                     </div>
@@ -813,9 +927,14 @@ export default function AdminSettings({
                       <Input
                         id="logs-path-ind"
                         value={localConfig.storage.logsPath}
-                        onChange={(e) => updateLocalConfig({
-                          storage: { ...localConfig.storage, logsPath: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            storage: {
+                              ...localConfig.storage,
+                              logsPath: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="./logs"
                       />
                     </div>
@@ -824,9 +943,14 @@ export default function AdminSettings({
                       <Input
                         id="backup-path-ind"
                         value={localConfig.storage.backupPath}
-                        onChange={(e) => updateLocalConfig({
-                          storage: { ...localConfig.storage, backupPath: e.target.value }
-                        })}
+                        onChange={(e) =>
+                          updateLocalConfig({
+                            storage: {
+                              ...localConfig.storage,
+                              backupPath: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="./backups"
                       />
                     </div>
@@ -854,29 +978,44 @@ export default function AdminSettings({
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">Dark Mode Support</Label>
-                <p className="text-xs text-gray-500">Enable dark theme support</p>
+                <p className="text-xs text-gray-500">
+                  Enable dark theme support
+                </p>
               </div>
               <Switch
-                checked={localConfig.features.darkMode}
-                onCheckedChange={(checked) => updateLocalConfig({
-                  features: { ...localConfig.features, darkMode: checked }
-                })}
+                checked={localConfig.features.themeMode === "dark"}
+                onCheckedChange={(checked) =>
+                  updateLocalConfig({
+                    features: {
+                      ...localConfig.features,
+                      themeMode: checked ? "dark" : "light",
+                    },
+                  })
+                }
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">Notifications</Label>
                 <p className="text-xs text-gray-500">System notifications</p>
               </div>
               <Switch
-                checked={localConfig.features.notifications}
-                onCheckedChange={(checked) => updateLocalConfig({
-                  features: { ...localConfig.features, notifications: checked }
-                })}
+                checked={localConfig.features.notifications.enabled}
+                onCheckedChange={(checked) =>
+                  updateLocalConfig({
+                    features: {
+                      ...localConfig.features,
+                      notifications: {
+                        ...localConfig.features.notifications,
+                        enabled: checked,
+                      },
+                    },
+                  })
+                }
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">Auto Backup</Label>
@@ -884,12 +1023,14 @@ export default function AdminSettings({
               </div>
               <Switch
                 checked={localConfig.features.autoBackup}
-                onCheckedChange={(checked) => updateLocalConfig({
-                  features: { ...localConfig.features, autoBackup: checked }
-                })}
+                onCheckedChange={(checked) =>
+                  updateLocalConfig({
+                    features: { ...localConfig.features, autoBackup: checked },
+                  })
+                }
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-sm font-medium">Export Reports</Label>
@@ -897,9 +1038,14 @@ export default function AdminSettings({
               </div>
               <Switch
                 checked={localConfig.features.exportReports}
-                onCheckedChange={(checked) => updateLocalConfig({
-                  features: { ...localConfig.features, exportReports: checked }
-                })}
+                onCheckedChange={(checked) =>
+                  updateLocalConfig({
+                    features: {
+                      ...localConfig.features,
+                      exportReports: checked,
+                    },
+                  })
+                }
               />
             </div>
           </div>
@@ -911,13 +1057,15 @@ export default function AdminSettings({
         <CardContent>
           <div className="flex items-center justify-between pt-4">
             <div className="flex items-center gap-2">
-              {saveStatus === 'success' && (
+              {saveStatus === "success" && (
                 <div className="flex items-center gap-1 text-green-600">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span className="text-sm">Configuration saved successfully</span>
+                  <span className="text-sm">
+                    Configuration saved successfully
+                  </span>
                 </div>
               )}
-              {saveStatus === 'error' && (
+              {saveStatus === "error" && (
                 <div className="flex items-center gap-1 text-red-600">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm">Failed to save configuration</span>
@@ -934,7 +1082,7 @@ export default function AdminSettings({
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {isSaving ? 'Saving...' : 'Save Configuration'}
+              {isSaving ? "Saving..." : "Save Configuration"}
             </Button>
           </div>
         </CardContent>
