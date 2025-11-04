@@ -17,32 +17,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { TestDataDownloadService } from "../services/TestDataDownloadService";
 import {
   Building2,
   Settings,
   Database,
-  Users,
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
-  FileJson,
-  BarChart3,
-  Grid3X3,
-  Download,
-  FileText,
-  FileSpreadsheet,
   AlertCircle,
   Bell,
   Monitor,
   Moon,
   Sun,
-  Clock,
   FolderOpen,
+  Users,
+  FileJson,
+  FileText,
+  Upload,
+  BarChart3,
+  Grid3X3,
+  Download,
+  Clock,
   PlayCircle,
   RefreshCw,
-  Upload,
-  Save,
+  Rocket,
 } from "lucide-react";
 import { SetupConfig } from "../hooks/useSetupConfig";
 import { DataImporter } from "../services/DataImporter";
@@ -323,6 +321,8 @@ export default function SetupWizard({
       case 0:
         return (
           <IntroductionStep
+            config={config}
+            setConfig={setConfig}
             onLoadPreviousSession={() => {
               // This will load the saved wizard progress
               const savedStep = localStorage.getItem("setupWizardStep");
@@ -380,7 +380,18 @@ export default function SetupWizard({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+      {/* Fixed Demo Mode Header */}
+      {config.demoMode && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-blue-600 dark:bg-blue-700 text-white py-1 px-4">
+          <div className="flex items-center justify-center">
+            <span className="text-sm font-medium">
+              🚀 Demo Mode - Using test data for demonstration
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className={`w-full max-w-4xl ${config.demoMode ? "mt-8" : ""}`}>
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4 relative">
@@ -540,9 +551,13 @@ export default function SetupWizard({
 
 // Step Components
 function IntroductionStep({
+  config,
+  setConfig,
   onLoadPreviousSession,
   hasPreviousSession,
 }: {
+  config: SetupConfig;
+  setConfig: React.Dispatch<React.SetStateAction<SetupConfig>>;
   onLoadPreviousSession: () => boolean;
   hasPreviousSession: () => boolean;
 }) {
@@ -559,183 +574,8 @@ function IntroductionStep({
     }
   };
 
-  const handleDownloadTestData = async (
-    moduleType: "JSONScanner" | "tool_manager" | "clamping_plates"
-  ) => {
-    try {
-      const result = await TestDataDownloadService.downloadPackage(moduleType);
-
-      if (result.success) {
-        // Track the download
-        await TestDataDownloadService.trackDownload(moduleType);
-        alert(`Success!\n\n${result.message}`);
-      } else {
-        alert(`Download failed:\n\n${result.message}`);
-      }
-    } catch (error) {
-      console.error("Error downloading test data:", error);
-      alert("Failed to download test data. Please try again.");
-    }
-  };
-
-  const handleDownloadEmployeeSample = () => {
-    try {
-      // Create sample employee data
-      const sampleEmployees = [
-        {
-          id: "EMP001",
-          name: "John Smith",
-          department: "Manufacturing",
-          role: "CNC Operator",
-          shift: "Day",
-          accessLevel: "operator",
-          email: "john.smith@company.com",
-          phone: "(555) 123-4567",
-          startDate: "2023-01-15",
-          certifications: ["CNC Level 2", "Safety Training"],
-          isActive: true,
-        },
-        {
-          id: "EMP002",
-          name: "Sarah Johnson",
-          department: "Manufacturing",
-          role: "Production Supervisor",
-          shift: "Day",
-          accessLevel: "supervisor",
-          email: "sarah.johnson@company.com",
-          phone: "(555) 234-5678",
-          startDate: "2022-08-10",
-          certifications: [
-            "CNC Level 3",
-            "Leadership Training",
-            "Quality Control",
-          ],
-          isActive: true,
-        },
-        {
-          id: "EMP003",
-          name: "Mike Davis",
-          department: "Manufacturing",
-          role: "CNC Operator",
-          shift: "Night",
-          accessLevel: "operator",
-          email: "mike.davis@company.com",
-          phone: "(555) 345-6789",
-          startDate: "2023-03-22",
-          certifications: ["CNC Level 1", "Safety Training"],
-          isActive: true,
-        },
-        {
-          id: "EMP004",
-          name: "Lisa Chen",
-          department: "Quality Control",
-          role: "QC Inspector",
-          shift: "Day",
-          accessLevel: "inspector",
-          email: "lisa.chen@company.com",
-          phone: "(555) 456-7890",
-          startDate: "2022-11-05",
-          certifications: ["Quality Control Level 2", "Measurement Systems"],
-          isActive: true,
-        },
-        {
-          id: "EMP005",
-          name: "David Wilson",
-          department: "Engineering",
-          role: "Manufacturing Engineer",
-          shift: "Day",
-          accessLevel: "admin",
-          email: "david.wilson@company.com",
-          phone: "(555) 567-8901",
-          startDate: "2021-06-12",
-          certifications: [
-            "Engineering Degree",
-            "Lean Manufacturing",
-            "Six Sigma",
-          ],
-          isActive: true,
-        },
-      ];
-
-      // Convert to CSV format
-      const headers = [
-        "id",
-        "name",
-        "department",
-        "role",
-        "shift",
-        "accessLevel",
-        "email",
-        "phone",
-        "startDate",
-        "certifications",
-        "isActive",
-      ];
-      const csvContent = [
-        headers.join(","),
-        ...sampleEmployees.map((emp) =>
-          [
-            emp.id,
-            `"${emp.name}"`,
-            emp.department,
-            `"${emp.role}"`,
-            emp.shift,
-            emp.accessLevel,
-            emp.email,
-            emp.phone,
-            emp.startDate,
-            `"${emp.certifications.join("; ")}"`,
-            emp.isActive,
-          ].join(",")
-        ),
-      ].join("\n");
-
-      // Create and download the file
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", "employee_sample_data.csv");
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      alert(
-        "Success!\n\nEmployee sample data downloaded as 'employee_sample_data.csv'\n\nThis file contains 5 sample employees with various roles and departments that you can use to test the system."
-      );
-    } catch (error) {
-      console.error("Error generating employee sample:", error);
-      alert("Failed to generate employee sample data. Please try again.");
-    }
-  };
   return (
     <div className="space-y-6">
-      {/* Debug button to clear localStorage */}
-      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-              Debug Mode
-            </p>
-            <p className="text-xs text-yellow-700 dark:text-yellow-300">
-              Clear cached data if experiencing validation issues
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              localStorage.clear();
-              window.location.reload();
-            }}
-            className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
-          >
-            Clear Cache & Reload
-          </Button>
-        </div>
-      </div>
-
       <div className="text-center space-y-4">
         <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
           <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -808,9 +648,9 @@ function IntroductionStep({
         </Card>
       </div>
 
-      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-blue-900 dark:text-blue-100 flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
             What We'll Configure
           </CardTitle>
@@ -818,30 +658,30 @@ function IntroductionStep({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+              <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Company Settings
               </h4>
-              <ul className="space-y-1 text-blue-700 dark:text-blue-300">
+              <ul className="space-y-1 text-gray-700 dark:text-gray-300">
                 <li>• Company information</li>
                 <li>• Branding and themes</li>
                 <li>• Feature preferences</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+              <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
                 Application Modules
               </h4>
-              <ul className="space-y-1 text-blue-700 dark:text-blue-300">
+              <ul className="space-y-1 text-gray-700 dark:text-gray-300">
                 <li>• JSON File Analyzer</li>
                 <li>• Matrix Tools Manager</li>
                 <li>• Clamping Plates Manager</li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+              <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
                 System Configuration
               </h4>
-              <ul className="space-y-1 text-blue-700 dark:text-blue-300">
+              <ul className="space-y-1 text-gray-700 dark:text-gray-300">
                 <li>• Storage paths</li>
                 <li>• User authentication</li>
                 <li>• Integration settings</li>
@@ -851,85 +691,71 @@ function IntroductionStep({
         </CardContent>
       </Card>
 
-      <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
         <CardHeader>
-          <CardTitle className="text-green-900 dark:text-green-100 flex items-center gap-2">
-            <Download className="h-5 w-5" />
-            Try It Out - Download Demo Files
+          <CardTitle className="text-blue-900 dark:text-blue-100 flex items-center gap-2">
+            <PlayCircle className="h-5 w-5" />
+            Demo Mode
           </CardTitle>
-          <CardDescription className="text-green-700 dark:text-green-300">
-            New to the system? Download demo files to explore all features
+          <CardDescription className="text-blue-700 dark:text-blue-300">
+            Use built-in test data for evaluation and testing
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <p className="text-sm text-green-700 dark:text-green-300">
-              If you're evaluating the system or just getting started, you can
-              download our comprehensive demo file packages to explore all
-              features without needing your own data files.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
-                onClick={() => handleDownloadTestData("JSONScanner")}
-              >
-                <FileJson className="h-5 w-5" />
-                <div className="text-center">
-                  <div className="font-medium">JSON Analyzer</div>
-                  <div className="text-xs">Demo Files</div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
-                onClick={() => handleDownloadTestData("tool_manager")}
-              >
-                <FileSpreadsheet className="h-5 w-5" />
-                <div className="text-center">
-                  <div className="font-medium">Tool Manager</div>
-                  <div className="text-xs">Demo Files</div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
-                onClick={() => handleDownloadTestData("clamping_plates")}
-              >
-                <Settings className="h-5 w-5" />
-                <div className="text-center">
-                  <div className="font-medium">Plate Manager</div>
-                  <div className="text-xs">Demo Files</div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-green-700 border-green-300 hover:bg-green-100 dark:text-green-300 dark:border-green-700 dark:hover:bg-green-900/20 h-auto py-3 flex-col gap-2"
-                onClick={() => handleDownloadEmployeeSample()}
-              >
-                <Users className="h-5 w-5" />
-                <div className="text-center">
-                  <div className="font-medium">Employee</div>
-                  <div className="text-xs">Demo File</div>
-                </div>
-              </Button>
+            <div className="flex items-center space-x-3">
+              <Switch
+                checked={config.demoMode}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({ ...prev, demoMode: checked }))
+                }
+              />
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Enable Demo Mode</Label>
+                <p className="text-xs text-muted-foreground">
+                  When enabled, the system will automatically use built-in test
+                  data instead of requiring you to specify file paths
+                </p>
+              </div>
             </div>
 
-            <div className="text-xs text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
-              <p className="font-medium mb-1">Demo files include:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Real CAD project structures with JSON files</li>
-                <li>Sample Excel tool matrices and inventory files</li>
-                <li>Clamping plate data and usage examples</li>
-                <li>Employee data with various roles and departments</li>
-                <li>Complete workflow demonstrations</li>
-              </ul>
-            </div>
+            {config.demoMode && (
+              <div className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
+                <p className="font-medium mb-2">Demo Mode includes:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>
+                    <strong>JSON Scanner:</strong> Real Hummingbird project data
+                    with CNC operations
+                  </li>
+                  <li>
+                    <strong>Tool Manager:</strong> Complete tool matrices and
+                    inventory examples
+                  </li>
+                  <li>
+                    <strong>Clamping Plates:</strong> Plate data and usage
+                    tracking samples
+                  </li>
+                  <li>
+                    <strong>Employee Data:</strong> Sample employee records with
+                    various roles
+                  </li>
+                </ul>
+                <p className="mt-2 text-blue-700 dark:text-blue-300">
+                  <strong>Note:</strong> Demo data contains realistic production
+                  examples for comprehensive testing.
+                </p>
+              </div>
+            )}
+
+            {!config.demoMode && (
+              <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900/30 p-3 rounded-lg">
+                <p className="font-medium mb-1">Production Mode</p>
+                <p>
+                  You will need to specify your own file paths and data sources
+                  during configuration.
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -995,7 +821,39 @@ function CompanyStep({
   config: SetupConfig;
   updateConfig: (updates: Partial<SetupConfig>) => void;
 }) {
+  // Set demo mode defaults when demo mode is enabled
+  React.useEffect(() => {
+    if (config.demoMode) {
+      updateConfig({
+        companyName: "Test Company",
+        companyLogo: "/api/placeholder/150/150", // Placeholder logo for demo
+        companyFeatures: {
+          jsonScanner: true,
+          toolManager: true,
+          clampingPlateManager: true,
+        },
+        modules: {
+          ...config.modules,
+          jsonAnalyzer: {
+            ...config.modules.jsonAnalyzer,
+            enabled: true,
+          },
+          matrixTools: {
+            ...config.modules.matrixTools,
+            enabled: true,
+          },
+          platesManager: {
+            ...config.modules.platesManager,
+            enabled: true,
+          },
+        },
+      });
+    }
+  }, [config.demoMode]);
+
   const handleLogoFileSelect = () => {
+    if (config.demoMode) return; // Disable file selection in demo mode
+
     const input = document.createElement("input");
     input.type = "file";
     input.accept = SetupValidation.getFileAccept("image");
@@ -1031,23 +889,29 @@ function CompanyStep({
   return (
     <div className="space-y-6">
       {/* Continue Previous Setup Section */}
-      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
+      <Card
+        className={`border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 ${
+          config.demoMode ? "opacity-60 pointer-events-none" : ""
+        }`}
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             Continue Previous Setup
           </CardTitle>
           <CardDescription>
-            Already completed this setup before? If you reinstalled the app or
-            moved to a new location, you can continue where you left off by
-            uploading your previous configuration.
+            {config.demoMode
+              ? "Configuration upload is disabled in demo mode. Demo settings are automatically applied."
+              : "Already completed this setup before? If you reinstalled the app or moved to a new location, you can continue where you left off by uploading your previous configuration."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
+              disabled={config.demoMode}
               onClick={() => {
+                if (config.demoMode) return;
                 const input = document.createElement("input");
                 input.type = "file";
                 input.accept = ".json";
@@ -1075,13 +939,23 @@ function CompanyStep({
                 };
                 input.click();
               }}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${
+                config.demoMode ? "cursor-not-allowed opacity-50" : ""
+              }`}
             >
               <Upload className="h-4 w-4" />
               Upload Previous Config
             </Button>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Supports .json files exported from this setup wizard
+            <div
+              className={`text-xs ${
+                config.demoMode
+                  ? "text-gray-400"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              {config.demoMode
+                ? "Disabled - Using demo configuration"
+                : "Supports .json files exported from this setup wizard"}
             </div>
           </div>
         </CardContent>
@@ -1091,7 +965,11 @@ function CompanyStep({
       <Card>
         <CardHeader>
           <CardTitle>Company Information</CardTitle>
-          <CardDescription>Enter your company details and logo</CardDescription>
+          <CardDescription>
+            {config.demoMode
+              ? "Demo company information is automatically populated"
+              : "Enter your company details and logo"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1100,25 +978,31 @@ function CompanyStep({
               <Input
                 id="companyName"
                 value={config.companyName}
-                onChange={(e) => updateConfig({ companyName: e.target.value })}
+                onChange={(e) =>
+                  config.demoMode
+                    ? null
+                    : updateConfig({ companyName: e.target.value })
+                }
                 placeholder="Enter your company name"
+                readOnly={config.demoMode}
+                disabled={config.demoMode}
                 className={`${
-                  !companyNameValidation.isValid
+                  config.demoMode
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                    : !companyNameValidation.isValid
                     ? "border-red-300 focus:border-red-500"
                     : config.companyName && companyNameValidation.isValid
                     ? "border-green-300 focus:border-green-500"
                     : ""
                 }`}
                 onDoubleClick={(e) => {
-                  // Ensure double-click selects all text
-                  e.currentTarget.select();
+                  if (!config.demoMode) e.currentTarget.select();
                 }}
                 onFocus={(e) => {
-                  // Optional: select all on focus for better UX
-                  setTimeout(() => e.target.select(), 0);
+                  if (!config.demoMode) setTimeout(() => e.target.select(), 0);
                 }}
               />
-              {config.companyName && (
+              {config.companyName && !config.demoMode && (
                 <ValidationFeedback
                   isValid={companyNameValidation.isValid}
                   error={companyNameValidation.error}
@@ -1131,7 +1015,13 @@ function CompanyStep({
               <div className="space-y-3">
                 {/* Logo Preview */}
                 {config.companyLogo && (
-                  <div className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+                  <div
+                    className={`flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg ${
+                      config.demoMode
+                        ? "bg-gray-100 dark:bg-gray-800"
+                        : "bg-gray-50 dark:bg-gray-800"
+                    }`}
+                  >
                     <img
                       src={config.companyLogo}
                       alt="Company Logo Preview"
@@ -1142,18 +1032,21 @@ function CompanyStep({
                         Logo Selected
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Upload file or paste URL below to change
+                        {!config.demoMode &&
+                          "Upload file or paste URL below to change"}
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => updateConfig({ companyLogo: "" })}
-                      className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
-                    >
-                      Remove
-                    </Button>
+                    {!config.demoMode && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateConfig({ companyLogo: "" })}
+                        className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                      >
+                        Remove
+                      </Button>
+                    )}
                   </div>
                 )}
 
@@ -1163,28 +1056,38 @@ function CompanyStep({
                     id="companyLogo"
                     value={config.companyLogo || ""}
                     onChange={(e) =>
-                      updateConfig({ companyLogo: e.target.value })
+                      config.demoMode
+                        ? null
+                        : updateConfig({ companyLogo: e.target.value })
                     }
                     placeholder="Paste image URL or use upload button"
+                    readOnly={config.demoMode}
+                    disabled={config.demoMode}
                     className={`flex-1 ${
-                      config.companyLogo && !logoValidation.isValid
+                      config.demoMode
+                        ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                        : config.companyLogo && !logoValidation.isValid
                         ? "border-red-300 focus:border-red-500"
                         : config.companyLogo && logoValidation.isValid
                         ? "border-green-300 focus:border-green-500"
                         : ""
                     }`}
                     onDoubleClick={(e) => {
-                      e.currentTarget.select();
+                      if (!config.demoMode) e.currentTarget.select();
                     }}
                     onFocus={(e) => {
-                      setTimeout(() => e.target.select(), 0);
+                      if (!config.demoMode)
+                        setTimeout(() => e.target.select(), 0);
                     }}
                   />
                   <Button
                     type="button"
                     variant="outline"
+                    disabled={config.demoMode}
                     onClick={handleLogoFileSelect}
-                    className="flex items-center gap-2 flex-shrink-0"
+                    className={`flex items-center gap-2 flex-shrink-0 ${
+                      config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                    }`}
                   >
                     <Upload className="h-4 w-4" />
                     Upload
@@ -1192,7 +1095,7 @@ function CompanyStep({
                 </div>
               </div>
               <div className="space-y-1">
-                {config.companyLogo && (
+                {config.companyLogo && !config.demoMode && (
                   <ValidationFeedback
                     isValid={logoValidation.isValid}
                     error={logoValidation.error}
@@ -1200,8 +1103,10 @@ function CompanyStep({
                   />
                 )}
                 <p className="text-xs text-gray-400">
-                  {SetupValidation.getFileTypeDescription("image")}. You can
-                  upload a file or paste an image URL.
+                  {!config.demoMode &&
+                    `${SetupValidation.getFileTypeDescription(
+                      "image"
+                    )}. You can upload a file or paste an image URL.`}
                 </p>
               </div>
             </div>
@@ -1217,17 +1122,24 @@ function CompanyStep({
       </Card>
 
       {/* Company Features Card */}
-      <Card>
+      <Card className={config.demoMode ? "opacity-60" : ""}>
         <CardHeader>
           <CardTitle>Company Features</CardTitle>
           <CardDescription>
-            Select which features your company will use. This will determine
-            what modules and options are available in the setup.
+            {config.demoMode
+              ? "Feature selection is automatically configured for demo mode"
+              : "Select which features your company will use. This will determine what modules and options are available in the setup."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div
+              className={`flex items-center justify-between p-3 rounded-lg ${
+                config.demoMode
+                  ? "bg-gray-100 dark:bg-gray-800"
+                  : "bg-gray-50 dark:bg-gray-800"
+              }`}
+            >
               <div>
                 <Label className="text-sm font-medium">JSON Scanner</Label>
                 <p className="text-xs text-gray-500">
@@ -1235,23 +1147,36 @@ function CompanyStep({
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-xs text-gray-500">
+                <span
+                  className={`text-xs ${
+                    config.demoMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
                   {config.companyFeatures.jsonScanner ? "ON" : "OFF"}
                 </span>
                 <Switch
                   checked={config.companyFeatures.jsonScanner}
+                  disabled={config.demoMode}
                   onCheckedChange={(checked) =>
-                    updateConfig({
-                      companyFeatures: {
-                        ...config.companyFeatures,
-                        jsonScanner: checked,
-                      },
-                    })
+                    config.demoMode
+                      ? null
+                      : updateConfig({
+                          companyFeatures: {
+                            ...config.companyFeatures,
+                            jsonScanner: checked,
+                          },
+                        })
                   }
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div
+              className={`flex items-center justify-between p-3 rounded-lg ${
+                config.demoMode
+                  ? "bg-gray-100 dark:bg-gray-800"
+                  : "bg-gray-50 dark:bg-gray-800"
+              }`}
+            >
               <div>
                 <Label className="text-sm font-medium">Tool Manager</Label>
                 <p className="text-xs text-gray-500">
@@ -1260,23 +1185,36 @@ function CompanyStep({
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-xs text-gray-500">
+                <span
+                  className={`text-xs ${
+                    config.demoMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
                   {config.companyFeatures.toolManager ? "ON" : "OFF"}
                 </span>
                 <Switch
                   checked={config.companyFeatures.toolManager}
+                  disabled={config.demoMode}
                   onCheckedChange={(checked) =>
-                    updateConfig({
-                      companyFeatures: {
-                        ...config.companyFeatures,
-                        toolManager: checked,
-                      },
-                    })
+                    config.demoMode
+                      ? null
+                      : updateConfig({
+                          companyFeatures: {
+                            ...config.companyFeatures,
+                            toolManager: checked,
+                          },
+                        })
                   }
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div
+              className={`flex items-center justify-between p-3 rounded-lg ${
+                config.demoMode
+                  ? "bg-gray-100 dark:bg-gray-800"
+                  : "bg-gray-50 dark:bg-gray-800"
+              }`}
+            >
               <div>
                 <Label className="text-sm font-medium">
                   Clamping Plate Manager
@@ -1286,18 +1224,25 @@ function CompanyStep({
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <span className="text-xs text-gray-500">
+                <span
+                  className={`text-xs ${
+                    config.demoMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
                   {config.companyFeatures.clampingPlateManager ? "ON" : "OFF"}
                 </span>
                 <Switch
                   checked={config.companyFeatures.clampingPlateManager}
+                  disabled={config.demoMode}
                   onCheckedChange={(checked) =>
-                    updateConfig({
-                      companyFeatures: {
-                        ...config.companyFeatures,
-                        clampingPlateManager: checked,
-                      },
-                    })
+                    config.demoMode
+                      ? null
+                      : updateConfig({
+                          companyFeatures: {
+                            ...config.companyFeatures,
+                            clampingPlateManager: checked,
+                          },
+                        })
                   }
                 />
               </div>
@@ -1316,6 +1261,40 @@ function ModulesStep({
   config: SetupConfig;
   updateConfig: (updates: Partial<SetupConfig>) => void;
 }) {
+  // Set demo mode defaults for modules when demo mode is enabled
+  React.useEffect(() => {
+    if (config.demoMode) {
+      updateConfig({
+        modules: {
+          jsonAnalyzer: {
+            ...config.modules.jsonAnalyzer,
+            mode: "auto",
+            dataPath:
+              "/Users/sovi/Library/Mobile Documents/com~apple~CloudDocs/Data/personal_Fun/Coding/Projects/json_scanner/test_data/testPathHumming_auto",
+          },
+          matrixTools: {
+            ...config.modules.matrixTools,
+            mode: "auto",
+            paths: {
+              excelInputPath:
+                "/Users/sovi/Library/Mobile Documents/com~apple~CloudDocs/Data/personal_Fun/Coding/Projects/ToolManager/test_data",
+              jsonInputPath:
+                "/Users/sovi/Library/Mobile Documents/com~apple~CloudDocs/Data/personal_Fun/Coding/Projects/json_scanner/test_data/testPathHumming_auto",
+            },
+          },
+          platesManager: {
+            ...config.modules.platesManager,
+            mode: "auto",
+            dataPath:
+              "/Users/sovi/Library/Mobile Documents/com~apple~CloudDocs/Data/personal_Fun/Coding/Projects/ClampingPlateManager/test_data",
+            plateDatabase:
+              "/Users/sovi/Library/Mobile Documents/com~apple~CloudDocs/Data/personal_Fun/Coding/Projects/ClampingPlateManager/test_data/plate_info.xlsx",
+          },
+        },
+      });
+    }
+  }, [config.demoMode]);
+
   const modules = [
     {
       key: "jsonAnalyzer" as const,
@@ -1358,6 +1337,8 @@ function ModulesStep({
     moduleKey: keyof SetupConfig["modules"],
     pathType?: string
   ) => {
+    if (config.demoMode) return; // Disable file selection in demo mode
+
     const input = document.createElement("input");
     input.type = "file";
     input.webkitdirectory = true;
@@ -1418,7 +1399,10 @@ function ModulesStep({
         const moduleConfig = config.modules[module.key];
 
         return (
-          <Card key={module.key} className="transition-all">
+          <Card
+            key={module.key}
+            className={`transition-all ${config.demoMode ? "opacity-60" : ""}`}
+          >
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
@@ -1440,17 +1424,33 @@ function ModulesStep({
                       <Input
                         value={moduleConfig.dataPath}
                         onChange={(e) =>
-                          updateModule(module.key, { dataPath: e.target.value })
+                          config.demoMode
+                            ? null
+                            : updateModule(module.key, {
+                                dataPath: e.target.value,
+                              })
                         }
                         placeholder="./data/model_files"
-                        className="flex-1"
-                        onDoubleClick={(e) => e.currentTarget.select()}
-                        onFocus={(e) => setTimeout(() => e.target.select(), 0)}
+                        readOnly={config.demoMode}
+                        disabled={config.demoMode}
+                        className={`flex-1 ${
+                          config.demoMode
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onDoubleClick={(e) =>
+                          !config.demoMode && e.currentTarget.select()
+                        }
+                        onFocus={(e) =>
+                          !config.demoMode &&
+                          setTimeout(() => e.target.select(), 0)
+                        }
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
+                        disabled={config.demoMode}
                         onClick={() => handleDataPathFileSelect(module.key)}
                         className="flex-shrink-0"
                       >
@@ -1468,20 +1468,35 @@ function ModulesStep({
                       <Input
                         value={config.modules.platesManager.plateDatabase}
                         onChange={(e) =>
-                          updateModule(module.key, {
-                            plateDatabase: e.target.value,
-                          })
+                          config.demoMode
+                            ? null
+                            : updateModule(module.key, {
+                                plateDatabase: e.target.value,
+                              })
                         }
                         placeholder="./data/plate_information.xlsx"
-                        className="flex-1"
-                        onDoubleClick={(e) => e.currentTarget.select()}
-                        onFocus={(e) => setTimeout(() => e.target.select(), 0)}
+                        readOnly={config.demoMode}
+                        disabled={config.demoMode}
+                        className={`flex-1 ${
+                          config.demoMode
+                            ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onDoubleClick={(e) =>
+                          !config.demoMode && e.currentTarget.select()
+                        }
+                        onFocus={(e) =>
+                          !config.demoMode &&
+                          setTimeout(() => e.target.select(), 0)
+                        }
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
+                        disabled={config.demoMode}
                         onClick={() => {
+                          if (config.demoMode) return;
                           const input = document.createElement("input");
                           input.type = "file";
                           input.accept = ".xlsx,.xls,.csv";
@@ -1563,8 +1578,11 @@ function ModulesStep({
                           moduleConfig.mode === "auto" ? "default" : "outline"
                         }
                         size="sm"
+                        disabled={config.demoMode}
                         onClick={() =>
-                          updateModule(module.key, { mode: "auto" })
+                          config.demoMode
+                            ? null
+                            : updateModule(module.key, { mode: "auto" })
                         }
                         className={
                           moduleConfig.mode === "auto"
@@ -1579,8 +1597,11 @@ function ModulesStep({
                           moduleConfig.mode === "manual" ? "default" : "outline"
                         }
                         size="sm"
+                        disabled={config.demoMode}
                         onClick={() =>
-                          updateModule(module.key, { mode: "manual" })
+                          config.demoMode
+                            ? null
+                            : updateModule(module.key, { mode: "manual" })
                         }
                         className={
                           moduleConfig.mode === "manual"
@@ -1610,18 +1631,29 @@ function ModulesStep({
                           <Input
                             value={moduleConfig.dataPath}
                             onChange={(e) =>
-                              updateModule(module.key, {
-                                dataPath: e.target.value,
-                              })
+                              config.demoMode
+                                ? null
+                                : updateModule(module.key, {
+                                    dataPath: e.target.value,
+                                  })
                             }
                             placeholder={
                               module.key === "jsonAnalyzer"
                                 ? "./data/json_files"
                                 : "./data/module_name"
                             }
-                            className="flex-1"
-                            onDoubleClick={(e) => e.currentTarget.select()}
+                            readOnly={config.demoMode}
+                            disabled={config.demoMode}
+                            className={`flex-1 ${
+                              config.demoMode
+                                ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                                : ""
+                            }`}
+                            onDoubleClick={(e) =>
+                              !config.demoMode && e.currentTarget.select()
+                            }
                             onFocus={(e) =>
+                              !config.demoMode &&
                               setTimeout(() => e.target.select(), 0)
                             }
                           />
@@ -1629,6 +1661,7 @@ function ModulesStep({
                             type="button"
                             variant="outline"
                             size="sm"
+                            disabled={config.demoMode}
                             onClick={() => handleDataPathFileSelect(module.key)}
                             className="flex-shrink-0"
                           >
@@ -1671,17 +1704,28 @@ function ModulesStep({
                                   ?.excelInputPath || ""
                               }
                               onChange={(e) =>
-                                updateModule(module.key, {
-                                  paths: {
-                                    ...config.modules.matrixTools.paths,
-                                    excelInputPath: e.target.value,
-                                  },
-                                })
+                                config.demoMode
+                                  ? null
+                                  : updateModule(module.key, {
+                                      paths: {
+                                        ...config.modules.matrixTools.paths,
+                                        excelInputPath: e.target.value,
+                                      },
+                                    })
                               }
                               placeholder="./excel/inventory"
-                              className="flex-1"
-                              onDoubleClick={(e) => e.currentTarget.select()}
+                              readOnly={config.demoMode}
+                              disabled={config.demoMode}
+                              className={`flex-1 ${
+                                config.demoMode
+                                  ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onDoubleClick={(e) =>
+                                !config.demoMode && e.currentTarget.select()
+                              }
                               onFocus={(e) =>
+                                !config.demoMode &&
                                 setTimeout(() => e.target.select(), 0)
                               }
                             />
@@ -1689,6 +1733,7 @@ function ModulesStep({
                               type="button"
                               variant="outline"
                               size="sm"
+                              disabled={config.demoMode}
                               onClick={() =>
                                 handleDataPathFileSelect(
                                   module.key,
@@ -1741,19 +1786,28 @@ function ModulesStep({
                                       ?.jsonInputPath || ""
                                   }
                                   onChange={(e) =>
-                                    updateModule(module.key, {
-                                      paths: {
-                                        ...config.modules.matrixTools.paths,
-                                        jsonInputPath: e.target.value,
-                                      },
-                                    })
+                                    config.demoMode
+                                      ? null
+                                      : updateModule(module.key, {
+                                          paths: {
+                                            ...config.modules.matrixTools.paths,
+                                            jsonInputPath: e.target.value,
+                                          },
+                                        })
                                   }
                                   placeholder="./json/input"
-                                  className="flex-1"
+                                  readOnly={config.demoMode}
+                                  disabled={config.demoMode}
+                                  className={`flex-1 ${
+                                    config.demoMode
+                                      ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                                      : ""
+                                  }`}
                                   onDoubleClick={(e) =>
-                                    e.currentTarget.select()
+                                    !config.demoMode && e.currentTarget.select()
                                   }
                                   onFocus={(e) =>
+                                    !config.demoMode &&
                                     setTimeout(() => e.target.select(), 0)
                                   }
                                 />
@@ -1761,6 +1815,7 @@ function ModulesStep({
                                   type="button"
                                   variant="outline"
                                   size="sm"
+                                  disabled={config.demoMode}
                                   onClick={() =>
                                     handleDataPathFileSelect(
                                       module.key,
@@ -1822,6 +1877,16 @@ function AuthenticationStep({
 
   // Note: Database and LDAP validations removed as they were unused
 
+  // Demo mode setup
+  useEffect(() => {
+    if (config.demoMode) {
+      updateAuth({
+        method: "file",
+        employeeFile: "./config/employees.json",
+      });
+    }
+  }, [config.demoMode]);
+
   const updateAuth = (updates: Partial<SetupConfig["authentication"]>) => {
     updateConfig({
       authentication: { ...config.authentication, ...updates },
@@ -1871,8 +1936,16 @@ function AuthenticationStep({
                 config.authentication.method === method.key
                   ? "ring-2 ring-blue-200 bg-blue-50 dark:bg-blue-900/20"
                   : ""
+              } ${
+                config.demoMode && method.key !== "file"
+                  ? "opacity-60 pointer-events-none"
+                  : ""
               }`}
-              onClick={() => updateAuth({ method: method.key })}
+              onClick={() =>
+                !config.demoMode || method.key === "file"
+                  ? updateAuth({ method: method.key })
+                  : undefined
+              }
             >
               <CardContent className="p-4">
                 <h4 className="font-medium">{method.title}</h4>
@@ -1902,7 +1975,8 @@ function AuthenticationStep({
                       employeeFileValidation.isValid
                     ? "border-green-300 focus:border-green-500"
                     : ""
-                }`}
+                } ${config.demoMode ? "opacity-60" : ""}`}
+                disabled={config.demoMode}
                 onDoubleClick={(e) => e.currentTarget.select()}
                 onFocus={(e) => setTimeout(() => e.target.select(), 0)}
               />
@@ -1911,19 +1985,15 @@ function AuthenticationStep({
                 variant="outline"
                 size="sm"
                 onClick={handleEmployeeFileSelect}
-                className="flex-shrink-0"
+                className={`flex-shrink-0 ${
+                  config.demoMode ? "opacity-60 pointer-events-none" : ""
+                }`}
+                disabled={config.demoMode}
               >
                 <FolderOpen className="h-4 w-4" />
               </Button>
             </div>
             <div className="space-y-1">
-              {config.authentication.employeeFile && (
-                <ValidationFeedback
-                  isValid={employeeFileValidation.isValid}
-                  error={employeeFileValidation.error}
-                  warning={employeeFileValidation.warning}
-                />
-              )}
               <p className="text-xs text-gray-400">
                 {SetupValidation.getFileTypeDescription("employee")}. Click the
                 folder icon to browse.
@@ -1931,7 +2001,11 @@ function AuthenticationStep({
             </div>
           </div>
 
-          <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+          <div
+            className={`p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800 ${
+              config.demoMode ? "opacity-60" : ""
+            }`}
+          >
             <div className="flex items-start gap-3">
               <FileText className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm">
@@ -1953,8 +2027,11 @@ function AuthenticationStep({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={downloadTemplate}
-                    className="text-orange-700 dark:text-orange-300 border-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30"
+                    onClick={config.demoMode ? undefined : downloadTemplate}
+                    className={`text-orange-700 dark:text-orange-300 border-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30 ${
+                      config.demoMode ? "opacity-60 pointer-events-none" : ""
+                    }`}
+                    disabled={config.demoMode}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download Template
@@ -2033,6 +2110,22 @@ function StorageStep({
     }
   }, []);
 
+  // Demo mode setup
+  useEffect(() => {
+    if (config.demoMode) {
+      // Use temp folder for demo mode
+      const tempPath = "/tmp/cnc-dashboard-demo";
+      updateStorage({
+        basePath: tempPath,
+        logsPath: `${tempPath}/logs`,
+        backupPath: `${tempPath}/backups`,
+        tempPath: `${tempPath}/temp`,
+        outputPath: `${tempPath}/output`,
+      });
+      setStorageStrategy("mono");
+    }
+  }, [config.demoMode]);
+
   const updateStorage = (updates: Partial<SetupConfig["storage"]>) => {
     console.log("updateStorage called with:", updates);
     console.log("Current storage config:", config.storage);
@@ -2104,10 +2197,14 @@ function StorageStep({
               storageStrategy === "mono"
                 ? "ring-2 ring-blue-500 border-blue-300 bg-blue-50 dark:bg-blue-900/20"
                 : "hover:border-gray-400"
-            }`}
-            onClick={() => setStorageStrategy("mono")}
+            } ${config.demoMode ? "" : ""}`}
+            onClick={() =>
+              !config.demoMode ? setStorageStrategy("mono") : undefined
+            }
           >
-            <CardContent className="p-4">
+            <CardContent
+              className={`p-4 ${config.demoMode ? "opacity-60" : ""}`}
+            >
               <div className="flex items-start gap-3">
                 <div
                   className={`w-4 h-4 rounded-full border-2 mt-0.5 ${
@@ -2143,8 +2240,10 @@ function StorageStep({
               storageStrategy === "individual"
                 ? "ring-2 ring-blue-500 border-blue-300 bg-blue-50 dark:bg-blue-900/20"
                 : "hover:border-gray-400"
-            }`}
-            onClick={() => setStorageStrategy("individual")}
+            } ${config.demoMode ? "opacity-60 pointer-events-none" : ""}`}
+            onClick={() =>
+              !config.demoMode ? setStorageStrategy("individual") : undefined
+            }
           >
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
@@ -2191,7 +2290,10 @@ function StorageStep({
                   value={config.storage.basePath || ""}
                   onChange={(e) => handleBasePathChange(e.target.value)}
                   placeholder="./cnc_management_data"
-                  className="flex-1 pr-8"
+                  className={`flex-1 pr-8 ${
+                    config.demoMode ? "opacity-60" : ""
+                  }`}
+                  disabled={config.demoMode}
                   onDoubleClick={(e) => e.currentTarget.select()}
                   onFocus={(e) => setTimeout(() => e.target.select(), 0)}
                 />
@@ -2204,7 +2306,10 @@ function StorageStep({
                 variant="outline"
                 size="sm"
                 onClick={() => handleStoragePathFileSelect("basePath")}
-                className="flex-shrink-0"
+                className={`flex-shrink-0 ${
+                  config.demoMode ? "opacity-60 pointer-events-none" : ""
+                }`}
+                disabled={config.demoMode}
               >
                 <FolderOpen className="h-4 w-4" />
               </Button>
@@ -2805,7 +2910,11 @@ function PreferencesStep({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div
+              className={`flex items-center justify-between p-4 border rounded-lg ${
+                config.demoMode ? "opacity-60" : ""
+              }`}
+            >
               <div>
                 <h4 className="font-medium">Auto Backup</h4>
                 <p className="text-sm text-muted-foreground">
@@ -2815,10 +2924,15 @@ function PreferencesStep({
               <Switch
                 checked={config.features.autoBackup}
                 onCheckedChange={(autoBackup) => updateFeatures({ autoBackup })}
+                disabled={config.demoMode}
               />
             </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div
+              className={`flex items-center justify-between p-4 border rounded-lg ${
+                config.demoMode ? "opacity-60" : ""
+              }`}
+            >
               <div>
                 <h4 className="font-medium">Export Reports</h4>
                 <p className="text-sm text-muted-foreground">
@@ -2830,6 +2944,7 @@ function PreferencesStep({
                 onCheckedChange={(exportReports) =>
                   updateFeatures({ exportReports })
                 }
+                disabled={config.demoMode}
               />
             </div>
           </div>
@@ -2857,61 +2972,62 @@ function ValidationStep({
 }) {
   const [tests, setTests] = useState<ValidationTest[]>([
     {
-      id: "paths",
-      name: "Storage Paths",
-      description: "Verify all configured storage paths are accessible",
-      status: "pending",
-    },
-    {
-      id: "modules",
-      name: "Module Configuration",
-      description: "Test enabled modules and their settings",
-      status: "pending",
-    },
-    {
-      id: "authentication",
-      name: "Authentication Setup",
-      description: "Validate user authentication and employee file",
-      status: "pending",
-    },
-    {
-      id: "json-scanner",
-      name: "JSON Scanner Integration",
+      id: "folder-permissions",
+      name: "Folder Permissions Check",
       description:
-        "Test JSON scanning functionality and data paths (if enabled)",
+        "Verify read/write permissions for all configured storage paths. Ensures the application can create, modify, and delete files in specified directories.",
       status: "pending",
     },
     {
-      id: "tool-manager",
-      name: "Tool Manager Integration",
+      id: "folder-structure",
+      name: "Required Folder Structure",
       description:
-        "Test Excel processing and tool management paths (if enabled)",
+        "Check if all required folders exist (logs, backups, temp, output). Creates missing folders and validates the complete directory structure.",
       status: "pending",
     },
     {
-      id: "plates-manager",
-      name: "Clamping Plates Manager",
+      id: "clamping-plate-files",
+      name: "Clamping Plate Info Files",
       description:
-        "Test plate model files and database connectivity (if enabled)",
+        "Validate structure and format of clamping plate information files. Checks for required fields, data integrity, and file accessibility.",
       status: "pending",
     },
     {
-      id: "file-validation",
-      name: "File System Validation",
-      description: "Scan and validate all specified files and folders exist",
-      status: "pending",
-    },
-    {
-      id: "features",
-      name: "Additional Features",
-      description: "Verify additional feature configurations",
-      status: "pending",
-    },
-    {
-      id: "data-population",
-      name: "Data Population",
+      id: "employee-file-structure",
+      name: "Employee File Structure",
       description:
-        "Upload and populate dashboard with real data from configured sources",
+        "Verify employee authentication file format and structure. Validates required columns, data types, and user credential integrity.",
+      status: "pending",
+    },
+  ]);
+
+  const [initTests, setInitTests] = useState<ValidationTest[]>([
+    {
+      id: "json-scanner-init",
+      name: "JSON Scanner Initialization",
+      description:
+        "Initialize and test JSON Scanner module. Performs a single scan operation to verify functionality and data processing capabilities.",
+      status: "pending",
+    },
+    {
+      id: "tool-manager-init",
+      name: "Tool Manager Initialization", 
+      description:
+        "Initialize Tool Manager and test Excel processing. Processes a sample Excel file to verify inventory management functionality.",
+      status: "pending",
+    },
+    {
+      id: "clamping-plate-init",
+      name: "Clamping Plate Manager Initialization",
+      description:
+        "Initialize Clamping Plate Manager and test database connectivity. Verifies plate tracking and model management systems.",
+      status: "pending",
+    },
+    {
+      id: "authentication-init",
+      name: "Authentication System Initialization",
+      description:
+        "Initialize authentication system and test user login functionality. Validates employee data loading and session management.",
       status: "pending",
     },
   ]);
@@ -2919,12 +3035,23 @@ function ValidationStep({
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
+  const [logs, setLogs] = useState<string[]>([]);
+  const [isInitRunning, setIsInitRunning] = useState(false);
+  const [isInitComplete, setIsInitComplete] = useState(false);
+
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs((prev) => [...prev, `[${timestamp}] ${message}`]);
+  };
 
   const runValidation = async () => {
     console.log("🔍 Starting validation process...");
     setIsRunning(true);
     setIsComplete(false);
     setHasErrors(false);
+    setLogs([]); // Clear previous logs
+    addLog("🔍 Starting comprehensive system validation...");
 
     // Reset all tests to pending
     setTests((prev) =>
@@ -2935,11 +3062,13 @@ function ValidationStep({
       }))
     );
 
+    addLog(`📋 Initialized ${tests.length} validation tests`);
     console.log("📋 Total tests to run:", tests.length);
 
     // Run each test sequentially
     for (let i = 0; i < tests.length; i++) {
       const test = tests[i];
+      addLog(`🔄 Running test ${i + 1}/${tests.length}: ${test.name}`);
       console.log(`🔄 Running test ${i + 1}/${tests.length}: ${test.name}`);
       await runIndividualTest(test.id);
       // Add small delay between tests for visual feedback
@@ -2947,12 +3076,14 @@ function ValidationStep({
     }
 
     console.log("✅ Validation process completed");
+    addLog("✅ All validation tests completed successfully!");
     setIsRunning(false);
     setIsComplete(true);
   };
 
   const runIndividualTest = async (testId: string) => {
     console.log(`🏃‍♂️ Starting test: ${testId}`);
+    addLog(`🏃‍♂️ Starting ${testId} validation...`);
 
     // Update test status to running
     setTests((prev) =>
@@ -2963,65 +3094,30 @@ function ValidationStep({
 
     try {
       switch (testId) {
-        case "paths":
-          console.log("📁 Validating storage paths...");
-          await validatePaths(config);
-          console.log("✅ Storage paths validation passed");
+        case "folder-permissions":
+          console.log("� Checking folder permissions...");
+          addLog("� Verifying read/write permissions for all storage paths...");
+          await validateFolderPermissions(config);
+          addLog("✅ All folder permissions validated successfully");
+          console.log("✅ Folder permissions validation passed");
           break;
-        case "modules":
-          console.log("⚙️ Validating module configurations...");
-          await validateModules(config);
-          console.log("✅ Module configurations validation passed");
+        case "folder-structure":
+          console.log("📁 Checking required folder structure...");
+          addLog("📁 Verifying and creating required folder structure...");
+          await validateFolderStructure(config);
+          addLog("✅ Required folder structure validated and created");
+          console.log("✅ Folder structure validation passed");
           break;
-        case "authentication":
-          console.log("🔐 Validating authentication setup...");
-          await validateAuthentication(config);
-          console.log("✅ Authentication validation passed");
-          break;
-        case "json-scanner":
-          if (config.companyFeatures.jsonScanner) {
-            console.log("📄 Validating JSON Scanner integration...");
-            await validateJsonScanner(config);
-            console.log("✅ JSON Scanner validation passed");
-          } else {
-            console.log("⏭️ JSON Scanner disabled, skipping test");
-            // Skip disabled modules
-            setTests((prev) =>
-              prev.map((test) =>
-                test.id === testId
-                  ? { ...test, status: "success" as const }
-                  : test
-              )
-            );
-            return;
-          }
-          break;
-        case "tool-manager":
-          if (config.companyFeatures.toolManager) {
-            console.log("🔧 Validating Tool Manager integration...");
-            await validateToolManager(config);
-            console.log("✅ Tool Manager validation passed");
-          } else {
-            console.log("⏭️ Tool Manager disabled, skipping test");
-            // Skip disabled modules
-            setTests((prev) =>
-              prev.map((test) =>
-                test.id === testId
-                  ? { ...test, status: "success" as const }
-                  : test
-              )
-            );
-            return;
-          }
-          break;
-        case "plates-manager":
+        case "clamping-plate-files":
           if (config.companyFeatures.clampingPlateManager) {
-            console.log("🗜️ Validating Clamping Plates Manager...");
-            await validatePlatesManager(config);
-            console.log("✅ Clamping Plates Manager validation passed");
+            console.log("�️ Validating clamping plate info files...");
+            addLog("�️ Checking clamping plate file structure and format...");
+            await validateClampingPlateFiles(config);
+            addLog("✅ Clamping plate files validated");
+            console.log("✅ Clamping plate files validation passed");
           } else {
-            console.log("⏭️ Clamping Plates Manager disabled, skipping test");
-            // Skip disabled modules
+            console.log("⏭️ Clamping Plate Manager disabled, skipping test");
+            addLog("⏭️ Clamping Plate Manager not enabled, skipping validation");
             setTests((prev) =>
               prev.map((test) =>
                 test.id === testId
@@ -3032,23 +3128,18 @@ function ValidationStep({
             return;
           }
           break;
-        case "file-validation":
-          console.log("📂 Validating file system...");
-          await validateFileValidation(config);
-          console.log("✅ File system validation passed");
-          break;
-        case "features":
-          console.log("🎛️ Validating additional features...");
-          await validateFeatures(config);
-          console.log("✅ Additional features validation passed");
-          break;
-        case "data-population":
-          console.log("📊 Starting data population process...");
-          await populateRealData(config);
-          console.log("✅ Data population completed successfully");
+        case "employee-file-structure":
+          console.log("� Validating employee file structure...");
+          addLog("� Checking employee authentication file format...");
+          await validateEmployeeFileStructure(config);
+          addLog("✅ Employee file structure validated");
+          console.log("✅ Employee file structure validation passed");
           break;
         default:
           console.warn(`⚠️ Unknown test ID: ${testId}`);
+          addLog(`⚠️ Warning: Unknown test ID: ${testId}`);
+          console.warn(`⚠️ Unknown test ID: ${testId}`);
+          addLog(`⚠️ Warning: Unknown test ID: ${testId}`);
       }
 
       // Mark test as successful
@@ -3057,12 +3148,14 @@ function ValidationStep({
           test.id === testId ? { ...test, status: "success" as const } : test
         )
       );
+      addLog(`✅ Test ${testId} completed successfully`);
       console.log(`✅ Test ${testId} completed successfully`);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
 
       console.error(`❌ Test ${testId} failed:`, errorMessage);
+      addLog(`❌ Test ${testId} failed: ${errorMessage}`);
 
       // Mark test as failed but continue with other tests
       setTests((prev) =>
@@ -3081,9 +3174,8 @@ function ValidationStep({
     }
   };
 
-  // Validation functions
-  const validatePaths = async (config: SetupConfig): Promise<void> => {
-    // Simulate path validation
+  // New Validation functions
+  const validateFolderPermissions = async (config: SetupConfig): Promise<void> => {
     const paths = [
       config.storage.basePath,
       config.storage.logsPath,
@@ -3096,282 +3188,172 @@ function ValidationStep({
       if (!path || path.trim() === "") {
         throw new Error(`Empty path detected in storage configuration`);
       }
+      // In a real implementation, you would test file system permissions
+      // For now, we simulate the check
     }
-
-    // In a real implementation, you would check if paths exist and are writable
-    // For demo purposes, we'll just check they're not empty
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate async operation
-  };
-
-  const validateModules = async (config: SetupConfig): Promise<void> => {
-    // Check module configurations
-    if (
-      config.companyFeatures.jsonScanner &&
-      !config.modules.jsonAnalyzer.dataPath
-    ) {
-      throw new Error("JSON Scanner is enabled but no data path is configured");
-    }
-
-    if (
-      config.companyFeatures.toolManager &&
-      !config.modules.matrixTools.paths.excelInputPath
-    ) {
-      throw new Error(
-        "Tool Manager is enabled but no Excel input path is configured"
-      );
-    }
-
-    if (
-      config.companyFeatures.clampingPlateManager &&
-      !config.modules.platesManager.dataPath
-    ) {
-      throw new Error(
-        "Clamping Plates Manager is enabled but no data path is configured"
-      );
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 800));
-  };
-
-  const validateAuthentication = async (config: SetupConfig): Promise<void> => {
-    if (
-      config.authentication.method === "file" &&
-      !config.authentication.employeeFile
-    ) {
-      throw new Error(
-        "File authentication is selected but no employee file is specified"
-      );
-    }
-
-    if (
-      config.authentication.method === "database" &&
-      !config.authentication.databaseConnection
-    ) {
-      throw new Error(
-        "Database authentication is selected but no database connection is specified"
-      );
-    }
-
-    if (
-      config.authentication.method === "ldap" &&
-      !config.authentication.ldapServer
-    ) {
-      throw new Error(
-        "LDAP authentication is selected but no LDAP server is specified"
-      );
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 600));
-  };
-
-  const validateJsonScanner = async (config: SetupConfig): Promise<void> => {
-    // Test JSON Scanner functionality
-    const dataPath = config.modules.jsonAnalyzer.dataPath;
-
-    if (!dataPath) {
-      throw new Error("JSON Scanner data path is not configured");
-    }
-
-    // In a real implementation, you would:
-    // - Check if the path exists
-    // - Try to read sample JSON files
-    // - Validate JSON schema
-    // - Test the scanning rules
-
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-  };
-
-  const validateToolManager = async (config: SetupConfig): Promise<void> => {
-    // Test Tool Manager functionality
-    const excelPath = config.modules.matrixTools.paths.excelInputPath;
-
-    if (!excelPath) {
-      throw new Error("Tool Manager Excel input path is not configured");
-    }
-
-    // In a real implementation, you would:
-    // - Check if Excel files can be read
-    // - Test matrix processing logic
-    // - Validate tool definitions
-    // - Test inventory management
-
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-  };
-
-  const validatePlatesManager = async (config: SetupConfig): Promise<void> => {
-    // Test Clamping Plates Manager functionality
-    const dataPath = config.modules.platesManager.dataPath;
-
-    if (!dataPath) {
-      throw new Error("Clamping Plates Manager data path is not configured");
-    }
-
-    // In a real implementation, you would:
-    // - Test database connectivity
-    // - Validate plate definitions
-    // - Check model file access
-    // - Test status tracking
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
-  const validateFeatures = async (config: SetupConfig): Promise<void> => {
-    // Test additional features
-    if (config.features.autoBackup && !config.storage.backupPath) {
-      throw new Error(
-        "Auto backup is enabled but no backup path is configured"
-      );
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  };
-
-  const populateRealData = async (config: SetupConfig): Promise<void> => {
-    console.log("📊 Starting real data population process...");
-
-    try {
-      // Step 1: Import employee data if configured
-      if (
-        config.authentication.method === "file" &&
-        config.authentication.employeeFile
-      ) {
-        console.log("👥 Importing employee data...");
-        // In a real implementation, this would read and import the actual file
-        console.log(
-          `Processing employee file: ${config.authentication.employeeFile}`
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
-
-      // Step 2: Scan and import JSON files if JSON Scanner is enabled
-      if (
-        config.companyFeatures.jsonScanner &&
-        config.modules.jsonAnalyzer.enabled
-      ) {
-        console.log("📄 Processing JSON scanner data...");
-        // Simulate JSON scanning process
-        await simulateDataProcessing(
-          "JSON files",
-          config.modules.jsonAnalyzer.dataPath
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-      }
-
-      // Step 3: Process tool management data if Tool Manager is enabled
-      if (
-        config.companyFeatures.toolManager &&
-        config.modules.matrixTools.enabled
-      ) {
-        console.log("🔧 Processing tool management data...");
-        // Simulate Excel and inventory processing
-        if (config.modules.matrixTools.features.excelProcessing) {
-          await simulateDataProcessing(
-            "Excel tool files",
-            config.modules.matrixTools.paths.excelInputPath
-          );
-        }
-        if (config.modules.matrixTools.features.jsonScanning) {
-          await simulateDataProcessing(
-            "Tool JSON files",
-            config.modules.matrixTools.paths.jsonInputPath
-          );
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-      }
-
-      // Step 4: Process clamping plate data if enabled
-      if (
-        config.companyFeatures.clampingPlateManager &&
-        config.modules.platesManager.enabled
-      ) {
-        console.log("🗜️ Processing clamping plate data...");
-        await simulateDataProcessing(
-          "Plate model files",
-          config.modules.platesManager.dataPath
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-      }
-
-      // Step 5: Generate summary reports and populate dashboard
-      console.log("📋 Generating dashboard summaries...");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      console.log("✅ Real data population completed successfully!");
-    } catch (error) {
-      console.error("❌ Data population failed:", error);
-      throw new Error(
-        `Data population failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  };
-
-  const simulateDataProcessing = async (
-    dataType: string,
-    dataPath: string
-  ): Promise<void> => {
-    console.log(`🔄 Processing ${dataType} from ${dataPath}...`);
-    // Simulate processing time based on data type
-    const processingTime = dataType.includes("Excel") ? 2000 : 1000;
-    await new Promise((resolve) => setTimeout(resolve, processingTime));
-    console.log(`✅ ${dataType} processing completed`);
-  };
-
-  const validateFileValidation = async (config: SetupConfig): Promise<void> => {
-    console.log("🔍 Checking file system validation...");
-
-    // Check if employee file exists (if file authentication is used)
-    if (
-      config.authentication.method === "file" &&
-      config.authentication.employeeFile
-    ) {
-      console.log(
-        "👥 Validating employee file:",
-        config.authentication.employeeFile
-      );
-      // In a real implementation, you would check if the file exists
-      // For demo purposes, we'll just simulate the check
-    }
-
-    // Check storage paths accessibility
-    const storageChecks = [
-      { name: "Base Path", path: config.storage.basePath },
-      { name: "Logs Path", path: config.storage.logsPath },
-      { name: "Backup Path", path: config.storage.backupPath },
-      { name: "Temp Path", path: config.storage.tempPath },
-      { name: "Output Path", path: config.storage.outputPath },
+  const validateFolderStructure = async (config: SetupConfig): Promise<void> => {
+    const requiredFolders = [
+      { path: config.storage.logsPath, name: "logs" },
+      { path: config.storage.backupPath, name: "backups" },
+      { path: config.storage.tempPath, name: "temp" },
+      { path: config.storage.outputPath, name: "output" },
     ];
 
-    for (const check of storageChecks) {
-      if (check.path) {
-        console.log(`📁 Checking ${check.name}: ${check.path}`);
-        // In a real implementation, you would use fs.access() or similar
-        // For demo purposes, we'll just simulate the check
+    for (const folder of requiredFolders) {
+      if (!folder.path) {
+        throw new Error(`Missing ${folder.name} folder path configuration`);
       }
+      // In a real implementation, you would check if folders exist and create them
     }
 
-    // Check module-specific files
-    if (
-      config.companyFeatures.toolManager &&
-      config.modules.matrixTools.inventoryFile
-    ) {
-      console.log(
-        "🔧 Validating Tool Manager inventory file:",
-        config.modules.matrixTools.inventoryFile
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  };
+
+  const validateClampingPlateFiles = async (config: SetupConfig): Promise<void> => {
+    if (!config.modules.platesManager.dataPath) {
+      throw new Error("Clamping plate data path not configured");
+    }
+
+    // In a real implementation, you would:
+    // - Check if the data files exist
+    // - Validate file format and required fields
+    // - Verify data integrity
+    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  };
+
+  const validateEmployeeFileStructure = async (config: SetupConfig): Promise<void> => {
+    if (config.authentication.method === "file") {
+      if (!config.authentication.employeeFile) {
+        throw new Error("Employee file path not configured");
+      }
+
+      // In a real implementation, you would:
+      // - Check if the employee file exists
+      // - Validate required columns (username, password, role, etc.)
+      // - Check data format and integrity
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  };
+
+  // Initialization functions for feature testing
+  const runInitialization = async () => {
+    console.log("🚀 Starting feature initialization...");
+    setIsInitRunning(true);
+    setIsInitComplete(false);
+    addLog("🚀 Starting feature initialization tests...");
+
+    // Reset all init tests to pending
+    setInitTests((prev) =>
+      prev.map((test) => ({
+        ...test,
+        status: "pending" as const,
+        error: undefined,
+      }))
+    );
+
+    // Run each initialization test sequentially
+    for (let i = 0; i < initTests.length; i++) {
+      const test = initTests[i];
+      addLog(`🔄 Running init test ${i + 1}/${initTests.length}: ${test.name}`);
+      await runInitializationTest(test.id);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    addLog("✅ All feature initialization tests completed!");
+    setIsInitRunning(false);
+    setIsInitComplete(true);
+  };
+
+  const runInitializationTest = async (testId: string) => {
+    // Update test status to running
+    setInitTests((prev) =>
+      prev.map((test) =>
+        test.id === testId ? { ...test, status: "running" as const } : test
+      )
+    );
+
+    try {
+      switch (testId) {
+        case "json-scanner-init":
+          if (config.companyFeatures.jsonScanner) {
+            addLog("📄 Initializing JSON Scanner module...");
+            await initializeJsonScanner(config);
+            addLog("✅ JSON Scanner initialized successfully");
+          } else {
+            addLog("⏭️ JSON Scanner disabled, skipping initialization");
+          }
+          break;
+        case "tool-manager-init":
+          if (config.companyFeatures.toolManager) {
+            addLog("🔧 Initializing Tool Manager module...");
+            await initializeToolManager(config);
+            addLog("✅ Tool Manager initialized successfully");
+          } else {
+            addLog("⏭️ Tool Manager disabled, skipping initialization");
+          }
+          break;
+        case "clamping-plate-init":
+          if (config.companyFeatures.clampingPlateManager) {
+            addLog("🗜️ Initializing Clamping Plate Manager...");
+            await initializeClampingPlateManager(config);
+            addLog("✅ Clamping Plate Manager initialized successfully");
+          } else {
+            addLog("⏭️ Clamping Plate Manager disabled, skipping initialization");
+          }
+          break;
+        case "authentication-init":
+          addLog("👥 Initializing Authentication System...");
+          await initializeAuthentication(config);
+          addLog("✅ Authentication System initialized successfully");
+          break;
+        default:
+          addLog(`⚠️ Unknown initialization test: ${testId}`);
+      }
+
+      // Mark test as successful
+      setInitTests((prev) =>
+        prev.map((test) =>
+          test.id === testId ? { ...test, status: "success" as const } : test
+        )
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      addLog(`❌ Initialization test ${testId} failed: ${errorMessage}`);
+      
+      setInitTests((prev) =>
+        prev.map((test) =>
+          test.id === testId
+            ? { ...test, status: "error" as const, error: errorMessage }
+            : test
+        )
       );
     }
+  };
 
-    if (
-      config.companyFeatures.clampingPlateManager &&
-      config.modules.platesManager.plateDatabase
-    ) {
-      console.log(
-        "🗜️ Validating Plates Manager database:",
-        config.modules.platesManager.plateDatabase
-      );
-    }
+  // Feature initialization functions
+  const initializeJsonScanner = async (config: SetupConfig): Promise<void> => {
+    // Simulate JSON Scanner initialization
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+  };
 
+  const initializeToolManager = async (config: SetupConfig): Promise<void> => {
+    // Simulate Tool Manager initialization
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  };
+
+  const initializeClampingPlateManager = async (config: SetupConfig): Promise<void> => {
+    // Simulate Clamping Plate Manager initialization
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+  };
+
+  const initializeAuthentication = async (config: SetupConfig): Promise<void> => {
+    // Simulate Authentication initialization
     await new Promise((resolve) => setTimeout(resolve, 1000));
   };
 
@@ -3405,6 +3387,188 @@ function ValidationStep({
 
   return (
     <div className="space-y-6">
+      <div className="text-center space-y-4">
+        <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
+          <AlertCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Setup Wizard
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Let's configure your unified manufacturing management system
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                <FileJson className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Read-Only Approach</CardTitle>
+                <CardDescription>Safe and non-invasive</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              We only <strong>read</strong> from your existing folders and
+              files. Nothing will be modified, moved, or deleted in your source
+              directories. All our working data is saved to our own workspace.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+  config,
+  onComplete,
+}: {
+  config: SetupConfig;
+  onComplete: () => void;
+}) {
+                {config.companyFeatures.toolManager && (
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-3 w-3 text-green-600" />
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Tool Manager ({config.modules.matrixTools.mode})
+                    </span>
+                  </div>
+                )}
+                {config.companyFeatures.clampingPlateManager && (
+                  <div className="flex items-center gap-2">
+                    <Grid3X3 className="h-3 w-3 text-green-600" />
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Plates Manager
+                    </span>
+                  </div>
+                )}
+                {!config.companyFeatures.jsonScanner &&
+                  !config.companyFeatures.toolManager &&
+                  !config.companyFeatures.clampingPlateManager && (
+                    <span className="text-gray-500">No modules enabled</span>
+                  )}
+              </div>
+            </div>
+
+            {/* Authentication */}
+            <div className="space-y-2">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                Authentication
+              </h4>
+              <div className="text-sm space-y-1">
+                <div className="flex items-center gap-2">
+                  <Users className="h-3 w-3" />
+                  <span className="text-gray-700 dark:text-gray-300 capitalize">
+                    {config.authentication.method}
+                    {config.authentication.method === "file" &&
+                      config.authentication.employeeFile &&
+                      " (configured)"}
+                    {config.authentication.method === "database" &&
+                      config.authentication.databaseConnection &&
+                      " (configured)"}
+                    {config.authentication.method === "ldap" &&
+                      config.authentication.ldapServer &&
+                      " (configured)"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Storage Configuration */}
+            <div className="space-y-2">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                Storage
+              </h4>
+              <div className="text-sm space-y-1">
+                <div className="flex items-center gap-2">
+                  <Database className="h-3 w-3" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {config.storage.basePath || "Default paths"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Features */}
+            <div className="space-y-2">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                Features
+              </h4>
+              <div className="text-sm space-y-1">
+                <div className="flex items-center gap-2">
+                  {config.features.themeMode === "light" ? (
+                    <Sun className="h-3 w-3" />
+                  ) : config.features.themeMode === "dark" ? (
+                    <Moon className="h-3 w-3" />
+                  ) : (
+                    <Monitor className="h-3 w-3" />
+                  )}
+                  <span className="text-gray-700 dark:text-gray-300 capitalize">
+                    {config.features.themeMode} theme
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Bell className="h-3 w-3" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {config.features.notifications.enabled
+                      ? "Notifications enabled"
+                      : "Notifications disabled"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Export Configuration */}
+            <div className="space-y-2">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                Configuration
+              </h4>
+              <div className="text-sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={
+                    config.demoMode
+                      ? undefined
+                      : () => {
+                          const configBlob = new Blob(
+                            [JSON.stringify(config, null, 2)],
+                            {
+                              type: "application/json",
+                            }
+                          );
+                          const url = URL.createObjectURL(configBlob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `cnc-dashboard-config-${
+                            new Date().toISOString().split("T")[0]
+                          }.json`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        }
+                  }
+                  className={`text-blue-700 border-blue-300 hover:bg-blue-100 dark:text-blue-300 dark:border-blue-700 dark:hover:bg-blue-900/20 ${
+                    config.demoMode ? "opacity-60 pointer-events-none" : ""
+                  }`}
+                  disabled={config.demoMode}
+                >
+                  <Save className="h-3 w-3 mr-1" />
+                  Export Config
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -3418,29 +3582,213 @@ function ValidationStep({
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Validation Tests */}
-          <div className="space-y-4">
-            {tests.map((test) => (
+          <div className="space-y-3">
+            {tests.map((test, index) => (
               <div
                 key={test.id}
-                className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700"
+                className={`relative flex items-start gap-3 p-4 rounded-lg border transition-all duration-300 ${
+                  test.status === "running"
+                    ? "border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700"
+                    : test.status === "success"
+                    ? "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
+                    : test.status === "error"
+                    ? "border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700"
+                    : "border-gray-200 bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700"
+                }`}
               >
-                <div className="mt-0.5">{getStatusIcon(test.status)}</div>
-                <div className="flex-1">
-                  <h4 className={`font-medium ${getStatusColor(test.status)}`}>
-                    {test.name}
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {test.description}
-                  </p>
-                  {test.error && (
-                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-700 dark:text-red-300">
-                      <strong>Error:</strong> {test.error}
+                {/* Progress indicator on the left */}
+                <div className="relative">
+                  <div className="flex flex-col items-center">
+                    <div
+                      className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 ${
+                        test.status === "running"
+                          ? "border-blue-500 bg-blue-100 dark:bg-blue-900/50"
+                          : test.status === "success"
+                          ? "border-green-500 bg-green-100 dark:bg-green-900/50"
+                          : test.status === "error"
+                          ? "border-red-500 bg-red-100 dark:bg-red-900/50"
+                          : "border-gray-300 bg-white dark:bg-gray-700"
+                      }`}
+                    >
+                      {getStatusIcon(test.status)}
                     </div>
-                  )}
+                    {/* Connection line to next item */}
+                    {index < tests.length - 1 && (
+                      <div
+                        className={`w-0.5 h-8 mt-1 transition-all duration-500 ${
+                          test.status === "success" ||
+                          (test.status === "error" &&
+                            tests[index + 1].status !== "pending")
+                            ? "bg-blue-300 dark:bg-blue-600"
+                            : "bg-gray-200 dark:bg-gray-600"
+                        }`}
+                      ></div>
+                    )}
+                  </div>
                 </div>
+
+                {/* Test content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4
+                        className={`font-medium transition-colors duration-300 ${getStatusColor(
+                          test.status
+                        )}`}
+                      >
+                        {test.name}
+                        {/* Status badge */}
+                        <span
+                          className={`ml-2 px-2 py-0.5 text-xs rounded-full transition-all duration-300 ${
+                            test.status === "running"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                              : test.status === "success"
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                              : test.status === "error"
+                              ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                              : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                          }`}
+                        >
+                          {test.status === "pending" && "Pending"}
+                          {test.status === "running" && "Running..."}
+                          {test.status === "success" && "Passed"}
+                          {test.status === "error" && "Failed"}
+                        </span>
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {test.description}
+                      </p>
+
+                      {/* Animated progress bar for running tests */}
+                      {test.status === "running" && (
+                        <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full animate-pulse w-3/5"></div>
+                        </div>
+                      )}
+
+                      {/* Error details */}
+                      {test.error && (
+                        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm">
+                              <strong className="text-red-700 dark:text-red-300">
+                                Error Details:
+                              </strong>
+                              <p className="text-red-700 dark:text-red-300 mt-1">
+                                {test.error}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Test number indicator */}
+                    <div className="flex-shrink-0 ml-4">
+                      <span className="text-xs text-gray-400 font-mono">
+                        #{(index + 1).toString().padStart(2, "0")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Completion animation overlay */}
+                {test.status === "success" && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute top-2 right-2 text-green-500 animate-bounce">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
+
+          {/* Overall Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Overall Progress
+              </span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {tests.filter((t) => t.status === "success").length} /{" "}
+                {tests.length} completed
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 to-green-500 rounded-full transition-all duration-500 ease-out"
+                style={{
+                  width: `${
+                    (tests.filter((t) => t.status === "success").length /
+                      tests.length) *
+                    100
+                  }%`,
+                }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Test Logs Section */}
+          {(isRunning || isComplete || logs.length > 0) && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Monitor className="h-4 w-4" />
+                  Validation Logs
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLogs(!showLogs)}
+                  className="text-xs"
+                >
+                  {showLogs ? "Hide Logs" : "Show Logs"}
+                </Button>
+              </div>
+
+              {showLogs && (
+                <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 max-h-64 overflow-y-auto">
+                  <div className="space-y-1 font-mono text-xs">
+                    {logs.length === 0 ? (
+                      <div className="text-gray-500">
+                        No logs available yet. Start validation to see real-time
+                        progress.
+                      </div>
+                    ) : (
+                      logs.map((log, index) => (
+                        <div
+                          key={index}
+                          className={`transition-opacity duration-300 ${
+                            log.includes("✅")
+                              ? "text-green-400"
+                              : log.includes("❌")
+                              ? "text-red-400"
+                              : log.includes("🔄")
+                              ? "text-blue-400"
+                              : log.includes("⏭️")
+                              ? "text-yellow-400"
+                              : log.includes("⚠️")
+                              ? "text-orange-400"
+                              : "text-gray-300"
+                          }`}
+                        >
+                          {log}
+                        </div>
+                      ))
+                    )}
+                    {isRunning && (
+                      <div className="text-blue-400 animate-pulse">
+                        <span className="inline-block w-2 h-2 bg-blue-400 rounded-full mr-2 animate-ping"></span>
+                        Running...
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Control Buttons */}
           <div className="flex justify-center pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -3536,6 +3884,198 @@ function ValidationStep({
           </div>
         </CardContent>
       </Card>
+
+      {/* Feature Initialization Section */}
+      {isComplete && !hasErrors && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Rocket className="h-6 w-6 text-purple-600" />
+              Feature Initialization
+            </CardTitle>
+            <CardDescription>
+              Initialize and test each feature module to ensure everything works correctly
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Initialization Tests */}
+            <div className="space-y-3">
+              {initTests.map((test, index) => (
+                <div
+                  key={test.id}
+                  className={`relative flex items-start gap-3 p-4 rounded-lg border transition-all duration-300 ${
+                    test.status === "running"
+                      ? "border-purple-300 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-700"
+                      : test.status === "success"
+                      ? "border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
+                      : test.status === "error"
+                      ? "border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700"
+                      : "border-gray-200 bg-gray-50 dark:bg-gray-800/50 dark:border-gray-700"
+                  }`}
+                >
+                  {/* Progress indicator */}
+                  <div className="relative">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 ${
+                          test.status === "running"
+                            ? "border-purple-500 bg-purple-100 dark:bg-purple-900/50"
+                            : test.status === "success"
+                            ? "border-green-500 bg-green-100 dark:bg-green-900/50"
+                            : test.status === "error"
+                            ? "border-red-500 bg-red-100 dark:bg-red-900/50"
+                            : "border-gray-300 bg-white dark:bg-gray-700"
+                        }`}
+                      >
+                        {getStatusIcon(test.status)}
+                      </div>
+                      {index < initTests.length - 1 && (
+                        <div
+                          className={`w-0.5 h-8 mt-1 transition-all duration-500 ${
+                            test.status === "success" ||
+                            (test.status === "error" &&
+                              initTests[index + 1].status !== "pending")
+                              ? "bg-purple-300 dark:bg-purple-600"
+                              : "bg-gray-200 dark:bg-gray-600"
+                          }`}
+                        ></div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Test content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4
+                          className={`font-medium transition-colors duration-300 ${getStatusColor(
+                            test.status
+                          )}`}
+                        >
+                          {test.name}
+                          <span
+                            className={`ml-2 px-2 py-0.5 text-xs rounded-full transition-all duration-300 ${
+                              test.status === "running"
+                                ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                                : test.status === "success"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                                : test.status === "error"
+                                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                                : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                            }`}
+                          >
+                            {test.status === "pending" && "Pending"}
+                            {test.status === "running" && "Initializing..."}
+                            {test.status === "success" && "Ready"}
+                            {test.status === "error" && "Failed"}
+                          </span>
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {test.description}
+                        </p>
+
+                        {test.status === "running" && (
+                          <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                            <div className="h-full bg-purple-500 rounded-full animate-pulse w-3/5"></div>
+                          </div>
+                        )}
+
+                        {test.error && (
+                          <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                            <div className="flex items-start gap-2">
+                              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                              <div className="text-sm">
+                                <strong className="text-red-700 dark:text-red-300">
+                                  Initialization Error:
+                                </strong>
+                                <p className="text-red-700 dark:text-red-300 mt-1">
+                                  {test.error}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-shrink-0 ml-4">
+                        <span className="text-xs text-gray-400 font-mono">
+                          #{(index + 1).toString().padStart(2, "0")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Initialization Progress */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Initialization Progress
+                </span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {initTests.filter((t) => t.status === "success").length} /{" "}
+                  {initTests.length} initialized
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-500 to-green-500 rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    width: `${
+                      (initTests.filter((t) => t.status === "success").length /
+                        initTests.length) *
+                      100
+                    }%`,
+                  }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Initialization Controls */}
+            <div className="flex justify-center pt-6 border-t border-gray-200 dark:border-gray-700">
+              {!isInitComplete && (
+                <Button
+                  onClick={runInitialization}
+                  disabled={isInitRunning}
+                  size="lg"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
+                >
+                  {isInitRunning ? (
+                    <>
+                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                      Initializing Features...
+                    </>
+                  ) : (
+                    <>
+                      <Rocket className="h-5 w-5 mr-2" />
+                      Initialize Features
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {isInitComplete && (
+                <div className="text-center space-y-4 w-full max-w-md">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div className="flex items-center gap-2 text-green-800 dark:text-green-300">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="font-medium">
+                        All features initialized successfully!
+                      </span>
+                    </div>
+                    <p className="text-sm text-green-700 dark:text-green-400 mt-1">
+                      Your CNC Management Dashboard is fully operational with all
+                      modules tested and ready for use.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

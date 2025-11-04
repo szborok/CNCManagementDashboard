@@ -3,6 +3,7 @@ import { SetupProcessor } from "../services/SetupProcessor";
 
 export interface SetupConfig {
   isConfigured: boolean;
+  demoMode: boolean;
   companyName: string;
   companyLogo?: string;
   companyFeatures: {
@@ -36,6 +37,7 @@ export interface SetupConfig {
       mode: "auto" | "manual";
       dataPath: string;
       plateDatabase: string;
+      plateInfoFile?: string;
     };
   };
   authentication: {
@@ -74,6 +76,7 @@ export interface SetupConfig {
 
 const defaultConfig: SetupConfig = {
   isConfigured: false,
+  demoMode: false,
   companyName: "",
   companyFeatures: {
     jsonScanner: true,
