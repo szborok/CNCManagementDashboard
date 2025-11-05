@@ -1,0 +1,75 @@
+[
+  {
+    "id": "emp001",
+    "name": "János Kovács",
+    "email": "janos.kovacs@euroform.hu",
+    "role": "administrator",
+    "department": "IT",
+    "active": true,
+    "phone": "+36 30 123 4567",
+    "position": "System Administrator",
+    "startDate": "2020-03-15",
+    "createdAt": "2024-01-15T08:30:00.000Z"
+  },
+  {
+    "id": "emp002",
+    "name": "Péter Nagy",
+    "email": "peter.nagy@euroform.hu",
+    "role": "operator",
+    "department": "Production",
+    "active": true,
+    "phone": "+36 30 234 5678",
+    "position": "CNC Operator",
+    "startDate": "2021-06-10",
+    "createdAt": "2024-01-15T08:30:00.000Z"
+  },
+  {
+    "id": "emp003",
+    "name": "Anna Szabó",
+    "email": "anna.szabo@euroform.hu",
+    "role": "supervisor",
+    "department": "Production",
+    "active": true,
+    "phone": "+36 30 345 6789",
+    "position": "Production Supervisor",
+    "startDate": "2019-11-20",
+    "createdAt": "2024-01-15T08:30:00.000Z"
+  },
+  {
+    "id": "emp004",
+    "name": "Gábor Tóth",
+    "email": "gabor.toth@euroform.hu",
+    "role": "operator",
+    "department": "Quality Control",
+    "active": true,
+    "phone": "+36 30 456 7890",
+    "position": "Quality Inspector",
+    "startDate": "2022-02-14",
+    "createdAt": "2024-01-15T08:30:00.000Z"
+  },
+  {
+    "id": "emp005",
+    "name": "Katalin Varga",
+    "email": "katalin.varga@euroform.hu",
+    "role": "manager",
+    "department": "Engineering",
+    "active": true,
+    "phone": "+36 30 567 8901",
+    "position": "Engineering Manager",
+    "startDate": "2018-09-01",
+    "createdAt": "2024-01-15T08:30:00.000Z"
+  },
+  {
+    "id": "emp006",
+    "name": "László Horváth",
+    "email": "laszlo.horvath@euroform.hu",
+    "role": "operator",
+    "department": "Production",
+    "active": false,
+    "phone": "+36 30 678 9012",
+    "position": "CNC Operator",
+    "startDate": "2020-12-03",
+    "endDate": "2024-08-15",
+    "createdAt": "2024-01-15T08:30:00.000Z"
+  }
+]

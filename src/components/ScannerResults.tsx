@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -7,17 +7,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, FileJson } from "lucide-react";
 
 interface ScanResult {
   id: string;
-  projectName: string;
-  scanDate: Date;
-  status: "passed" | "failed" | "warning";
-  rulesExecuted: number;
-  rulesPassed: number;
-  rulesFailed: number;
-  details: any;
+  filename: string;
+  processedAt: string;
+  results: {
+    rulesApplied: string[];
+    violations: Array<{
+      rule: string;
+      severity: string;
+      message: string;
+      location: string;
+      suggestion: string;
+    }>;
+    optimizations: Array<{
+      type: string;
+      originalValue: number;
+      suggestedValue: number;
+      improvement: string;
+    }>;
+    machiningTime: string;
+    estimatedCost: number;
+  };
+  status: string;
 }
 
 interface ScannerResultsProps {
@@ -25,168 +40,191 @@ interface ScannerResultsProps {
 }
 
 const ScannerResults: React.FC<ScannerResultsProps> = ({ currentUser: _currentUser }) => {
-  // Mock data - this will be replaced with API calls
-  const mockResults: ScanResult[] = [
-    {
-      id: "1",
-      projectName: "W5270NS01060A",
-      scanDate: new Date("2024-10-29T10:30:00"),
-      status: "passed",
-      rulesExecuted: 7,
-      rulesPassed: 7,
-      rulesFailed: 0,
-      details: {},
-    },
-    {
-      id: "2",
-      projectName: "BRK_Test_001",
-      scanDate: new Date("2024-10-29T09:15:00"),
-      status: "warning",
-      rulesExecuted: 6,
-      rulesPassed: 5,
-      rulesFailed: 1,
-      details: {},
-    },
-    {
-      id: "3",
-      projectName: "Matrix_Analysis_002",
-      scanDate: new Date("2024-10-29T08:45:00"),
-      status: "failed",
-      rulesExecuted: 5,
-      rulesPassed: 2,
-      rulesFailed: 3,
-      details: {},
-    },
-  ];
+  const [scanResults, setScanResults] = useState<ScanResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "passed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "warning":
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case "failed":
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+  useEffect(() => {
+    loadDemoData();
+  }, []);
+
+  const loadDemoData = () => {
+    try {
+      const resultsData = localStorage.getItem('demoProcessingResults');
+      if (resultsData) {
+        const parsed = JSON.parse(resultsData);
+        setScanResults(parsed.jsonAnalysis || []);
+      }
+    } catch (error) {
+      console.error('Failed to load demo data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      passed: "default",
-      warning: "secondary",
-      failed: "destructive",
-    } as const;
-
-    return (
-      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
-        {status.toUpperCase()}
-      </Badge>
-    );
+  const getStatusBadge = (violations: any[]) => {
+    if (violations.length === 0) return <Badge className="bg-green-100 text-green-800">Passed</Badge>;
+    const hasErrors = violations.some(v => v.severity === 'ERROR');
+    if (hasErrors) return <Badge variant="destructive">Failed</Badge>;
+    return <Badge className="bg-yellow-100 text-yellow-800">Warning</Badge>;
   };
+
+  const formatTimestamp = (timestamp: string) => {
+    return new Date(timestamp).toLocaleString();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">JSON Scanner Results</h1>
+        <div className="grid grid-cols-1 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            JSON Scanner Results
-          </h1>
-          <p className="text-muted-foreground">
-            Analysis results from CNC program scanning and rule validation
-          </p>
+          <h1 className="text-3xl font-bold">JSON Scanner Results</h1>
+          <p className="text-muted-foreground">Analysis results from CNC program scanning</p>
         </div>
+        <Button onClick={loadDemoData} variant="outline">
+          <FileJson className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Scans</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm">Total Analyses</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockResults.length}</div>
-            <p className="text-xs text-muted-foreground">+2 from last hour</p>
+            <div className="text-2xl font-bold">{scanResults.length}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm">Success Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Math.round(
-                (mockResults.filter((r) => r.status === "passed").length /
-                  mockResults.length) *
-                  100
-              )}
-              %
+              {scanResults.length > 0 
+                ? Math.round((scanResults.filter(r => r.results.violations.length === 0).length / scanResults.length) * 100)
+                : 0}%
             </div>
-            <p className="text-xs text-muted-foreground">
-              Based on recent scans
-            </p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Rules</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+          <CardHeader>
+            <CardTitle className="text-sm">Rules Applied</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">7</div>
-            <p className="text-xs text-muted-foreground">
-              Validation rules active
-            </p>
+            <div className="text-2xl font-bold">
+              {scanResults.reduce((total, result) => total + result.results.rulesApplied.length, 0)}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Scan Results</CardTitle>
-          <CardDescription>
-            Latest JSON file analyses and rule validations
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {mockResults.map((result) => (
-              <div
-                key={result.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex items-center space-x-4">
-                  {getStatusIcon(result.status)}
-                  <div>
-                    <h3 className="font-medium">{result.projectName}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {result.scanDate.toLocaleString()}
-                    </p>
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Analysis Results</h2>
+        {scanResults.length > 0 ? (
+          scanResults.map((result) => (
+            <Card key={result.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <FileJson className="h-5 w-5" />
+                    <CardTitle>{result.filename}</CardTitle>
+                    {getStatusBadge(result.results.violations)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatTimestamp(result.processedAt)}
+                  </div>
+                </div>
+                <CardDescription>
+                  Time: {result.results.machiningTime} | Cost: \
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Rules Applied ({result.results.rulesApplied.length})</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {result.results.rulesApplied.map((rule, index) => (
+                      <Badge key={index} variant="outline">{rule}</Badge>
+                    ))}
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <div className="text-right text-sm">
-                    <div>
-                      {result.rulesPassed}/{result.rulesExecuted} rules passed
-                    </div>
-                    {result.rulesFailed > 0 && (
-                      <div className="text-red-500">
-                        {result.rulesFailed} failed
+                {result.results.violations.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2 text-red-600">Violations</h4>
+                    {result.results.violations.map((violation, index) => (
+                      <div key={index} className="p-3 bg-red-50 rounded border-red-200 border">
+                        <div className="flex items-center gap-2 mb-1">
+                          <XCircle className="h-4 w-4 text-red-500" />
+                          <span className="font-medium">{violation.rule}</span>
+                          <Badge variant="destructive">{violation.severity}</Badge>
+                        </div>
+                        <p className="text-sm mb-1">{violation.message}</p>
+                        <p className="text-xs text-red-600">Location: {violation.location}</p>
+                        <p className="text-xs text-red-600 mt-1">💡 {violation.suggestion}</p>
                       </div>
-                    )}
+                    ))}
                   </div>
-                  {getStatusBadge(result.status)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                )}
+
+                {result.results.optimizations.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2 text-blue-600">Optimizations</h4>
+                    {result.results.optimizations.map((opt, index) => (
+                      <div key={index} className="p-3 bg-blue-50 rounded border-blue-200 border">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CheckCircle className="h-4 w-4 text-blue-500" />
+                          <span className="font-medium">{opt.type}</span>
+                        </div>
+                        <p className="text-sm">{opt.originalValue} → {opt.suggestedValue} ({opt.improvement})</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {result.results.violations.length === 0 && (
+                  <div className="p-3 bg-green-50 rounded border-green-200 border">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="font-medium">All checks passed!</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileJson className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">No Analysis Results</h3>
+              <p className="text-muted-foreground mb-4">
+                Complete setup wizard to generate demo data.
+              </p>
+              <Button onClick={loadDemoData}>Load Demo Data</Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

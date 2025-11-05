@@ -35,8 +35,7 @@ export interface SetupConfig {
     platesManager: {
       enabled: boolean;
       mode: "auto" | "manual";
-      dataPath: string;
-      plateDatabase: string;
+      modelsPath?: string;
       plateInfoFile?: string;
     };
   };
@@ -47,11 +46,15 @@ export interface SetupConfig {
     ldapServer?: string;
   };
   storage: {
+    mode: "simple" | "advanced";
     basePath?: string;
     logsPath: string;
     backupPath: string;
     tempPath: string;
     outputPath: string;
+    jsonFoundPath?: string;
+    jsonFixedPath?: string;
+    resultFilesPath?: string;
   };
   features: {
     themeMode: "light" | "dark" | "system";
@@ -107,8 +110,8 @@ const defaultConfig: SetupConfig = {
     platesManager: {
       enabled: false,
       mode: "auto",
-      dataPath: "",
-      plateDatabase: "",
+      modelsPath: "",
+      plateInfoFile: "",
     },
   },
   authentication: {
@@ -116,11 +119,15 @@ const defaultConfig: SetupConfig = {
     employeeFile: "",
   },
   storage: {
+    mode: "simple",
     basePath: "",
     logsPath: "",
     backupPath: "",
     tempPath: "",
     outputPath: "",
+    jsonFoundPath: "",
+    jsonFixedPath: "",
+    resultFilesPath: "",
   },
   features: {
     themeMode: "system",
