@@ -228,10 +228,21 @@ export class DataImporter {
 
     data.plates.forEach((plate: any, index: number) => {
       if (!plate.id) errors.push(`Plate ${index + 1}: Missing id`);
-      if (!plate.name) errors.push(`Plate ${index + 1}: Missing name`);
-      if (!plate.status) errors.push(`Plate ${index + 1}: Missing status`);
-      if (!["new", "in-use", "free", "locked"].includes(plate.status)) {
+      // Accept either "name" OR "plateNumber" from ClampingPlateManager
+      if (!plate.name && !plate.plateNumber) {
+        errors.push(`Plate ${index + 1}: Missing name or plateNumber`);
+      }
+      // Status is optional - ClampingPlateManager uses isLocked boolean instead
+      // Valid statuses if provided: "new", "in-use", "free", "locked"
+      if (
+        plate.status &&
+        !["new", "in-use", "free", "locked"].includes(plate.status)
+      ) {
         errors.push(`Plate ${index + 1}: Invalid status`);
+      }
+      // Accept isLocked boolean from ClampingPlateManager
+      if (plate.isLocked !== undefined && typeof plate.isLocked !== "boolean") {
+        errors.push(`Plate ${index + 1}: isLocked must be boolean`);
       }
     });
 
@@ -253,12 +264,23 @@ export class DataImporter {
         if (!tool.id) errors.push(`Tool ${index + 1}: Missing id`);
         if (!tool.name) errors.push(`Tool ${index + 1}: Missing name`);
         if (!tool.status) errors.push(`Tool ${index + 1}: Missing status`);
-        if (
-          !["available", "in_use", "maintenance", "retired"].includes(
-            tool.status
-          )
-        ) {
-          errors.push(`Tool ${index + 1}: Invalid status`);
+        // Allow ToolManager status values: "in_use", "available", or matrix boolean
+        const validStatuses = [
+          "available",
+          "in_use",
+          "maintenance",
+          "retired",
+          "IN_MATRIX",
+          "NOT_IN_MATRIX",
+        ];
+        if (!validStatuses.includes(tool.status)) {
+          errors.push(
+            `Tool ${index + 1}: Invalid status (got: ${tool.status})`
+          );
+        }
+        // Optional: isMatrix boolean for filtering
+        if (tool.isMatrix !== undefined && typeof tool.isMatrix !== "boolean") {
+          errors.push(`Tool ${index + 1}: isMatrix must be boolean`);
         }
       });
     }
