@@ -3180,7 +3180,7 @@ function ValidationStep({
 
   const runFeatureTest = async (testId: string) => {
     const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
-    
+
     switch (testId) {
       case "json-scanner-init":
         if (config.companyFeatures.jsonScanner) {
@@ -3195,13 +3195,18 @@ function ValidationStep({
           if (isDemoMode) {
             addLog(`   → 🔍 Loading existing test results from backend...`);
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            
+
             try {
               // Import test results from backend's test_processed_data
-              const response = await fetch('/demo-data/jsonscanner-results.json');
+              const response = await fetch(
+                "/demo-data/jsonscanner-results.json"
+              );
               if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem('jsonScannerResults', JSON.stringify(data));
+                localStorage.setItem(
+                  "jsonScannerResults",
+                  JSON.stringify(data)
+                );
                 addLog(`   → ✅ Loaded ${data.length} JSON analysis results`);
                 addLog(`   → � Results available for dashboard display`);
               } else {
@@ -3240,13 +3245,20 @@ function ValidationStep({
           if (isDemoMode) {
             addLog(`   → 🔍 Loading existing test results from backend...`);
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            
+
             try {
-              const response = await fetch('/demo-data/toolmanager-results.json');
+              const response = await fetch(
+                "/demo-data/toolmanager-results.json"
+              );
               if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem('toolManagerResults', JSON.stringify(data));
-                const totalTools = (data.matrixTools?.length || 0) + (data.nonMatrixTools?.length || 0);
+                localStorage.setItem(
+                  "toolManagerResults",
+                  JSON.stringify(data)
+                );
+                const totalTools =
+                  (data.matrixTools?.length || 0) +
+                  (data.nonMatrixTools?.length || 0);
                 addLog(`   → ✅ Loaded ${totalTools} tool tracking records`);
                 addLog(`   → 📊 Results available for dashboard display`);
               } else {
@@ -3284,21 +3296,34 @@ function ValidationStep({
           if (isDemoMode) {
             addLog(`   → 🔍 Loading existing test results from backend...`);
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            
+
             try {
-              const response = await fetch('/demo-data/clampingplate-results.json');
+              const response = await fetch(
+                "/demo-data/clampingplate-results.json"
+              );
               if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem('clampingPlateResults', JSON.stringify(data));
-                addLog(`   → ✅ Loaded ${data.plates?.length || 0} clamping plate records`);
+                localStorage.setItem(
+                  "clampingPlateResults",
+                  JSON.stringify(data)
+                );
+                addLog(
+                  `   → ✅ Loaded ${
+                    data.plates?.length || 0
+                  } clamping plate records`
+                );
                 addLog(`   → � Results available for dashboard display`);
               } else {
                 addLog(`   → ℹ️  No pre-existing results found`);
-                addLog(`   → 💡 Run 'npm run test' in ClampingPlateManager to generate`);
+                addLog(
+                  `   → 💡 Run 'npm run test' in ClampingPlateManager to generate`
+                );
               }
             } catch (error) {
               addLog(`   → ℹ️  Backend results not found - run backends first`);
-              addLog(`   → 📝 Instructions: cd ClampingPlateManager && npm run test`);
+              addLog(
+                `   → 📝 Instructions: cd ClampingPlateManager && npm run test`
+              );
             }
           } else {
             // Production mode simulation

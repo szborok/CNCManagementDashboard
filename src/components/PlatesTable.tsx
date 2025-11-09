@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -27,6 +27,50 @@ interface PlatesTableProps {
   user: LegacyUser;
   filter?: 'new-health' | 'used-health' | 'locked-health' | 'free-occupancy' | 'in-use-occupancy' | 'ongoing-work' | 'history';
 }
+
+// Helper to load real clamping plate data from backend results
+const loadRealPlateData = (): Plate[] => {
+  try {
+    const storedData = localStorage.getItem('clampingPlateResults');
+    if (storedData) {
+      const clampingData = JSON.parse(storedData);
+      if (clampingData.plates && Array.isArray(clampingData.plates)) {
+        // Transform backend plate format to app Plate format
+        return clampingData.plates.map((backendPlate: any) => {
+          const health: 'new' | 'used' | 'locked' = backendPlate.isLocked 
+            ? 'locked' 
+            : (backendPlate.health === 'new' ? 'new' : 'used');
+          
+          const occupancy: 'free' | 'in-use' = backendPlate.isLocked ? 'in-use' : 'free';
+
+          return {
+            id: backendPlate.id,
+            name: `Plate ${backendPlate.plateNumber}`,
+            shelf: backendPlate.shelfNumber || backendPlate.shelf || 'Unknown',
+            previewImage: backendPlate.previewImage || '/placeholder-plate.png',
+            xtFile: backendPlate.currentModelFile || '',
+            health,
+            occupancy,
+            notes: backendPlate.notes || '',
+            lastWorkName: backendPlate.workProjects?.[backendPlate.workProjects.length - 1]?.workOrder || '',
+            lastModifiedBy: 'System',
+            lastModifiedDate: new Date(backendPlate.metadata?.generatedDate || Date.now()),
+            history: backendPlate.workProjects?.map((wp: any, idx: number) => ({
+              id: `${backendPlate.id}_${idx}`,
+              action: 'Work completed',
+              user: 'Operator',
+              date: new Date(),
+              details: `${wp.projectCode || ''}: ${wp.workOrder}`.trim()
+            })) || []
+          };
+        });
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load real plate data, using mock data:', error);
+  }
+  return [];
+};
 
 // Mock data
 const mockPlates: Plate[] = [
@@ -215,12 +259,40 @@ const getFilteredPlates = (plates: Plate[], filter?: string, search?: string) =>
 };
 
 export default function PlatesTable({ user, filter }: PlatesTableProps) {
+  const [plates, setPlates] = useState<Plate[]>([]);
   const [selectedPlate, setSelectedPlate] = useState<Plate | null>(null);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'shelf' | 'modified'>('modified');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const filteredPlates = getFilteredPlates(mockPlates, filter, search);
+  // Load real plate data on mount and when localStorage changes
+  useEffect(() => {
+    const loadPlates = () => {
+      const realPlates = loadRealPlateData();
+      if (realPlates.length > 0) {
+        console.log(`✅ Loaded ${realPlates.length} real plates from backend`);
+        setPlates(realPlates);
+      } else {
+        console.log('ℹ️ No real plate data found, using mock data');
+        setPlates(mockPlates);
+      }
+    };
+
+    loadPlates();
+
+    // Listen for storage changes (when setup wizard loads data)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'clampingPlateResults') {
+        loadPlates();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+
+  const filteredPlates = getFilteredPlates(plates, filter, search);
 
   const sortedPlates = [...filteredPlates].sort((a, b) => {
     let aValue: string | Date, bValue: string | Date;
