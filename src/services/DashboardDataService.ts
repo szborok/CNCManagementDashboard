@@ -45,13 +45,25 @@ export interface DashboardData {
   };
 }
 
+import { BackendDataLoader } from './BackendDataLoader';
+
 export class DashboardDataService {
   static async loadDashboardData(): Promise<DashboardData | null> {
     try {
+      // First, try to generate from backend data
+      const backendData = await BackendDataLoader.generateDashboardFromBackends();
+      if (backendData) {
+        // Save it to localStorage for caching
+        localStorage.setItem('dashboardData', JSON.stringify(backendData));
+        return backendData;
+      }
+
+      // Fall back to stored dashboard data
       const storedData = localStorage.getItem('dashboardData');
       if (storedData) {
         return JSON.parse(storedData);
       }
+      
       return null;
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
