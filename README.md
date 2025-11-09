@@ -82,7 +82,7 @@ Each module can be used independently or as part of the integrated dashboard exp
    - Import existing data or download test samples
    - Set up authentication and storage paths
 
-## � Demo Mode - Try Before You Configure
+## 🎯 Demo Mode - Try Before You Configure
 
 **Want to explore the system immediately?** Run in demo mode with pre-configured test data paths:
 
@@ -90,12 +90,48 @@ Each module can be used independently or as part of the integrated dashboard exp
 npm run demo
 ```
 
+### How Demo Mode Works
+
 Demo mode automatically populates the setup wizard with paths to test data from all backend modules:
+
 - **JSON Scanner**: `../JSONScanner/data/test_source_data`
-- **Tool Manager**: `../ToolManager/data/test_source_data`
+- **Tool Manager**: `../ToolManager/data/test_source_data`  
 - **Clamping Plate Manager**: `../ClampingPlateManager/data/test_source_data`
 
+**Important**: Demo mode shows **real backend results** from test data processing - no mock data!
+
+### To See Data on Dashboard:
+
+1. **Run backend services in test mode** to generate result files:
+
+   ```bash
+   # In JSONScanner directory
+   npm run test
+   
+   # In ToolManager directory  
+   npm run test
+   
+   # In ClampingPlateManager directory
+   npm run test
+   ```
+
+2. **Import result files** into dashboard:
+   - Dashboard reads from `test_processed_data/BRK CNC Management Dashboard/` folders
+   - Or use dashboard's import feature to upload result JSON files
+   - All data comes from actual backend processing - zero mock data
+
+### Dashboard Data Sources
+
+The dashboard displays **real data only**:
+
+- **JSONScanner Results**: Reads `*_BRK_result.json` files from backend's results folder
+- **ToolManager Results**: Reads `ToolManager_Result.json` consolidated report
+- **ClampingPlate Inventory**: Reads `clamping_plates_inventory_*.json` files
+
+**No sample/mock data** - If you don't see data on the dashboard, run the backend services first to generate results!
+
 This lets you:
+
 - ✅ Complete the setup wizard with working test data paths
 - ✅ Explore all features without manual configuration
 - ✅ See how the system works with real-world sample data

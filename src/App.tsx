@@ -12,7 +12,6 @@ import Sidebar from "./components/Sidebar";
 import SetupWizard from "./components/SetupWizard_New";
 import ProtectedRoute, { AdminRoute } from "./components/ProtectedRoute";
 import { Toaster } from "./components/ui/sonner";
-import { initializeSampleBackendData } from "./utils/initializeSampleData";
 
 // Enhanced Login Component - Clean and Simple
 function WorkingLoginPage() {
@@ -688,10 +687,7 @@ export default function App() {
 function AppWithSetup() {
   const { config, isLoading, saveConfig, isFirstTimeSetup } = useSetupConfig();
 
-  // Initialize sample backend data on first render (demo mode or first time)
-  useEffect(() => {
-    initializeSampleBackendData();
-  }, []);
+  // No sample data initialization - dashboard uses real backend results only
 
   if (isLoading) {
     return (
