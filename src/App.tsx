@@ -5,6 +5,7 @@ import { useSetupConfig } from "./hooks/useSetupConfig";
 import Dashboard from "./components/Dashboard";
 import PlatesTable from "./components/PlatesTable";
 import ScannerResults from "./components/ScannerResults";
+import JSONResultsAll from "./components/JSONResultsAll";
 import ToolManager from "./components/ToolManager";
 import Settings from "./components/Settings";
 import AdminSettings from "./components/AdminSettings";
@@ -317,11 +318,14 @@ export type AppView =
   | "settings"
   | "admin-settings"
   // JSON File Analyzer views
+  | "all-auto-results"
   | "my-auto-results"
   | "my-manual-results"
   | "manual-upload"
   // Matrix Tools Manager views
   | "available-tools"
+  | "remaining-tools"
+  | "non-matrix-tools"
   | "projects-by-tools"
   | "tools-by-projects";
 
@@ -484,6 +488,12 @@ function AppContent() {
             </ProtectedRoute>
           )}
 
+          {currentView === "all-auto-results" && (
+            <AdminRoute>
+              <JSONResultsAll />
+            </AdminRoute>
+          )}
+
           {currentView === "scanner-results" && (
             <ProtectedRoute>
               <ScannerResults currentUser={legacyUser} />
@@ -583,16 +593,20 @@ function AppContent() {
           {/* Matrix Tools Manager Views */}
           {currentView === "available-tools" && (
             <ProtectedRoute>
-              <div className="p-6">
-                <h1 className="text-2xl font-bold mb-4">
-                  Currently Available Matrix Tools
-                </h1>
-                <p className="text-gray-600">
-                  This page will show matrix tools that are currently available
-                  (not in use).
-                </p>
-              </div>
+              <ToolManager currentUser={legacyUser} view="available" />
             </ProtectedRoute>
+          )}
+
+          {currentView === "remaining-tools" && (
+            <ProtectedRoute>
+              <ToolManager currentUser={legacyUser} view="remaining" />
+            </ProtectedRoute>
+          )}
+
+          {currentView === "non-matrix-tools" && (
+            <AdminRoute>
+              <ToolManager currentUser={legacyUser} view="non-matrix" />
+            </AdminRoute>
           )}
 
           {currentView === "projects-by-tools" && (

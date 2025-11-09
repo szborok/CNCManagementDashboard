@@ -72,7 +72,7 @@ export class BackendDataLoader {
    * Get backend data paths based on demo mode
    */
   private static getBackendPaths() {
-    const isDemoMode = import.meta.env.VITE_DEMO_MODE === "true";
+    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
 
     if (isDemoMode) {
       return {
@@ -93,6 +93,83 @@ export class BackendDataLoader {
         clampingPlateResults:
           "../ClampingPlateManager/data/processed_data/clamping_plates_inventory.json",
       };
+    }
+  }
+
+  /**
+   * Ensure demo data is loaded from demo-data files if in demo mode
+   * This runs on app startup to sync localStorage with latest demo files
+   */
+  static async ensureDemoDataLoaded(): Promise<void> {
+    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
+
+    if (!isDemoMode) {
+      return; // Only auto-sync in demo mode
+    }
+
+    try {
+      console.log("🔄 Checking demo data freshness...");
+
+      const [jsonResponse, toolResponse, plateResponse] = await Promise.all([
+        fetch("/demo-data/jsonscanner-results.json"),
+        fetch("/demo-data/toolmanager-results.json"),
+        fetch("/demo-data/clampingplate-results.json"),
+      ]);
+
+      let updated = false;
+
+      if (jsonResponse.ok) {
+        const jsonData = await jsonResponse.json();
+        const stored = localStorage.getItem("jsonScannerResults");
+        const storedData = stored ? JSON.parse(stored) : null;
+
+        // Update if not present or different length (simple freshness check)
+        if (!storedData || storedData.length !== jsonData.length) {
+          localStorage.setItem("jsonScannerResults", JSON.stringify(jsonData));
+          console.log(
+            `✅ Synced ${jsonData.length} JSON Scanner results from demo-data`
+          );
+          updated = true;
+        }
+      }
+
+      if (toolResponse.ok) {
+        const toolData = await toolResponse.json();
+        const stored = localStorage.getItem("toolManagerResults");
+        if (!stored) {
+          localStorage.setItem("toolManagerResults", JSON.stringify(toolData));
+          console.log("✅ Synced Tool Manager results from demo-data");
+          updated = true;
+        }
+      }
+
+      if (plateResponse.ok) {
+        const plateData = await plateResponse.json();
+        const stored = localStorage.getItem("clampingPlateResults");
+        const storedData = stored ? JSON.parse(stored) : null;
+
+        if (
+          !storedData ||
+          storedData.plates?.length !== plateData.plates?.length
+        ) {
+          localStorage.setItem(
+            "clampingPlateResults",
+            JSON.stringify(plateData)
+          );
+          console.log(
+            `✅ Synced ${
+              plateData.plates?.length || 0
+            } Clamping Plate results from demo-data`
+          );
+          updated = true;
+        }
+      }
+
+      if (!updated) {
+        console.log("✓ Demo data is up to date");
+      }
+    } catch (error) {
+      console.warn("Could not sync demo data:", error);
     }
   }
 

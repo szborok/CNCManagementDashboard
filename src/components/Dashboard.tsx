@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { 
-  Grid3X3, 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import {
+  Grid3X3,
   Clock,
   FileJson,
   Archive,
@@ -11,17 +17,23 @@ import {
   BarChart3,
   AlertCircle,
   CheckCircle2,
-  RefreshCw
-} from 'lucide-react';
-import { User as UserType } from '../App';
-import { DashboardDataService, DashboardData } from '../services/DashboardDataService';
+  RefreshCw,
+} from "lucide-react";
+import { User as UserType } from "../App";
+import {
+  DashboardDataService,
+  DashboardData,
+} from "../services/DashboardDataService";
+import { BackendDataLoader } from "../services/BackendDataLoader";
 
 interface DashboardProps {
   user: UserType;
 }
 
 export default function Dashboard({ user }: DashboardProps) {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -32,10 +44,14 @@ export default function Dashboard({ user }: DashboardProps) {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
+
+      // Ensure demo data is fresh (only in demo mode)
+      await BackendDataLoader.ensureDemoDataLoaded();
+
       const data = await DashboardDataService.loadDashboardData();
       setDashboardData(data || DashboardDataService.generateFallbackData());
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error("Failed to load dashboard data:", error);
       setDashboardData(DashboardDataService.generateFallbackData());
     } finally {
       setIsLoading(false);
@@ -45,10 +61,47 @@ export default function Dashboard({ user }: DashboardProps) {
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
+
+      // In demo mode, fetch fresh data from demo-data files
+      try {
+        const [jsonResponse, toolResponse, plateResponse] = await Promise.all([
+          fetch("/demo-data/jsonscanner-results.json"),
+          fetch("/demo-data/toolmanager-results.json"),
+          fetch("/demo-data/clampingplate-results.json"),
+        ]);
+
+        if (jsonResponse.ok) {
+          const jsonData = await jsonResponse.json();
+          localStorage.setItem("jsonScannerResults", JSON.stringify(jsonData));
+          console.log(`✅ Refreshed ${jsonData.length} JSON Scanner results`);
+        }
+
+        if (toolResponse.ok) {
+          const toolData = await toolResponse.json();
+          localStorage.setItem("toolManagerResults", JSON.stringify(toolData));
+          console.log("✅ Refreshed Tool Manager results");
+        }
+
+        if (plateResponse.ok) {
+          const plateData = await plateResponse.json();
+          localStorage.setItem(
+            "clampingPlateResults",
+            JSON.stringify(plateData)
+          );
+          console.log(
+            `✅ Refreshed ${
+              plateData.plates?.length || 0
+            } Clamping Plate results`
+          );
+        }
+      } catch (fetchError) {
+        console.log("ℹ️ Could not fetch fresh demo data, using cached data");
+      }
+
       await DashboardDataService.refreshData();
       await loadDashboardData();
     } catch (error) {
-      console.error('Failed to refresh data:', error);
+      console.error("Failed to refresh data:", error);
     } finally {
       setIsRefreshing(false);
     }
@@ -57,8 +110,10 @@ export default function Dashboard({ user }: DashboardProps) {
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    );
+
     if (diffInMinutes < 60) {
       return `${diffInMinutes} minutes ago`;
     } else if (diffInMinutes < 1440) {
@@ -97,7 +152,9 @@ export default function Dashboard({ user }: DashboardProps) {
     return (
       <div className="space-y-6">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {user.username}!</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Welcome back, {user.username}!
+          </h1>
           <p className="text-gray-600 dark:text-gray-300">
             Unable to load dashboard data. Please try refreshing the page.
           </p>
@@ -112,7 +169,9 @@ export default function Dashboard({ user }: DashboardProps) {
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {user.username}!</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              Welcome back, {user.username}!
+            </h1>
             <p className="text-gray-600 dark:text-gray-300">
               Here's what's happening with your CNC Management Dashboard.
             </p>
@@ -127,7 +186,9 @@ export default function Dashboard({ user }: DashboardProps) {
             disabled={isRefreshing}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
         </div>
@@ -143,7 +204,9 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{dashboardData.overview.totalProjects}</div>
+            <div className="text-2xl font-bold">
+              {dashboardData.overview.totalProjects}
+            </div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -156,7 +219,9 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{dashboardData.overview.activeProjects}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {dashboardData.overview.activeProjects}
+            </div>
             <p className="text-xs text-muted-foreground">Currently running</p>
           </CardContent>
         </Card>
@@ -169,7 +234,9 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{dashboardData.overview.completedToday}</div>
+            <div className="text-2xl font-bold text-green-600">
+              {dashboardData.overview.completedToday}
+            </div>
             <p className="text-xs text-muted-foreground">Tasks finished</p>
           </CardContent>
         </Card>
@@ -182,7 +249,9 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{dashboardData.overview.toolsInUse}</div>
+            <div className="text-2xl font-bold text-purple-600">
+              {dashboardData.overview.toolsInUse}
+            </div>
             <p className="text-xs text-muted-foreground">Currently active</p>
           </CardContent>
         </Card>
@@ -195,23 +264,32 @@ export default function Dashboard({ user }: DashboardProps) {
             <CardTitle className="text-sm flex items-center gap-2">
               <FileJson className="h-4 w-4" />
               JSON Scanner
-              <Badge variant={dashboardData.modules.jsonScanner.status === 'active' ? 'default' : 'secondary'}>
+              <Badge
+                variant={
+                  dashboardData.modules.jsonScanner.status === "active"
+                    ? "default"
+                    : "secondary"
+                }
+              >
                 {dashboardData.modules.jsonScanner.status}
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Files Processed</span>
-              <span className="font-bold">{dashboardData.modules.jsonScanner.filesProcessed}</span>
+              <span className="text-xs text-muted-foreground">
+                Files Processed
+              </span>
+              <span className="font-bold">
+                {dashboardData.modules.jsonScanner.filesProcessed}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Last Scan</span>
               <span className="text-xs">
-                {dashboardData.modules.jsonScanner.lastScan 
+                {dashboardData.modules.jsonScanner.lastScan
                   ? formatTimestamp(dashboardData.modules.jsonScanner.lastScan)
-                  : 'Never'
-                }
+                  : "Never"}
               </span>
             </div>
           </CardContent>
@@ -222,23 +300,34 @@ export default function Dashboard({ user }: DashboardProps) {
             <CardTitle className="text-sm flex items-center gap-2">
               <Archive className="h-4 w-4" />
               Tool Manager
-              <Badge variant={dashboardData.modules.toolManager.status === 'active' ? 'default' : 'secondary'}>
+              <Badge
+                variant={
+                  dashboardData.modules.toolManager.status === "active"
+                    ? "default"
+                    : "secondary"
+                }
+              >
                 {dashboardData.modules.toolManager.status}
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Tools Tracked</span>
-              <span className="font-bold">{dashboardData.modules.toolManager.toolsTracked}</span>
+              <span className="text-xs text-muted-foreground">
+                Tools Tracked
+              </span>
+              <span className="font-bold">
+                {dashboardData.modules.toolManager.toolsTracked}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Last Update</span>
               <span className="text-xs">
-                {dashboardData.modules.toolManager.lastUpdate 
-                  ? formatTimestamp(dashboardData.modules.toolManager.lastUpdate)
-                  : 'Never'
-                }
+                {dashboardData.modules.toolManager.lastUpdate
+                  ? formatTimestamp(
+                      dashboardData.modules.toolManager.lastUpdate
+                    )
+                  : "Never"}
               </span>
             </div>
           </CardContent>
@@ -249,23 +338,34 @@ export default function Dashboard({ user }: DashboardProps) {
             <CardTitle className="text-sm flex items-center gap-2">
               <Grid3X3 className="h-4 w-4" />
               Clamping Plates
-              <Badge variant={dashboardData.modules.clampingPlateManager.status === 'active' ? 'default' : 'secondary'}>
+              <Badge
+                variant={
+                  dashboardData.modules.clampingPlateManager.status === "active"
+                    ? "default"
+                    : "secondary"
+                }
+              >
                 {dashboardData.modules.clampingPlateManager.status}
               </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-muted-foreground">Plates Managed</span>
-              <span className="font-bold">{dashboardData.modules.clampingPlateManager.platesManaged}</span>
+              <span className="text-xs text-muted-foreground">
+                Plates Managed
+              </span>
+              <span className="font-bold">
+                {dashboardData.modules.clampingPlateManager.platesManaged}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Last Update</span>
               <span className="text-xs">
-                {dashboardData.modules.clampingPlateManager.lastUpdate 
-                  ? formatTimestamp(dashboardData.modules.clampingPlateManager.lastUpdate)
-                  : 'Never'
-                }
+                {dashboardData.modules.clampingPlateManager.lastUpdate
+                  ? formatTimestamp(
+                      dashboardData.modules.clampingPlateManager.lastUpdate
+                    )
+                  : "Never"}
               </span>
             </div>
           </CardContent>
@@ -287,21 +387,47 @@ export default function Dashboard({ user }: DashboardProps) {
           <div className="space-y-4">
             {dashboardData.recentActivity.length > 0 ? (
               dashboardData.recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border">
-                  <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                    activity.status === 'completed' ? 'bg-green-500' :
-                    activity.status === 'processing' ? 'bg-blue-500' : 'bg-red-500'
-                  }`} />
+                <div
+                  key={activity.id}
+                  className="flex items-start space-x-3 p-3 rounded-lg border"
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                      activity.status === "completed"
+                        ? "bg-green-500"
+                        : activity.status === "processing"
+                        ? "bg-blue-500"
+                        : "bg-red-500"
+                    }`}
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      {activity.type === 'json_analysis' && <FileJson className="h-4 w-4" />}
-                      {activity.type === 'tool_inventory' && <Archive className="h-4 w-4" />}
-                      {activity.type === 'plate_management' && <Grid3X3 className="h-4 w-4" />}
+                      {activity.type === "json_analysis" && (
+                        <FileJson className="h-4 w-4" />
+                      )}
+                      {activity.type === "tool_inventory" && (
+                        <Archive className="h-4 w-4" />
+                      )}
+                      {activity.type === "plate_management" && (
+                        <Grid3X3 className="h-4 w-4" />
+                      )}
                       <p className="text-sm font-medium">{activity.project}</p>
-                      <Badge variant={activity.status === 'completed' ? 'default' : 'secondary'}>
-                        {activity.status === 'completed' && <CheckCircle2 className="h-3 w-3 mr-1" />}
-                        {activity.status === 'processing' && <Clock className="h-3 w-3 mr-1" />}
-                        {activity.status === 'failed' && <AlertCircle className="h-3 w-3 mr-1" />}
+                      <Badge
+                        variant={
+                          activity.status === "completed"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {activity.status === "completed" && (
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                        )}
+                        {activity.status === "processing" && (
+                          <Clock className="h-3 w-3 mr-1" />
+                        )}
+                        {activity.status === "failed" && (
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                        )}
                         {activity.status}
                       </Badge>
                     </div>
@@ -319,7 +445,9 @@ export default function Dashboard({ user }: DashboardProps) {
               <div className="text-center py-8 text-muted-foreground">
                 <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>No recent activity to display</p>
-                <p className="text-xs">Start using the enabled modules to see activity here</p>
+                <p className="text-xs">
+                  Start using the enabled modules to see activity here
+                </p>
               </div>
             )}
           </div>
@@ -327,7 +455,9 @@ export default function Dashboard({ user }: DashboardProps) {
       </Card>
 
       {/* Project Completion Chart */}
-      {dashboardData.charts.projectCompletion.some(item => item.completed > 0 || item.active > 0) && (
+      {dashboardData.charts.projectCompletion.some(
+        (item) => item.completed > 0 || item.active > 0
+      ) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -342,15 +472,17 @@ export default function Dashboard({ user }: DashboardProps) {
             <div className="grid grid-cols-7 gap-2 text-center">
               {dashboardData.charts.projectCompletion.map((day) => (
                 <div key={day.name} className="space-y-2">
-                  <div className="text-xs font-medium text-muted-foreground">{day.name}</div>
+                  <div className="text-xs font-medium text-muted-foreground">
+                    {day.name}
+                  </div>
                   <div className="space-y-1">
-                    <div 
+                    <div
                       className="bg-green-200 dark:bg-green-800 rounded text-xs py-1"
                       title={`${day.completed} completed`}
                     >
                       {day.completed}
                     </div>
-                    <div 
+                    <div
                       className="bg-blue-200 dark:bg-blue-800 rounded text-xs py-1"
                       title={`${day.active} active`}
                     >

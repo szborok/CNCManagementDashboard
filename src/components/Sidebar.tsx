@@ -24,6 +24,7 @@ import {
   Archive,
   FolderOpen,
   Target,
+  AlertCircle,
 } from "lucide-react";
 import { AppView } from "../App";
 import { useState } from "react";
@@ -50,19 +51,19 @@ interface SidebarProps {
 }
 
 const healthStatusItems = [
-  { id: 'new-plates', label: 'New Plates', icon: Plus },
-  { id: 'used-plates', label: 'Used Plates', icon: Circle },
-  { id: 'locked-plates', label: 'Locked Plates', icon: Lock },
+  { id: "new-plates", label: "New Plates", icon: Plus },
+  { id: "used-plates", label: "Used Plates", icon: Circle },
+  { id: "locked-plates", label: "Locked Plates", icon: Lock },
 ] as const;
 
 const occupancyStatusItems = [
-  { id: 'free-plates', label: 'Free Plates', icon: Circle },
-  { id: 'in-use-plates', label: 'In Use Plates', icon: Zap },
+  { id: "free-plates", label: "Free Plates", icon: Circle },
+  { id: "in-use-plates", label: "In Use Plates", icon: Zap },
 ] as const;
 
 const myPlatesItems = [
-  { id: 'ongoing-work', label: 'Ongoing Work', icon: Clock },
-  { id: 'history', label: 'History', icon: History },
+  { id: "ongoing-work", label: "Ongoing Work", icon: Clock },
+  { id: "history", label: "History", icon: History },
 ] as const;
 
 export default function Sidebar({
@@ -73,12 +74,15 @@ export default function Sidebar({
   onToggle,
   onLogout,
 }: SidebarProps) {
-  const [expandedApps, setExpandedApps] = useState<string[]>(['analyzer', 'plates']);
+  const [expandedApps, setExpandedApps] = useState<string[]>([
+    "analyzer",
+    "plates",
+  ]);
 
   const toggleApp = (appId: string) => {
-    setExpandedApps(prev => 
-      prev.includes(appId) 
-        ? prev.filter(id => id !== appId)
+    setExpandedApps((prev) =>
+      prev.includes(appId)
+        ? prev.filter((id) => id !== appId)
         : [...prev, appId]
     );
   };
@@ -120,7 +124,11 @@ export default function Sidebar({
             {/* Company Logo */}
             <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
               {user.company?.logo ? (
-                <img src={user.company.logo} alt="Company Logo" className="w-8 h-8 rounded" />
+                <img
+                  src={user.company.logo}
+                  alt="Company Logo"
+                  className="w-8 h-8 rounded"
+                />
               ) : (
                 <Building2 className="w-6 h-6 text-gray-600 dark:text-gray-400" />
               )}
@@ -128,7 +136,7 @@ export default function Sidebar({
             {isOpen && (
               <div className="min-w-0">
                 <h2 className="text-lg font-semibold text-sidebar-foreground truncate">
-                  {user.company?.name || 'Your Company'}
+                  {user.company?.name || "Your Company"}
                 </h2>
                 <p className="text-xs text-sidebar-muted-foreground">
                   CNC Management System
@@ -172,23 +180,37 @@ export default function Sidebar({
               className={`w-full justify-between ${
                 !isOpen && "lg:justify-center"
               }`}
-              onClick={() => toggleApp('analyzer')}
+              onClick={() => toggleApp("analyzer")}
             >
               <div className="flex items-center">
                 <FileJson className="h-4 w-4" />
                 {isOpen && <span className="ml-3">JSON File Analyzer</span>}
               </div>
-              {isOpen && (
-                expandedApps.includes('analyzer') ? 
-                <ChevronDown className="h-4 w-4" /> : 
-                <ChevronRight className="h-4 w-4" />
-              )}
+              {isOpen &&
+                (expandedApps.includes("analyzer") ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                ))}
             </Button>
-            
-            {isOpen && expandedApps.includes('analyzer') && (
+
+            {isOpen && expandedApps.includes("analyzer") && (
               <div className="ml-6 space-y-1">
                 <Button
-                  variant={currentView === "my-auto-results" ? "default" : "ghost"}
+                  variant={
+                    currentView === "all-auto-results" ? "default" : "ghost"
+                  }
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("all-auto-results")}
+                >
+                  <FolderOpen className="h-3 w-3 mr-2" />
+                  All Auto Results
+                </Button>
+                <Button
+                  variant={
+                    currentView === "my-auto-results" ? "default" : "ghost"
+                  }
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => onViewChange("my-auto-results")}
@@ -197,7 +219,9 @@ export default function Sidebar({
                   My Auto Results
                 </Button>
                 <Button
-                  variant={currentView === "my-manual-results" ? "default" : "ghost"}
+                  variant={
+                    currentView === "my-manual-results" ? "default" : "ghost"
+                  }
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => onViewChange("my-manual-results")}
@@ -206,7 +230,9 @@ export default function Sidebar({
                   My Manual Results
                 </Button>
                 <Button
-                  variant={currentView === "manual-upload" ? "default" : "ghost"}
+                  variant={
+                    currentView === "manual-upload" ? "default" : "ghost"
+                  }
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => onViewChange("manual-upload")}
@@ -225,23 +251,26 @@ export default function Sidebar({
               className={`w-full justify-between ${
                 !isOpen && "lg:justify-center"
               }`}
-              onClick={() => toggleApp('tools')}
+              onClick={() => toggleApp("tools")}
             >
               <div className="flex items-center">
                 <BarChart3 className="h-4 w-4" />
                 {isOpen && <span className="ml-3">Matrix Tools Manager</span>}
               </div>
-              {isOpen && (
-                expandedApps.includes('tools') ? 
-                <ChevronDown className="h-4 w-4" /> : 
-                <ChevronRight className="h-4 w-4" />
-              )}
+              {isOpen &&
+                (expandedApps.includes("tools") ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                ))}
             </Button>
-            
-            {isOpen && expandedApps.includes('tools') && (
+
+            {isOpen && expandedApps.includes("tools") && (
               <div className="ml-6 space-y-1">
                 <Button
-                  variant={currentView === "available-tools" ? "default" : "ghost"}
+                  variant={
+                    currentView === "available-tools" ? "default" : "ghost"
+                  }
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => onViewChange("available-tools")}
@@ -250,7 +279,33 @@ export default function Sidebar({
                   Currently Available
                 </Button>
                 <Button
-                  variant={currentView === "projects-by-tools" ? "default" : "ghost"}
+                  variant={
+                    currentView === "remaining-tools" ? "default" : "ghost"
+                  }
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("remaining-tools")}
+                >
+                  <Archive className="h-3 w-3 mr-2" />
+                  Remaining Tools
+                </Button>
+                {user.isAdmin && (
+                  <Button
+                    variant={
+                      currentView === "non-matrix-tools" ? "default" : "ghost"
+                    }
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => onViewChange("non-matrix-tools")}
+                  >
+                    <AlertCircle className="h-3 w-3 mr-2" />
+                    All Tool Usage
+                  </Button>
+                )}
+                <Button
+                  variant={
+                    currentView === "projects-by-tools" ? "default" : "ghost"
+                  }
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => onViewChange("projects-by-tools")}
@@ -259,7 +314,9 @@ export default function Sidebar({
                   Projects by Tools
                 </Button>
                 <Button
-                  variant={currentView === "tools-by-projects" ? "default" : "ghost"}
+                  variant={
+                    currentView === "tools-by-projects" ? "default" : "ghost"
+                  }
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => onViewChange("tools-by-projects")}
@@ -278,20 +335,21 @@ export default function Sidebar({
               className={`w-full justify-between ${
                 !isOpen && "lg:justify-center"
               }`}
-              onClick={() => toggleApp('plates')}
+              onClick={() => toggleApp("plates")}
             >
               <div className="flex items-center">
                 <Wrench className="h-4 w-4" />
                 {isOpen && <span className="ml-3">Plates Manager</span>}
               </div>
-              {isOpen && (
-                expandedApps.includes('plates') ? 
-                <ChevronDown className="h-4 w-4" /> : 
-                <ChevronRight className="h-4 w-4" />
-              )}
+              {isOpen &&
+                (expandedApps.includes("plates") ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                ))}
             </Button>
-            
-            {isOpen && expandedApps.includes('plates') && (
+
+            {isOpen && expandedApps.includes("plates") && (
               <div className="ml-6 space-y-1">
                 <Button
                   variant={currentView === "all-plates" ? "default" : "ghost"}
@@ -301,9 +359,11 @@ export default function Sidebar({
                 >
                   All Plates
                 </Button>
-                
+
                 <div className="space-y-1 mt-2">
-                  <div className="text-xs text-muted-foreground px-2 py-1">Health Status</div>
+                  <div className="text-xs text-muted-foreground px-2 py-1">
+                    Health Status
+                  </div>
                   {healthStatusItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -320,9 +380,11 @@ export default function Sidebar({
                     );
                   })}
                 </div>
-                
+
                 <div className="space-y-1 mt-2">
-                  <div className="text-xs text-muted-foreground px-2 py-1">Occupancy</div>
+                  <div className="text-xs text-muted-foreground px-2 py-1">
+                    Occupancy
+                  </div>
                   {occupancyStatusItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -339,9 +401,11 @@ export default function Sidebar({
                     );
                   })}
                 </div>
-                
+
                 <div className="space-y-1 mt-2">
-                  <div className="text-xs text-muted-foreground px-2 py-1">My Plates</div>
+                  <div className="text-xs text-muted-foreground px-2 py-1">
+                    My Plates
+                  </div>
                   {myPlatesItems.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -386,7 +450,7 @@ export default function Sidebar({
                   </p>
                 </div>
               </div>
-              
+
               <div className="space-y-1">
                 <Button
                   variant="ghost"
@@ -397,7 +461,7 @@ export default function Sidebar({
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Button>
-                
+
                 {user.isAdmin && (
                   <Button
                     variant="ghost"
@@ -405,15 +469,25 @@ export default function Sidebar({
                     className="w-full justify-start"
                     onClick={() => onViewChange("admin-settings")}
                   >
-                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                    <svg
+                      className="h-4 w-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                      />
                     </svg>
                     Admin Settings
                   </Button>
                 )}
-                
+
                 <Button
-                  variant="ghost" 
+                  variant="ghost"
                   size="sm"
                   onClick={onLogout}
                   className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -433,7 +507,7 @@ export default function Sidebar({
               >
                 <Settings className="h-4 w-4" />
               </Button>
-              
+
               {user.isAdmin && (
                 <Button
                   variant="ghost"
@@ -441,12 +515,22 @@ export default function Sidebar({
                   onClick={() => onViewChange("admin-settings")}
                   className="w-full"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                    />
                   </svg>
                 </Button>
               )}
-              
+
               <Button
                 variant="ghost"
                 size="icon"
