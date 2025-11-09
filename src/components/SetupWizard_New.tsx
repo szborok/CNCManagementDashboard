@@ -11,13 +11,6 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import {
   Building2,
   Settings,
   Database,
@@ -27,17 +20,12 @@ import {
   AlertCircle,
   Bell,
   Monitor,
-  Moon,
-  Sun,
   FolderOpen,
   Users,
   FileJson,
   FileText,
   Upload,
-  BarChart3,
-  Grid3X3,
   Download,
-  Clock,
   PlayCircle,
   RefreshCw,
   Rocket,
@@ -46,10 +34,9 @@ import {
   Search,
 } from "lucide-react";
 import { SetupConfig } from "../hooks/useSetupConfig";
-import { DataImporter } from "../services/DataImporter";
 import { SetupValidation } from "../utils/setupValidation";
 import ValidationFeedback from "./ValidationFeedback";
-import { isDemoMode, demoConfig, getDemoMessage } from "../config/demoConfig";
+import { isDemoMode, demoConfig } from "../config/demoConfig";
 
 interface SetupWizardProps {
   onComplete: (config: SetupConfig) => void;
@@ -145,63 +132,6 @@ export default function SetupWizard({
       setCurrentStep(newStep);
     }
   };
-
-  // Validation function for each step
-  const isStepValid = (step: number): boolean => {
-    switch (step) {
-      case 0: // Introduction step - always valid
-        return true;
-      case 1: // Company step
-        const companyNameValid = SetupValidation.validateCompanyName(
-          config.companyName
-        ).isValid;
-        const logoValid = !!(
-          config.companyLogo && config.companyLogo.trim() !== ""
-        );
-        return companyNameValid && logoValid;
-      case 2: // Modules step
-        const modulesValid =
-          config.modules.jsonAnalyzer.enabled ||
-          config.modules.matrixTools.enabled ||
-          config.modules.platesManager.enabled;
-        return modulesValid;
-      case 3: // Authentication step
-        if (config.authentication.method === "file") {
-          return (
-            !!config.authentication.employeeFile &&
-            SetupValidation.validateEmployeeFile(
-              config.authentication.employeeFile
-            ).isValid
-          );
-        } else if (config.authentication.method === "ldap") {
-          return (
-            !!config.authentication.ldapServer &&
-            SetupValidation.validateLDAPServer(config.authentication.ldapServer)
-              .isValid
-          );
-        } else if (config.authentication.method === "database") {
-          return (
-            !!config.authentication.databaseConnection &&
-            SetupValidation.validateDatabaseConnection(
-              config.authentication.databaseConnection
-            ).isValid
-          );
-        }
-        return true;
-      case 4: // Storage step
-        if (config.storage.basePath) {
-          return SetupValidation.validateDirectoryPath(config.storage.basePath)
-            .isValid;
-        }
-        return true;
-      case 5: // Features step
-        return true;
-      default:
-        return true;
-    }
-  };
-
-  const currentStepValid = isStepValid(currentStep);
 
   const clearWizardProgress = () => {
     try {
@@ -545,10 +475,6 @@ function CompanyStep({
   const companyNameValidation = SetupValidation.validateCompanyName(
     config.companyName
   );
-  const logoValidation: { isValid: boolean; error?: string; warning?: string } =
-    config.companyLogo && config.companyLogo.trim() !== ""
-      ? { isValid: true }
-      : { isValid: false, error: "Company logo is required" };
 
   return (
     <div className="space-y-6">

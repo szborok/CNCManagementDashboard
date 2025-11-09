@@ -69,34 +69,6 @@ export interface ClampingPlateResult {
 
 export class BackendDataLoader {
   /**
-   * Get backend data paths based on demo mode
-   */
-  private static getBackendPaths() {
-    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
-
-    if (isDemoMode) {
-      return {
-        jsonScannerResults:
-          "../JSONScanner/data/test_processed_data/BRK CNC Management Dashboard/JSONScanner/results",
-        toolManagerResults:
-          "../ToolManager/data/test_processed_data/BRK CNC Management Dashboard/ToolManager/results/ToolManager_Result.json",
-        clampingPlateResults:
-          "../ClampingPlateManager/data/test_processed_data/clamping_plates_inventory_2025-11-08T21-45-06.json",
-      };
-    } else {
-      // Production paths - adjust these based on actual production structure
-      return {
-        jsonScannerResults:
-          "../JSONScanner/data/processed_data/BRK CNC Management Dashboard/JSONScanner/results",
-        toolManagerResults:
-          "../ToolManager/data/processed_data/BRK CNC Management Dashboard/ToolManager/results/ToolManager_Result.json",
-        clampingPlateResults:
-          "../ClampingPlateManager/data/processed_data/clamping_plates_inventory.json",
-      };
-    }
-  }
-
-  /**
    * Ensure demo data is loaded from demo-data files if in demo mode
    * This runs on app startup to sync localStorage with latest demo files
    */
