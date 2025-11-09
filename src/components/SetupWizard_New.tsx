@@ -49,6 +49,7 @@ import { SetupConfig } from "../hooks/useSetupConfig";
 import { DataImporter } from "../services/DataImporter";
 import { SetupValidation } from "../utils/setupValidation";
 import ValidationFeedback from "./ValidationFeedback";
+import { isDemoMode, demoConfig, getDemoMessage } from "../config/demoConfig";
 
 interface SetupWizardProps {
   onComplete: (config: SetupConfig) => void;
@@ -60,7 +61,10 @@ export default function SetupWizard({
   initialConfig,
 }: SetupWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [config, setConfig] = useState<SetupConfig>(initialConfig);
+  // Use demo config if in demo mode, otherwise use initialConfig
+  const [config, setConfig] = useState<SetupConfig>(
+    isDemoMode ? { ...initialConfig, ...demoConfig } : initialConfig
+  );
 
   const steps = [
     {
@@ -639,7 +643,7 @@ function CompanyStep({
                     How it will appear in your CNC Management Dashboard
                   </span>
                 </div>
-                
+
                 <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
                   <CardContent className="p-6">
                     <div className="flex flex-col items-center text-center space-y-3">
@@ -651,16 +655,23 @@ function CompanyStep({
                             alt="Company Logo"
                             className="w-16 h-16 object-contain border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 p-2"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
+                              (
+                                e.target as HTMLImageElement
+                              ).nextElementSibling?.classList.remove("hidden");
                             }}
                           />
                         ) : null}
-                        <div className={`w-16 h-16 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg ${config.companyLogo ? 'hidden' : ''}`}>
+                        <div
+                          className={`w-16 h-16 flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg ${
+                            config.companyLogo ? "hidden" : ""
+                          }`}
+                        >
                           <Building2 className="h-8 w-8 text-gray-400" />
                         </div>
                       </div>
-                      
+
                       {/* Company Name */}
                       <div>
                         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -670,9 +681,10 @@ function CompanyStep({
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  ✨ This preview shows how your company branding will appear in the sidebar header
+                  ✨ This preview shows how your company branding will appear in
+                  the sidebar header
                 </p>
               </div>
             )}
@@ -692,29 +704,36 @@ function CompanyStep({
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4">
-              <div className={`flex items-center justify-between p-4 border rounded-lg ${
-                config.companyFeatures.jsonScanner
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
-                  : "border-gray-200 dark:border-gray-700"
-              }`}>
+              <div
+                className={`flex items-center justify-between p-4 border rounded-lg ${
+                  config.companyFeatures.jsonScanner
+                    ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
+                    : "border-gray-200 dark:border-gray-700"
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    config.companyFeatures.jsonScanner
-                      ? "bg-blue-100 dark:bg-blue-900/20"
-                      : "bg-gray-100 dark:bg-gray-800"
-                  }`}>
-                    <FileJson className={`h-5 w-5 ${
+                  <div
+                    className={`p-2 rounded-lg ${
                       config.companyFeatures.jsonScanner
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-gray-600 dark:text-gray-400"
-                    }`} />
+                        ? "bg-blue-100 dark:bg-blue-900/20"
+                        : "bg-gray-100 dark:bg-gray-800"
+                    }`}
+                  >
+                    <FileJson
+                      className={`h-5 w-5 ${
+                        config.companyFeatures.jsonScanner
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-gray-600 dark:text-gray-400"
+                      }`}
+                    />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                       JSON Scanner
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Analyze and process CNC program JSON files with automated validation
+                      Analyze and process CNC program JSON files with automated
+                      validation
                     </p>
                   </div>
                 </div>
@@ -731,33 +750,42 @@ function CompanyStep({
                         })
                   }
                   disabled={config.demoMode}
-                  className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                  className={
+                    config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                  }
                 />
               </div>
 
-              <div className={`flex items-center justify-between p-4 border rounded-lg ${
-                config.companyFeatures.toolManager
-                  ? "border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/10"
-                  : "border-gray-200 dark:border-gray-700"
-              }`}>
+              <div
+                className={`flex items-center justify-between p-4 border rounded-lg ${
+                  config.companyFeatures.toolManager
+                    ? "border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/10"
+                    : "border-gray-200 dark:border-gray-700"
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    config.companyFeatures.toolManager
-                      ? "bg-green-100 dark:bg-green-900/20"
-                      : "bg-gray-100 dark:bg-gray-800"
-                  }`}>
-                    <Settings className={`h-5 w-5 ${
+                  <div
+                    className={`p-2 rounded-lg ${
                       config.companyFeatures.toolManager
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-gray-600 dark:text-gray-400"
-                    }`} />
+                        ? "bg-green-100 dark:bg-green-900/20"
+                        : "bg-gray-100 dark:bg-gray-800"
+                    }`}
+                  >
+                    <Settings
+                      className={`h-5 w-5 ${
+                        config.companyFeatures.toolManager
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-gray-600 dark:text-gray-400"
+                      }`}
+                    />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                       Tool Manager
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Comprehensive tool inventory and lifecycle management system
+                      Comprehensive tool inventory and lifecycle management
+                      system
                     </p>
                   </div>
                 </div>
@@ -774,33 +802,42 @@ function CompanyStep({
                         })
                   }
                   disabled={config.demoMode}
-                  className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                  className={
+                    config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                  }
                 />
               </div>
 
-              <div className={`flex items-center justify-between p-4 border rounded-lg ${
-                config.companyFeatures.clampingPlateManager
-                  ? "border-purple-200 bg-purple-50/50 dark:border-purple-800 dark:bg-purple-900/10"
-                  : "border-gray-200 dark:border-gray-700"
-              }`}>
+              <div
+                className={`flex items-center justify-between p-4 border rounded-lg ${
+                  config.companyFeatures.clampingPlateManager
+                    ? "border-purple-200 bg-purple-50/50 dark:border-purple-800 dark:bg-purple-900/10"
+                    : "border-gray-200 dark:border-gray-700"
+                }`}
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    config.companyFeatures.clampingPlateManager
-                      ? "bg-purple-100 dark:bg-purple-900/20"
-                      : "bg-gray-100 dark:bg-gray-800"
-                  }`}>
-                    <Database className={`h-5 w-5 ${
+                  <div
+                    className={`p-2 rounded-lg ${
                       config.companyFeatures.clampingPlateManager
-                        ? "text-purple-600 dark:text-purple-400"
-                        : "text-gray-600 dark:text-gray-400"
-                    }`} />
+                        ? "bg-purple-100 dark:bg-purple-900/20"
+                        : "bg-gray-100 dark:bg-gray-800"
+                    }`}
+                  >
+                    <Database
+                      className={`h-5 w-5 ${
+                        config.companyFeatures.clampingPlateManager
+                          ? "text-purple-600 dark:text-purple-400"
+                          : "text-gray-600 dark:text-gray-400"
+                      }`}
+                    />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                       Clamping Plate Manager
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Manage clamping plates and workholding solutions efficiently
+                      Manage clamping plates and workholding solutions
+                      efficiently
                     </p>
                   </div>
                 </div>
@@ -817,7 +854,9 @@ function CompanyStep({
                         })
                   }
                   disabled={config.demoMode}
-                  className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                  className={
+                    config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                  }
                 />
               </div>
             </div>
@@ -827,7 +866,8 @@ function CompanyStep({
                 <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                   <AlertCircle className="h-4 w-4" />
                   <span className="text-sm font-medium">
-                    Demo Mode: All company features are automatically enabled for testing
+                    Demo Mode: All company features are automatically enabled
+                    for testing
                   </span>
                 </div>
               </div>
@@ -877,10 +917,17 @@ function ModulesStep({
 
   // Sync JSON Scanner path with Tool Manager when both are enabled and in auto mode
   React.useEffect(() => {
-    if (config.companyFeatures.jsonScanner && config.companyFeatures.toolManager && 
-        config.modules.jsonAnalyzer.mode === "auto" && config.modules.matrixTools.mode === "auto") {
+    if (
+      config.companyFeatures.jsonScanner &&
+      config.companyFeatures.toolManager &&
+      config.modules.jsonAnalyzer.mode === "auto" &&
+      config.modules.matrixTools.mode === "auto"
+    ) {
       const jsonScannerPath = config.modules.jsonAnalyzer.dataPath;
-      if (jsonScannerPath && jsonScannerPath !== config.modules.matrixTools.paths.jsonInputPath) {
+      if (
+        jsonScannerPath &&
+        jsonScannerPath !== config.modules.matrixTools.paths.jsonInputPath
+      ) {
         updateConfig({
           modules: {
             ...config.modules,
@@ -895,7 +942,13 @@ function ModulesStep({
         });
       }
     }
-  }, [config.modules.jsonAnalyzer.dataPath, config.modules.jsonAnalyzer.mode, config.modules.matrixTools.mode, config.companyFeatures.jsonScanner, config.companyFeatures.toolManager]);
+  }, [
+    config.modules.jsonAnalyzer.dataPath,
+    config.modules.jsonAnalyzer.mode,
+    config.modules.matrixTools.mode,
+    config.companyFeatures.jsonScanner,
+    config.companyFeatures.toolManager,
+  ]);
 
   const handleModuleModeToggle = (
     module: keyof typeof config.modules,
@@ -919,7 +972,7 @@ function ModulesStep({
     value: string
   ) => {
     if (config.demoMode) return;
-    
+
     const moduleConfig = config.modules[module];
     const updates: any = {
       modules: {
@@ -930,8 +983,8 @@ function ModulesStep({
       },
     };
 
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
       updates.modules[module] = {
         ...moduleConfig,
         [parent]: {
@@ -947,8 +1000,13 @@ function ModulesStep({
     }
 
     // If updating JSON Scanner dataPath and Tool Manager is enabled and both in auto mode, sync the paths
-    if (module === 'jsonAnalyzer' && field === 'dataPath' && config.companyFeatures.toolManager && 
-        config.modules.jsonAnalyzer.mode === "auto" && config.modules.matrixTools.mode === "auto") {
+    if (
+      module === "jsonAnalyzer" &&
+      field === "dataPath" &&
+      config.companyFeatures.toolManager &&
+      config.modules.jsonAnalyzer.mode === "auto" &&
+      config.modules.matrixTools.mode === "auto"
+    ) {
       updates.modules.matrixTools = {
         ...config.modules.matrixTools,
         paths: {
@@ -978,7 +1036,8 @@ function ModulesStep({
               📁 Configure where each module will store and read its data files.
             </p>
             <p>
-              💡 Make sure these directories exist or will be created by the application.
+              💡 Make sure these directories exist or will be created by the
+              application.
             </p>
           </div>
         </CardContent>
@@ -993,21 +1052,32 @@ function ModulesStep({
                 JSON Scanner Paths
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Auto Mode</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Auto Mode
+                </span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={config.modules.jsonAnalyzer.mode === "auto"}
-                    onChange={(e) => handleModuleModeToggle("jsonAnalyzer", e.target.checked ? "auto" : "manual")}
+                    onChange={(e) =>
+                      handleModuleModeToggle(
+                        "jsonAnalyzer",
+                        e.target.checked ? "auto" : "manual"
+                      )
+                    }
                     disabled={config.demoMode}
                     className="sr-only peer"
                   />
-                  <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}></div>
+                  <div
+                    className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 ${
+                      config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                    }`}
+                  ></div>
                 </label>
               </div>
             </CardTitle>
             <CardDescription>
-              {config.modules.jsonAnalyzer.mode === "auto" 
+              {config.modules.jsonAnalyzer.mode === "auto"
                 ? "Configure data paths for JSON analysis and CNC program processing"
                 : "Paths will be requested when you run the JSON Scanner feature at the dashboard"}
             </CardDescription>
@@ -1021,17 +1091,29 @@ function ModulesStep({
                     <Input
                       id="jsonDataPath"
                       value={config.modules.jsonAnalyzer.dataPath}
-                      onChange={(e) => handleModulePathChange("jsonAnalyzer", "dataPath", e.target.value)}
+                      onChange={(e) =>
+                        handleModulePathChange(
+                          "jsonAnalyzer",
+                          "dataPath",
+                          e.target.value
+                        )
+                      }
                       placeholder="C:\CNC_Data\JsonFiles"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <Button
                       type="button"
                       variant="outline"
                       disabled={config.demoMode}
-                      className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                      className={
+                        config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                      }
                     >
                       Browse
                     </Button>
@@ -1048,9 +1130,12 @@ function ModulesStep({
                     <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Manual Path Configuration</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                      Manual Path Configuration
+                    </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      The JSON Scanner will ask for the data directory path when you start the feature from the dashboard.
+                      The JSON Scanner will ask for the data directory path when
+                      you start the feature from the dashboard.
                     </p>
                   </div>
                 </div>
@@ -1069,21 +1154,32 @@ function ModulesStep({
                 Tool Manager Paths
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Auto Mode</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Auto Mode
+                </span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={config.modules.matrixTools.mode === "auto"}
-                    onChange={(e) => handleModuleModeToggle("matrixTools", e.target.checked ? "auto" : "manual")}
+                    onChange={(e) =>
+                      handleModuleModeToggle(
+                        "matrixTools",
+                        e.target.checked ? "auto" : "manual"
+                      )
+                    }
                     disabled={config.demoMode}
                     className="sr-only peer"
                   />
-                  <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}></div>
+                  <div
+                    className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600 ${
+                      config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                    }`}
+                  ></div>
                 </label>
               </div>
             </CardTitle>
             <CardDescription>
-              {config.modules.matrixTools.mode === "auto" 
+              {config.modules.matrixTools.mode === "auto"
                 ? "Configure data paths for tool inventory and Excel processing"
                 : "Paths will be requested when you run the Tool Manager feature at the dashboard"}
             </CardDescription>
@@ -1097,17 +1193,29 @@ function ModulesStep({
                     <Input
                       id="excelScanPath"
                       value={config.modules.matrixTools.paths.excelInputPath}
-                      onChange={(e) => handleModulePathChange("matrixTools", "paths.excelInputPath", e.target.value)}
+                      onChange={(e) =>
+                        handleModulePathChange(
+                          "matrixTools",
+                          "paths.excelInputPath",
+                          e.target.value
+                        )
+                      }
                       placeholder="C:\Production\Matrix"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <Button
                       type="button"
                       variant="outline"
                       disabled={config.demoMode}
-                      className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                      className={
+                        config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                      }
                     >
                       Browse
                     </Button>
@@ -1122,23 +1230,68 @@ function ModulesStep({
                   <div className="flex gap-2">
                     <Input
                       id="jsonScanPath"
-                      value={config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto" ? config.modules.jsonAnalyzer.dataPath : config.modules.matrixTools.paths.jsonInputPath}
-                      onChange={(e) => !(config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto") && handleModulePathChange("matrixTools", "paths.jsonInputPath", e.target.value)}
+                      value={
+                        config.companyFeatures.jsonScanner &&
+                        config.modules.jsonAnalyzer.mode === "auto"
+                          ? config.modules.jsonAnalyzer.dataPath
+                          : config.modules.matrixTools.paths.jsonInputPath
+                      }
+                      onChange={(e) =>
+                        !(
+                          config.companyFeatures.jsonScanner &&
+                          config.modules.jsonAnalyzer.mode === "auto"
+                        ) &&
+                        handleModulePathChange(
+                          "matrixTools",
+                          "paths.jsonInputPath",
+                          e.target.value
+                        )
+                      }
                       placeholder="C:\Production\CNC_Data"
-                      readOnly={config.demoMode || (config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto")}
-                      disabled={config.demoMode || (config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto")}
-                      className={`${config.demoMode || (config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto") ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""} ${config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto" ? "border-blue-300 dark:border-blue-600" : ""}`}
+                      readOnly={
+                        config.demoMode ||
+                        (config.companyFeatures.jsonScanner &&
+                          config.modules.jsonAnalyzer.mode === "auto")
+                      }
+                      disabled={
+                        config.demoMode ||
+                        (config.companyFeatures.jsonScanner &&
+                          config.modules.jsonAnalyzer.mode === "auto")
+                      }
+                      className={`${
+                        config.demoMode ||
+                        (config.companyFeatures.jsonScanner &&
+                          config.modules.jsonAnalyzer.mode === "auto")
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      } ${
+                        config.companyFeatures.jsonScanner &&
+                        config.modules.jsonAnalyzer.mode === "auto"
+                          ? "border-blue-300 dark:border-blue-600"
+                          : ""
+                      }`}
                     />
                     <Button
                       type="button"
                       variant="outline"
-                      disabled={config.demoMode || (config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto")}
-                      className={config.demoMode || (config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto") ? "cursor-not-allowed opacity-50" : ""}
+                      disabled={
+                        config.demoMode ||
+                        (config.companyFeatures.jsonScanner &&
+                          config.modules.jsonAnalyzer.mode === "auto")
+                      }
+                      className={
+                        config.demoMode ||
+                        (config.companyFeatures.jsonScanner &&
+                          config.modules.jsonAnalyzer.mode === "auto")
+                          ? "cursor-not-allowed opacity-50"
+                          : ""
+                      }
                     >
                       Browse
                     </Button>
                   </div>
-                  {config.companyFeatures.jsonScanner && config.modules.jsonAnalyzer.mode === "auto" ? (
+                  {config.companyFeatures.jsonScanner &&
+                  config.modules.jsonAnalyzer.mode === "auto" ? (
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs">
                       <span className="flex items-center gap-1">
                         <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -1159,9 +1312,12 @@ function ModulesStep({
                     <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Manual Path Configuration</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                      Manual Path Configuration
+                    </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      The Tool Manager will ask for Excel and CNC data directory paths when you start the feature from the dashboard.
+                      The Tool Manager will ask for Excel and CNC data directory
+                      paths when you start the feature from the dashboard.
                     </p>
                   </div>
                 </div>
@@ -1180,21 +1336,32 @@ function ModulesStep({
                 Clamping Plate Manager Paths
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Auto Mode</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Auto Mode
+                </span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={config.modules.platesManager.mode === "auto"}
-                    onChange={(e) => handleModuleModeToggle("platesManager", e.target.checked ? "auto" : "manual")}
+                    onChange={(e) =>
+                      handleModuleModeToggle(
+                        "platesManager",
+                        e.target.checked ? "auto" : "manual"
+                      )
+                    }
                     disabled={config.demoMode}
                     className="sr-only peer"
                   />
-                  <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600 ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}></div>
+                  <div
+                    className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600 ${
+                      config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                    }`}
+                  ></div>
                 </label>
               </div>
             </CardTitle>
             <CardDescription>
-              {config.modules.platesManager.mode === "auto" 
+              {config.modules.platesManager.mode === "auto"
                 ? "Configure paths for clamping plate models and data"
                 : "Paths will be requested when you run the Clamping Plate Manager feature at the dashboard"}
             </CardDescription>
@@ -1208,17 +1375,29 @@ function ModulesStep({
                     <Input
                       id="plateModelsPath"
                       value={config.modules.platesManager.modelsPath || ""}
-                      onChange={(e) => handleModulePathChange("platesManager", "modelsPath", e.target.value)}
+                      onChange={(e) =>
+                        handleModulePathChange(
+                          "platesManager",
+                          "modelsPath",
+                          e.target.value
+                        )
+                      }
                       placeholder="C:\PlateManager\Models"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <Button
                       type="button"
                       variant="outline"
                       disabled={config.demoMode}
-                      className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                      className={
+                        config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                      }
                     >
                       Browse
                     </Button>
@@ -1234,17 +1413,29 @@ function ModulesStep({
                     <Input
                       id="plateInfoFile"
                       value={config.modules.platesManager.plateInfoFile || ""}
-                      onChange={(e) => handleModulePathChange("platesManager", "plateInfoFile", e.target.value)}
+                      onChange={(e) =>
+                        handleModulePathChange(
+                          "platesManager",
+                          "plateInfoFile",
+                          e.target.value
+                        )
+                      }
                       placeholder="C:\PlateManager\plate_info.xlsx"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <Button
                       type="button"
                       variant="outline"
                       disabled={config.demoMode}
-                      className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                      className={
+                        config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                      }
                     >
                       Browse
                     </Button>
@@ -1259,19 +1450,29 @@ function ModulesStep({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-orange-600 dark:text-orange-400 text-lg">📋</span>
+                        <span className="text-orange-600 dark:text-orange-400 text-lg">
+                          📋
+                        </span>
                         <h4 className="font-medium text-orange-900 dark:text-orange-100">
                           File Structure Requirements
                         </h4>
                       </div>
                       <p className="text-sm text-orange-800 dark:text-orange-200 mb-3">
-                        Your plate info file should follow our specific structure to ensure proper data import. 
-                        Download the sample file to see the required columns and format.
+                        Your plate info file should follow our specific
+                        structure to ensure proper data import. Download the
+                        sample file to see the required columns and format.
                       </p>
                       <div className="text-xs text-orange-700 dark:text-orange-300 space-y-1">
-                        <div>• <strong>Required columns:</strong> Plate ID, Name, Material, Dimensions, Weight, Status</div>
-                        <div>• <strong>Format:</strong> Excel (.xlsx) or CSV (.csv)</div>
-                        <div>• <strong>Encoding:</strong> UTF-8 recommended</div>
+                        <div>
+                          • <strong>Required columns:</strong> Plate ID, Name,
+                          Material, Dimensions, Weight, Status
+                        </div>
+                        <div>
+                          • <strong>Format:</strong> Excel (.xlsx) or CSV (.csv)
+                        </div>
+                        <div>
+                          • <strong>Encoding:</strong> UTF-8 recommended
+                        </div>
                       </div>
                     </div>
                     <Button
@@ -1282,21 +1483,91 @@ function ModulesStep({
                       onClick={() => {
                         // Create sample data and trigger download
                         const sampleData = [
-                          ['Plate ID', 'Name', 'Material', 'Thickness (mm)', 'Length (mm)', 'Width (mm)', 'Weight (kg)', 'Status', 'Location', 'Notes'],
-                          ['P001', 'Standard Base Plate', 'Steel', '25', '400', '300', '23.5', 'Available', 'Rack A1', 'General purpose plate'],
-                          ['P002', 'Heavy Duty Plate', 'Cast Iron', '40', '600', '400', '75.2', 'In Use', 'Machine 1', 'For heavy components'],
-                          ['P003', 'Precision Plate', 'Aluminum', '20', '300', '200', '3.24', 'Available', 'Rack B2', 'High precision work'],
-                          ['P004', 'Custom Plate #1', 'Steel', '30', '500', '350', '41.3', 'Maintenance', 'Workshop', 'Custom holes pattern'],
-                          ['P005', 'Vacuum Plate', 'Steel', '35', '450', '320', '39.8', 'Available', 'Rack A3', 'With vacuum channels']
+                          [
+                            "Plate ID",
+                            "Name",
+                            "Material",
+                            "Thickness (mm)",
+                            "Length (mm)",
+                            "Width (mm)",
+                            "Weight (kg)",
+                            "Status",
+                            "Location",
+                            "Notes",
+                          ],
+                          [
+                            "P001",
+                            "Standard Base Plate",
+                            "Steel",
+                            "25",
+                            "400",
+                            "300",
+                            "23.5",
+                            "Available",
+                            "Rack A1",
+                            "General purpose plate",
+                          ],
+                          [
+                            "P002",
+                            "Heavy Duty Plate",
+                            "Cast Iron",
+                            "40",
+                            "600",
+                            "400",
+                            "75.2",
+                            "In Use",
+                            "Machine 1",
+                            "For heavy components",
+                          ],
+                          [
+                            "P003",
+                            "Precision Plate",
+                            "Aluminum",
+                            "20",
+                            "300",
+                            "200",
+                            "3.24",
+                            "Available",
+                            "Rack B2",
+                            "High precision work",
+                          ],
+                          [
+                            "P004",
+                            "Custom Plate #1",
+                            "Steel",
+                            "30",
+                            "500",
+                            "350",
+                            "41.3",
+                            "Maintenance",
+                            "Workshop",
+                            "Custom holes pattern",
+                          ],
+                          [
+                            "P005",
+                            "Vacuum Plate",
+                            "Steel",
+                            "35",
+                            "450",
+                            "320",
+                            "39.8",
+                            "Available",
+                            "Rack A3",
+                            "With vacuum channels",
+                          ],
                         ];
-                        
+
                         // Convert to CSV
-                        const csvContent = sampleData.map(row => row.join(',')).join('\n');
-                        const blob = new Blob([csvContent], { type: 'text/csv' });
+                        const csvContent = sampleData
+                          .map((row) => row.join(","))
+                          .join("\n");
+                        const blob = new Blob([csvContent], {
+                          type: "text/csv",
+                        });
                         const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
+                        const a = document.createElement("a");
                         a.href = url;
-                        a.download = 'clamping_plates_sample.csv';
+                        a.download = "clamping_plates_sample.csv";
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
@@ -1315,9 +1586,13 @@ function ModulesStep({
                     <AlertCircle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Manual Path Configuration</h4>
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                      Manual Path Configuration
+                    </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      The Clamping Plate Manager will ask for models directory and plate info file paths when you start the feature from the dashboard.
+                      The Clamping Plate Manager will ask for models directory
+                      and plate info file paths when you start the feature from
+                      the dashboard.
                     </p>
                   </div>
                 </div>
@@ -1327,36 +1602,43 @@ function ModulesStep({
         </Card>
       )}
 
-      {(!config.companyFeatures.jsonScanner && !config.companyFeatures.toolManager && !config.companyFeatures.clampingPlateManager) && (
-        <Card className="border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-900/10">
-          <CardContent className="p-6 text-center">
-            <div className="flex flex-col items-center gap-3">
-              <AlertCircle className="h-12 w-12 text-orange-500" />
-              <div>
-                <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-200">
-                  No Modules Enabled
-                </h3>
-                <p className="text-orange-600 dark:text-orange-300">
-                  Please go back to the Company step and enable at least one module to configure its paths.
-                </p>
+      {!config.companyFeatures.jsonScanner &&
+        !config.companyFeatures.toolManager &&
+        !config.companyFeatures.clampingPlateManager && (
+          <Card className="border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-900/10">
+            <CardContent className="p-6 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <AlertCircle className="h-12 w-12 text-orange-500" />
+                <div>
+                  <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-200">
+                    No Modules Enabled
+                  </h3>
+                  <p className="text-orange-600 dark:text-orange-300">
+                    Please go back to the Company step and enable at least one
+                    module to configure its paths.
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
-      {config.demoMode && (config.companyFeatures.jsonScanner || config.companyFeatures.toolManager || config.companyFeatures.clampingPlateManager) && (
-        <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-              <AlertCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Demo Mode: All module paths are set to demo locations for testing
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {config.demoMode &&
+        (config.companyFeatures.jsonScanner ||
+          config.companyFeatures.toolManager ||
+          config.companyFeatures.clampingPlateManager) && (
+          <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Demo Mode: All module paths are set to demo locations for
+                  testing
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 }
@@ -1434,25 +1716,32 @@ function AuthenticationStep({
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className={`cursor-pointer border-2 transition-colors ${
-                config.authentication.method === "file"
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-              } ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}
-                onClick={() => !config.demoMode && handleAuthMethodChange("file")}
+              <Card
+                className={`cursor-pointer border-2 transition-colors ${
+                  config.authentication.method === "file"
+                    ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                } ${config.demoMode ? "cursor-not-allowed opacity-50" : ""}`}
+                onClick={() =>
+                  !config.demoMode && handleAuthMethodChange("file")
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      config.authentication.method === "file"
-                        ? "bg-blue-100 dark:bg-blue-900/20"
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}>
-                      <FileJson className={`h-5 w-5 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         config.authentication.method === "file"
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`} />
+                          ? "bg-blue-100 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <FileJson
+                        className={`h-5 w-5 ${
+                          config.authentication.method === "file"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">File-Based</h3>
@@ -1464,25 +1753,32 @@ function AuthenticationStep({
                 </CardContent>
               </Card>
 
-              <Card className={`cursor-pointer border-2 transition-colors ${
-                config.authentication.method === "database"
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-              } ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}
-                onClick={() => !config.demoMode && handleAuthMethodChange("database")}
+              <Card
+                className={`cursor-pointer border-2 transition-colors ${
+                  config.authentication.method === "database"
+                    ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                } ${config.demoMode ? "cursor-not-allowed opacity-50" : ""}`}
+                onClick={() =>
+                  !config.demoMode && handleAuthMethodChange("database")
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      config.authentication.method === "database"
-                        ? "bg-blue-100 dark:bg-blue-900/20"
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}>
-                      <Database className={`h-5 w-5 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         config.authentication.method === "database"
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`} />
+                          ? "bg-blue-100 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <Database
+                        className={`h-5 w-5 ${
+                          config.authentication.method === "database"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">Database</h3>
@@ -1494,25 +1790,32 @@ function AuthenticationStep({
                 </CardContent>
               </Card>
 
-              <Card className={`cursor-pointer border-2 transition-colors ${
-                config.authentication.method === "ldap"
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-              } ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}
-                onClick={() => !config.demoMode && handleAuthMethodChange("ldap")}
+              <Card
+                className={`cursor-pointer border-2 transition-colors ${
+                  config.authentication.method === "ldap"
+                    ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                } ${config.demoMode ? "cursor-not-allowed opacity-50" : ""}`}
+                onClick={() =>
+                  !config.demoMode && handleAuthMethodChange("ldap")
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      config.authentication.method === "ldap"
-                        ? "bg-blue-100 dark:bg-blue-900/20"
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}>
-                      <Users className={`h-5 w-5 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         config.authentication.method === "ldap"
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`} />
+                          ? "bg-blue-100 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <Users
+                        className={`h-5 w-5 ${
+                          config.authentication.method === "ldap"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">LDAP</h3>
@@ -1548,19 +1851,26 @@ function AuthenticationStep({
                     placeholder="C:\Data\employees.json or employees.csv"
                     readOnly={config.demoMode}
                     disabled={config.demoMode}
-                    className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                    className={
+                      config.demoMode
+                        ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                        : ""
+                    }
                   />
                   <Button
                     type="button"
                     variant="outline"
                     disabled={config.demoMode}
-                    className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                    className={
+                      config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                    }
                   >
                     Browse
                   </Button>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Supported formats: JSON, CSV. File must contain employee ID, name, and role information.
+                  Supported formats: JSON, CSV. File must contain employee ID,
+                  name, and role information.
                 </p>
               </div>
 
@@ -1569,20 +1879,33 @@ function AuthenticationStep({
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-orange-600 dark:text-orange-400 text-lg">👥</span>
+                      <span className="text-orange-600 dark:text-orange-400 text-lg">
+                        👥
+                      </span>
                       <h4 className="font-medium text-orange-900 dark:text-orange-100">
                         Employee File Structure Requirements
                       </h4>
                     </div>
                     <p className="text-sm text-orange-800 dark:text-orange-200 mb-3">
-                      Your employee file should follow our specific structure for proper authentication. 
-                      Download the sample file to see the required fields and format.
+                      Your employee file should follow our specific structure
+                      for proper authentication. Download the sample file to see
+                      the required fields and format.
                     </p>
                     <div className="text-xs text-orange-700 dark:text-orange-300 space-y-1">
-                      <div>• <strong>Required fields:</strong> Employee ID, Name, Role, Department, Access Level</div>
-                      <div>• <strong>Format:</strong> JSON (.json) or CSV (.csv)</div>
-                      <div>• <strong>Encoding:</strong> UTF-8 required</div>
-                      <div>• <strong>Roles:</strong> Admin, Manager, Operator, Viewer</div>
+                      <div>
+                        • <strong>Required fields:</strong> Employee ID, Name,
+                        Role, Department, Access Level
+                      </div>
+                      <div>
+                        • <strong>Format:</strong> JSON (.json) or CSV (.csv)
+                      </div>
+                      <div>
+                        • <strong>Encoding:</strong> UTF-8 required
+                      </div>
+                      <div>
+                        • <strong>Roles:</strong> Admin, Manager, Operator,
+                        Viewer
+                      </div>
                     </div>
                   </div>
                   <Button
@@ -1593,21 +1916,71 @@ function AuthenticationStep({
                     onClick={() => {
                       // Create sample employee data and trigger download
                       const sampleData = [
-                        ['Employee ID', 'Name', 'Role', 'Department', 'Access Level', 'Email', 'Status'],
-                        ['EMP001', 'John Smith', 'Admin', 'IT', 'Full', 'john.smith@company.com', 'Active'],
-                        ['EMP002', 'Sarah Johnson', 'Manager', 'Production', 'High', 'sarah.johnson@company.com', 'Active'],
-                        ['EMP003', 'Mike Wilson', 'Operator', 'Manufacturing', 'Medium', 'mike.wilson@company.com', 'Active'],
-                        ['EMP004', 'Lisa Brown', 'Operator', 'Quality Control', 'Medium', 'lisa.brown@company.com', 'Active'],
-                        ['EMP005', 'David Lee', 'Viewer', 'Engineering', 'Low', 'david.lee@company.com', 'Active']
+                        [
+                          "Employee ID",
+                          "Name",
+                          "Role",
+                          "Department",
+                          "Access Level",
+                          "Email",
+                          "Status",
+                        ],
+                        [
+                          "EMP001",
+                          "John Smith",
+                          "Admin",
+                          "IT",
+                          "Full",
+                          "john.smith@company.com",
+                          "Active",
+                        ],
+                        [
+                          "EMP002",
+                          "Sarah Johnson",
+                          "Manager",
+                          "Production",
+                          "High",
+                          "sarah.johnson@company.com",
+                          "Active",
+                        ],
+                        [
+                          "EMP003",
+                          "Mike Wilson",
+                          "Operator",
+                          "Manufacturing",
+                          "Medium",
+                          "mike.wilson@company.com",
+                          "Active",
+                        ],
+                        [
+                          "EMP004",
+                          "Lisa Brown",
+                          "Operator",
+                          "Quality Control",
+                          "Medium",
+                          "lisa.brown@company.com",
+                          "Active",
+                        ],
+                        [
+                          "EMP005",
+                          "David Lee",
+                          "Viewer",
+                          "Engineering",
+                          "Low",
+                          "david.lee@company.com",
+                          "Active",
+                        ],
                       ];
-                      
+
                       // Convert to CSV
-                      const csvContent = sampleData.map(row => row.join(',')).join('\n');
-                      const blob = new Blob([csvContent], { type: 'text/csv' });
+                      const csvContent = sampleData
+                        .map((row) => row.join(","))
+                        .join("\n");
+                      const blob = new Blob([csvContent], { type: "text/csv" });
                       const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
+                      const a = document.createElement("a");
                       a.href = url;
-                      a.download = 'employees_sample.csv';
+                      a.download = "employees_sample.csv";
                       document.body.appendChild(a);
                       a.click();
                       document.body.removeChild(a);
@@ -1634,19 +2007,28 @@ function AuthenticationStep({
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="databaseConnection">Database Connection String</Label>
+                <Label htmlFor="databaseConnection">
+                  Database Connection String
+                </Label>
                 <Input
                   id="databaseConnection"
                   type="text"
                   value={config.authentication.databaseConnection || ""}
-                  onChange={(e) => handleDatabaseConnectionChange(e.target.value)}
+                  onChange={(e) =>
+                    handleDatabaseConnectionChange(e.target.value)
+                  }
                   placeholder="Server=localhost;Database=employees;Trusted_Connection=true;"
                   readOnly={config.demoMode}
                   disabled={config.demoMode}
-                  className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                  className={
+                    config.demoMode
+                      ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      : ""
+                  }
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Provide a valid connection string for your SQL Server, MySQL, or PostgreSQL database.
+                  Provide a valid connection string for your SQL Server, MySQL,
+                  or PostgreSQL database.
                 </p>
               </div>
             </div>
@@ -1674,7 +2056,11 @@ function AuthenticationStep({
                   placeholder="ldap://dc.company.com:389"
                   readOnly={config.demoMode}
                   disabled={config.demoMode}
-                  className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                  className={
+                    config.demoMode
+                      ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                      : ""
+                  }
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Provide your LDAP server URL including protocol and port.
@@ -1691,7 +2077,8 @@ function AuthenticationStep({
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm font-medium">
-                Demo Mode: Using file-based authentication with test employee data
+                Demo Mode: Using file-based authentication with test employee
+                data
               </span>
             </div>
           </CardContent>
@@ -1733,9 +2120,12 @@ function StorageStep({
     });
   };
 
-  const handleStoragePathChange = (field: keyof typeof config.storage, value: string) => {
+  const handleStoragePathChange = (
+    field: keyof typeof config.storage,
+    value: string
+  ) => {
     if (config.demoMode) return;
-    
+
     const updates: any = {
       storage: {
         ...config.storage,
@@ -1744,7 +2134,7 @@ function StorageStep({
     };
 
     // Auto-generate subdirectories based on the base path in simple mode
-    if (field === 'basePath' && config.storage.mode === 'simple') {
+    if (field === "basePath" && config.storage.mode === "simple") {
       updates.storage.backupPath = value + "\\Backups";
       updates.storage.logsPath = value + "\\Logs";
       updates.storage.tempPath = value + "\\Temp";
@@ -1775,25 +2165,32 @@ function StorageStep({
           <div className="space-y-6">
             {/* Storage Mode Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className={`cursor-pointer border-2 transition-colors ${
-                config.storage.mode === "simple"
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-              } ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}
-                onClick={() => !config.demoMode && handleStorageModeChange("simple")}
+              <Card
+                className={`cursor-pointer border-2 transition-colors ${
+                  config.storage.mode === "simple"
+                    ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                } ${config.demoMode ? "cursor-not-allowed opacity-50" : ""}`}
+                onClick={() =>
+                  !config.demoMode && handleStorageModeChange("simple")
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      config.storage.mode === "simple"
-                        ? "bg-blue-100 dark:bg-blue-900/20"
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}>
-                      <FolderOpen className={`h-5 w-5 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         config.storage.mode === "simple"
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`} />
+                          ? "bg-blue-100 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <FolderOpen
+                        className={`h-5 w-5 ${
+                          config.storage.mode === "simple"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">Simple Mode</h3>
@@ -1805,25 +2202,32 @@ function StorageStep({
                 </CardContent>
               </Card>
 
-              <Card className={`cursor-pointer border-2 transition-colors ${
-                config.storage.mode === "advanced"
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-              } ${config.demoMode ? 'cursor-not-allowed opacity-50' : ''}`}
-                onClick={() => !config.demoMode && handleStorageModeChange("advanced")}
+              <Card
+                className={`cursor-pointer border-2 transition-colors ${
+                  config.storage.mode === "advanced"
+                    ? "border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/10"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                } ${config.demoMode ? "cursor-not-allowed opacity-50" : ""}`}
+                onClick={() =>
+                  !config.demoMode && handleStorageModeChange("advanced")
+                }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      config.storage.mode === "advanced"
-                        ? "bg-blue-100 dark:bg-blue-900/20"
-                        : "bg-gray-100 dark:bg-gray-800"
-                    }`}>
-                      <Settings className={`h-5 w-5 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         config.storage.mode === "advanced"
-                          ? "text-blue-600 dark:text-blue-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      }`} />
+                          ? "bg-blue-100 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <Settings
+                        className={`h-5 w-5 ${
+                          config.storage.mode === "advanced"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div>
                       <h3 className="font-semibold">Advanced Mode</h3>
@@ -1845,23 +2249,32 @@ function StorageStep({
                     <Input
                       id="basePath"
                       value={config.storage.basePath || ""}
-                      onChange={(e) => handleStoragePathChange("basePath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange("basePath", e.target.value)
+                      }
                       placeholder="C:\CNC_Applications_Data"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <Button
                       type="button"
                       variant="outline"
                       disabled={config.demoMode}
-                      className={config.demoMode ? "cursor-not-allowed opacity-50" : ""}
+                      className={
+                        config.demoMode ? "cursor-not-allowed opacity-50" : ""
+                      }
                     >
                       Browse
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Main directory where all CNC application data will be created, modified, and stored
+                    Main directory where all CNC application data will be
+                    created, modified, and stored
                   </p>
                 </div>
 
@@ -1872,50 +2285,71 @@ function StorageStep({
                     </h4>
                     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 font-mono">
                       <div className="flex items-center gap-2">
-                        <span className="text-blue-600 dark:text-blue-400">📁</span>
+                        <span className="text-blue-600 dark:text-blue-400">
+                          📁
+                        </span>
                         {config.storage.basePath}
                       </div>
                       <div className="ml-6 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-green-600 dark:text-green-400">📁</span>
+                          <span className="text-green-600 dark:text-green-400">
+                            📁
+                          </span>
                           JSON_Scanner_Data (CNC program analysis)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-green-600 dark:text-green-400">📁</span>
+                          <span className="text-green-600 dark:text-green-400">
+                            📁
+                          </span>
                           Tool_Manager_Data (Excel processing & inventory)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-green-600 dark:text-green-400">📁</span>
+                          <span className="text-green-600 dark:text-green-400">
+                            📁
+                          </span>
                           Clamping_Plates_Data (Plate management)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-orange-600 dark:text-orange-400">📁</span>
+                          <span className="text-orange-600 dark:text-orange-400">
+                            📁
+                          </span>
                           JSON_Found (Original JSON files found)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-cyan-600 dark:text-cyan-400">📁</span>
+                          <span className="text-cyan-600 dark:text-cyan-400">
+                            📁
+                          </span>
                           JSON_Fixed (Corrected JSON files)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-pink-600 dark:text-pink-400">📁</span>
+                          <span className="text-pink-600 dark:text-pink-400">
+                            📁
+                          </span>
                           Results (Analysis results & reports)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-yellow-600 dark:text-yellow-400">📁</span>
+                          <span className="text-yellow-600 dark:text-yellow-400">
+                            📁
+                          </span>
                           Backups (Automatic backups)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-purple-600 dark:text-purple-400">📁</span>
+                          <span className="text-purple-600 dark:text-purple-400">
+                            📁
+                          </span>
                           Logs (Application logs)
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-600 dark:text-gray-400">📁</span>
+                          <span className="text-gray-600 dark:text-gray-400">
+                            📁
+                          </span>
                           Temp (Temporary files)
                         </div>
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                      All subdirectories will be created automatically when needed
+                      All subdirectories will be created automatically when
+                      needed
                     </p>
                   </div>
                 )}
@@ -1931,11 +2365,17 @@ function StorageStep({
                     <Input
                       id="logsPath"
                       value={config.storage.logsPath || ""}
-                      onChange={(e) => handleStoragePathChange("logsPath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange("logsPath", e.target.value)
+                      }
                       placeholder="C:\CNC_Data\Logs"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Directory for application log files
@@ -1947,11 +2387,17 @@ function StorageStep({
                     <Input
                       id="backupPath"
                       value={config.storage.backupPath || ""}
-                      onChange={(e) => handleStoragePathChange("backupPath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange("backupPath", e.target.value)
+                      }
                       placeholder="C:\CNC_Data\Backups"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Directory for automatic backups
@@ -1963,11 +2409,17 @@ function StorageStep({
                     <Input
                       id="jsonFoundPath"
                       value={config.storage.jsonFoundPath || ""}
-                      onChange={(e) => handleStoragePathChange("jsonFoundPath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange("jsonFoundPath", e.target.value)
+                      }
                       placeholder="C:\CNC_Data\JSON_Found"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Directory for original JSON files found by scanner
@@ -1979,11 +2431,17 @@ function StorageStep({
                     <Input
                       id="jsonFixedPath"
                       value={config.storage.jsonFixedPath || ""}
-                      onChange={(e) => handleStoragePathChange("jsonFixedPath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange("jsonFixedPath", e.target.value)
+                      }
                       placeholder="C:\CNC_Data\JSON_Fixed"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Directory for corrected/processed JSON files
@@ -1995,11 +2453,20 @@ function StorageStep({
                     <Input
                       id="resultFilesPath"
                       value={config.storage.resultFilesPath || ""}
-                      onChange={(e) => handleStoragePathChange("resultFilesPath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange(
+                          "resultFilesPath",
+                          e.target.value
+                        )
+                      }
                       placeholder="C:\CNC_Data\Results"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Directory for analysis results and reports
@@ -2011,11 +2478,17 @@ function StorageStep({
                     <Input
                       id="tempPath"
                       value={config.storage.tempPath || ""}
-                      onChange={(e) => handleStoragePathChange("tempPath", e.target.value)}
+                      onChange={(e) =>
+                        handleStoragePathChange("tempPath", e.target.value)
+                      }
                       placeholder="C:\CNC_Data\Temp"
                       readOnly={config.demoMode}
                       disabled={config.demoMode}
-                      className={config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""}
+                      className={
+                        config.demoMode
+                          ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                          : ""
+                      }
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Directory for temporary files
@@ -2034,7 +2507,8 @@ function StorageStep({
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm font-medium">
-                Demo Mode: All storage paths are set to demo locations for testing
+                Demo Mode: All storage paths are set to demo locations for
+                testing
               </span>
             </div>
           </CardContent>
@@ -2078,7 +2552,10 @@ function PreferencesStep({
     }
   }, [config.demoMode]);
 
-  const handleFeatureChange = (field: keyof typeof config.features, value: any) => {
+  const handleFeatureChange = (
+    field: keyof typeof config.features,
+    value: any
+  ) => {
     if (config.demoMode) return;
     updateConfig({
       features: {
@@ -2088,7 +2565,10 @@ function PreferencesStep({
     });
   };
 
-  const handleNotificationChange = (field: keyof typeof config.features.notifications, value: boolean) => {
+  const handleNotificationChange = (
+    field: keyof typeof config.features.notifications,
+    value: boolean
+  ) => {
     if (config.demoMode) return;
     updateConfig({
       features: {
@@ -2101,7 +2581,10 @@ function PreferencesStep({
     });
   };
 
-  const handleAutoScanChange = (field: keyof typeof config.features.autoScan, value: any) => {
+  const handleAutoScanChange = (
+    field: keyof typeof config.features.autoScan,
+    value: any
+  ) => {
     if (config.demoMode) return;
     updateConfig({
       features: {
@@ -2142,15 +2625,21 @@ function PreferencesStep({
                     <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
                       <Palette className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
-                    <Label htmlFor="theme" className="font-medium">Theme Mode</Label>
+                    <Label htmlFor="theme" className="font-medium">
+                      Theme Mode
+                    </Label>
                   </div>
                   <select
                     id="theme"
                     value={config.features.themeMode}
-                    onChange={(e) => handleFeatureChange("themeMode", e.target.value)}
+                    onChange={(e) =>
+                      handleFeatureChange("themeMode", e.target.value)
+                    }
                     disabled={config.demoMode}
                     className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white ${
-                      config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""
+                      config.demoMode
+                        ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                        : ""
                     }`}
                   >
                     <option value="light">☀️ Light Mode</option>
@@ -2172,10 +2661,14 @@ function PreferencesStep({
                     <Label className="font-medium">Auto Backup</Label>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Automatically backup data</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Automatically backup data
+                    </span>
                     <Switch
                       checked={config.features.autoBackup}
-                      onCheckedChange={(checked) => handleFeatureChange("autoBackup", checked)}
+                      onCheckedChange={(checked) =>
+                        handleFeatureChange("autoBackup", checked)
+                      }
                       disabled={config.demoMode}
                     />
                   </div>
@@ -2194,10 +2687,14 @@ function PreferencesStep({
                     <Label className="font-medium">Export Reports</Label>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Enable report generation</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Enable report generation
+                    </span>
                     <Switch
                       checked={config.features.exportReports}
-                      onCheckedChange={(checked) => handleFeatureChange("exportReports", checked)}
+                      onCheckedChange={(checked) =>
+                        handleFeatureChange("exportReports", checked)
+                      }
                       disabled={config.demoMode}
                     />
                   </div>
@@ -2222,7 +2719,9 @@ function PreferencesStep({
                       <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <Label className="text-base font-medium">Enable Notifications</Label>
+                      <Label className="text-base font-medium">
+                        Enable Notifications
+                      </Label>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         Show system notifications and alerts
                       </p>
@@ -2230,7 +2729,9 @@ function PreferencesStep({
                   </div>
                   <Switch
                     checked={config.features.notifications.enabled}
-                    onCheckedChange={(checked) => handleNotificationChange("enabled", checked)}
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("enabled", checked)
+                    }
                     disabled={config.demoMode}
                   />
                 </div>
@@ -2239,48 +2740,77 @@ function PreferencesStep({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6 pl-4 border-l-2 border-blue-200 dark:border-blue-700">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">✅ Task Completion</Label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">When processes finish</p>
+                        <Label className="text-sm font-medium">
+                          ✅ Task Completion
+                        </Label>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          When processes finish
+                        </p>
                       </div>
                       <Switch
-                        checked={config.features.notifications.showTaskCompletion}
-                        onCheckedChange={(checked) => handleNotificationChange("showTaskCompletion", checked)}
+                        checked={
+                          config.features.notifications.showTaskCompletion
+                        }
+                        onCheckedChange={(checked) =>
+                          handleNotificationChange(
+                            "showTaskCompletion",
+                            checked
+                          )
+                        }
                         disabled={config.demoMode}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="text-sm font-medium">❌ Errors</Label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Critical issues</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Critical issues
+                        </p>
                       </div>
                       <Switch
                         checked={config.features.notifications.showErrors}
-                        onCheckedChange={(checked) => handleNotificationChange("showErrors", checked)}
+                        onCheckedChange={(checked) =>
+                          handleNotificationChange("showErrors", checked)
+                        }
                         disabled={config.demoMode}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">⚠️ Warnings</Label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Important notices</p>
+                        <Label className="text-sm font-medium">
+                          ⚠️ Warnings
+                        </Label>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Important notices
+                        </p>
                       </div>
                       <Switch
                         checked={config.features.notifications.showWarnings}
-                        onCheckedChange={(checked) => handleNotificationChange("showWarnings", checked)}
+                        onCheckedChange={(checked) =>
+                          handleNotificationChange("showWarnings", checked)
+                        }
                         disabled={config.demoMode}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-sm font-medium">🔄 System Updates</Label>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Application updates</p>
+                        <Label className="text-sm font-medium">
+                          🔄 System Updates
+                        </Label>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Application updates
+                        </p>
                       </div>
                       <Switch
-                        checked={config.features.notifications.showSystemUpdates}
-                        onCheckedChange={(checked) => handleNotificationChange("showSystemUpdates", checked)}
+                        checked={
+                          config.features.notifications.showSystemUpdates
+                        }
+                        onCheckedChange={(checked) =>
+                          handleNotificationChange("showSystemUpdates", checked)
+                        }
                         disabled={config.demoMode}
                       />
                     </div>
@@ -2303,15 +2833,20 @@ function PreferencesStep({
                       <Search className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div>
-                      <Label className="text-base font-medium">Enable Auto Scan</Label>
+                      <Label className="text-base font-medium">
+                        Enable Auto Scan
+                      </Label>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Automatically scan for new files in configured directories
+                        Automatically scan for new files in configured
+                        directories
                       </p>
                     </div>
                   </div>
                   <Switch
                     checked={config.features.autoScan.enabled}
-                    onCheckedChange={(checked) => handleAutoScanChange("enabled", checked)}
+                    onCheckedChange={(checked) =>
+                      handleAutoScanChange("enabled", checked)
+                    }
                     disabled={config.demoMode}
                   />
                 </div>
@@ -2320,14 +2855,23 @@ function PreferencesStep({
                   <div className="space-y-4 ml-6 pl-4 border-l-2 border-orange-200 dark:border-orange-700">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="scanInterval" className="font-medium">Scan Frequency</Label>
+                        <Label htmlFor="scanInterval" className="font-medium">
+                          Scan Frequency
+                        </Label>
                         <select
                           id="scanInterval"
                           value={config.features.autoScan.interval}
-                          onChange={(e) => handleAutoScanChange("interval", parseInt(e.target.value))}
+                          onChange={(e) =>
+                            handleAutoScanChange(
+                              "interval",
+                              parseInt(e.target.value)
+                            )
+                          }
                           disabled={config.demoMode}
                           className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white ${
-                            config.demoMode ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed" : ""
+                            config.demoMode
+                              ? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           <option value="15">⚡ Every 15 minutes</option>
@@ -2343,12 +2887,18 @@ function PreferencesStep({
 
                       <div className="flex items-center justify-between">
                         <div>
-                          <Label className="text-sm font-medium">🚀 Run on Startup</Label>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Start scanning when app launches</p>
+                          <Label className="text-sm font-medium">
+                            🚀 Run on Startup
+                          </Label>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Start scanning when app launches
+                          </p>
                         </div>
                         <Switch
                           checked={config.features.autoScan.runOnStartup}
-                          onCheckedChange={(checked) => handleAutoScanChange("runOnStartup", checked)}
+                          onCheckedChange={(checked) =>
+                            handleAutoScanChange("runOnStartup", checked)
+                          }
                           disabled={config.demoMode}
                         />
                       </div>
@@ -2367,7 +2917,8 @@ function PreferencesStep({
             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
               <AlertCircle className="h-4 w-4" />
               <span className="text-sm font-medium">
-                Demo Mode: All preferences are set to optimal defaults for demonstration
+                Demo Mode: All preferences are set to optimal defaults for
+                demonstration
               </span>
             </div>
           </CardContent>
@@ -2427,19 +2978,22 @@ function ValidationStep({
     {
       id: "json-scanner-init",
       name: "JSON Scanner - Test Run",
-      description: "Run JSON Scanner to process sample CNC program files and validate functionality.",
+      description:
+        "Run JSON Scanner to process sample CNC program files and validate functionality.",
       status: "pending",
     },
     {
       id: "tool-manager-init",
       name: "Tool Manager - Test Run",
-      description: "Process sample Excel files and perform tool inventory analysis.",
+      description:
+        "Process sample Excel files and perform tool inventory analysis.",
       status: "pending",
     },
     {
       id: "clamping-plate-init",
       name: "Clamping Plate Manager - Test Run",
-      description: "Load sample plate data and test plate management functionality.",
+      description:
+        "Load sample plate data and test plate management functionality.",
       status: "pending",
     },
   ]);
@@ -2497,9 +3051,17 @@ function ValidationStep({
       switch (testId) {
         case "folder-permissions":
           addLog(`📁 Checking folder permissions...`);
-          addLog(`   → Storage base path: ${config.storage.basePath || 'Not configured'}`);
-          addLog(`   → Logs path: ${config.storage.logsPath || 'Not configured'}`);
-          addLog(`   → Backup path: ${config.storage.backupPath || 'Not configured'}`);
+          addLog(
+            `   → Storage base path: ${
+              config.storage.basePath || "Not configured"
+            }`
+          );
+          addLog(
+            `   → Logs path: ${config.storage.logsPath || "Not configured"}`
+          );
+          addLog(
+            `   → Backup path: ${config.storage.backupPath || "Not configured"}`
+          );
           break;
         case "folder-structure":
           addLog(`🏗️  Verifying folder structure...`);
@@ -2509,8 +3071,16 @@ function ValidationStep({
         case "clamping-plate-files":
           if (config.companyFeatures.clampingPlateManager) {
             addLog(`🔩 Validating clamping plate files...`);
-            addLog(`   → Models path: ${config.modules.platesManager.modelsPath || 'Not configured'}`);
-            addLog(`   → Info file: ${config.modules.platesManager.plateInfoFile || 'Not configured'}`);
+            addLog(
+              `   → Models path: ${
+                config.modules.platesManager.modelsPath || "Not configured"
+              }`
+            );
+            addLog(
+              `   → Info file: ${
+                config.modules.platesManager.plateInfoFile || "Not configured"
+              }`
+            );
           } else {
             addLog(`🔩 Clamping plate manager disabled - skipping`);
           }
@@ -2518,8 +3088,12 @@ function ValidationStep({
         case "employee-file-structure":
           addLog(`👥 Checking employee authentication setup...`);
           addLog(`   → Auth method: ${config.authentication.method}`);
-          if (config.authentication.method === 'file') {
-            addLog(`   → Employee file: ${config.authentication.employeeFile || 'Not configured'}`);
+          if (config.authentication.method === "file") {
+            addLog(
+              `   → Employee file: ${
+                config.authentication.employeeFile || "Not configured"
+              }`
+            );
           }
           break;
       }
@@ -2550,7 +3124,9 @@ function ValidationStep({
   const runInitialization = async () => {
     setIsInitRunning(true);
     setIsInitComplete(false);
-    addLog("🚀 Starting feature test runs - each module will process sample data...");
+    addLog(
+      "🚀 Starting feature test runs - each module will process sample data..."
+    );
 
     for (let i = 0; i < initTests.length; i++) {
       const test = initTests[i];
@@ -2566,7 +3142,7 @@ function ValidationStep({
       // Run actual feature processing based on test type
       try {
         await runFeatureTest(test.id);
-        
+
         setInitTests((prev) =>
           prev.map((t) =>
             t.id === test.id ? { ...t, status: "success" as const } : t
@@ -2574,18 +3150,21 @@ function ValidationStep({
         );
 
         addLog(`✅ ${test.name} completed successfully`);
-        
+
         // Add a pause between tests for better UX
         if (i < initTests.length - 1) {
           addLog(`⏳ Preparing next test...`);
           await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         addLog(`❌ ${test.name} failed: ${errorMessage}`);
         setInitTests((prev) =>
           prev.map((t) =>
-            t.id === test.id ? { ...t, status: "error" as const, error: errorMessage } : t
+            t.id === test.id
+              ? { ...t, status: "error" as const, error: errorMessage }
+              : t
           )
         );
         // Continue with next test even if one fails
@@ -2605,8 +3184,12 @@ function ValidationStep({
         if (config.companyFeatures.jsonScanner) {
           addLog(`   → Starting JSON Scanner test run...`);
           addLog(`   → Mode: ${config.modules.jsonAnalyzer.mode}`);
-          addLog(`   → Data path: ${config.modules.jsonAnalyzer.dataPath || 'Will request at runtime'}`);
-          
+          addLog(
+            `   → Data path: ${
+              config.modules.jsonAnalyzer.dataPath || "Will request at runtime"
+            }`
+          );
+
           // Simulate JSON processing
           addLog(`   → 🔍 Scanning for CNC program files...`);
           await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -2629,8 +3212,14 @@ function ValidationStep({
         if (config.companyFeatures.toolManager) {
           addLog(`   → Starting Tool Manager test run...`);
           addLog(`   → Mode: ${config.modules.matrixTools.mode}`);
-          addLog(`   → Excel processing: ${config.modules.matrixTools.features.excelProcessing ? 'Enabled' : 'Disabled'}`);
-          
+          addLog(
+            `   → Excel processing: ${
+              config.modules.matrixTools.features.excelProcessing
+                ? "Enabled"
+                : "Disabled"
+            }`
+          );
+
           // Simulate Excel processing
           addLog(`   → 🔍 Scanning for Excel inventory files...`);
           await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -2651,8 +3240,13 @@ function ValidationStep({
         if (config.companyFeatures.clampingPlateManager) {
           addLog(`   → Starting Clamping Plate Manager test run...`);
           addLog(`   → Mode: ${config.modules.platesManager.mode}`);
-          addLog(`   → Models path: ${config.modules.platesManager.modelsPath || 'Will request at runtime'}`);
-          
+          addLog(
+            `   → Models path: ${
+              config.modules.platesManager.modelsPath ||
+              "Will request at runtime"
+            }`
+          );
+
           // Simulate plate data processing
           addLog(`   → 🔍 Loading plate information file...`);
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -2671,29 +3265,33 @@ function ValidationStep({
 
       default:
         addLog(`   → Unknown test: ${testId}`);
-        
+
         // Simulate authentication testing
         addLog(`   → 🔐 Testing authentication system...`);
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        if (config.authentication.method === 'file') {
-          addLog(`   → 📄 Loading employee file: ${config.authentication.employeeFile || 'employees.csv'}`);
+
+        if (config.authentication.method === "file") {
+          addLog(
+            `   → 📄 Loading employee file: ${
+              config.authentication.employeeFile || "employees.csv"
+            }`
+          );
           await new Promise((resolve) => setTimeout(resolve, 1000));
           addLog(`   → 👥 Validated 8 user accounts`);
           addLog(`   → 🔑 Tested login functionality`);
           addLog(`   → 🛡️  Verified access permissions`);
-        } else if (config.authentication.method === 'database') {
+        } else if (config.authentication.method === "database") {
           addLog(`   → 🗄️  Testing database connection...`);
           await new Promise((resolve) => setTimeout(resolve, 1500));
           addLog(`   → 📊 Connected to user database`);
           addLog(`   → 👥 Verified user table structure`);
-        } else if (config.authentication.method === 'ldap') {
+        } else if (config.authentication.method === "ldap") {
           addLog(`   → � Testing LDAP connection...`);
           await new Promise((resolve) => setTimeout(resolve, 1500));
           addLog(`   → 🔗 Connected to LDAP server`);
           addLog(`   → 👤 Tested user authentication`);
         }
-        
+
         addLog(`   → ✅ Authentication system fully functional`);
         break;
     }
@@ -2822,156 +3420,173 @@ function ValidationStep({
             Initialize and test each feature module
           </CardDescription>
         </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              {initTests.map((test) => (
-                <div
-                  key={test.id}
-                  className={`relative flex items-start gap-3 p-4 rounded-lg border transition-all duration-300 ${
-                    test.status === "running"
-                      ? "border-purple-300 bg-purple-50 dark:bg-purple-900/20"
-                      : test.status === "success"
-                      ? "border-green-300 bg-green-50 dark:bg-green-900/20"
-                      : test.status === "error"
-                      ? "border-red-300 bg-red-50 dark:bg-red-900/20"
-                      : "border-gray-200 bg-gray-50 dark:bg-gray-800/50"
-                  }`}
-                >
-                  <div className="relative">
-                    <div
-                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
-                        test.status === "running"
-                          ? "border-purple-500 bg-purple-100"
-                          : test.status === "success"
-                          ? "border-green-500 bg-green-100"
-                          : test.status === "error"
-                          ? "border-red-500 bg-red-100"
-                          : "border-gray-300 bg-white"
-                      }`}
-                    >
-                      {getStatusIcon(test.status)}
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h4
-                      className={`font-medium ${getStatusColor(test.status)}`}
-                    >
-                      {test.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {test.description}
-                    </p>
-                    {test.error && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-700">{test.error}</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Individual test run button */}
-                  <div className="flex flex-col gap-2">
-                    {test.status === "pending" && !isInitRunning && (
-                      <Button
-                        onClick={async () => {
-                          setCurrentInitTest(test.id);
-                          addLog(`🔄 Running individual test: ${test.name}`);
-                          
-                          setInitTests((prev) =>
-                            prev.map((t) =>
-                              t.id === test.id ? { ...t, status: "running" as const } : t
-                            )
-                          );
-
-                          try {
-                            await runFeatureTest(test.id);
-                            setInitTests((prev) =>
-                              prev.map((t) =>
-                                t.id === test.id ? { ...t, status: "success" as const } : t
-                              )
-                            );
-                            addLog(`✅ ${test.name} completed successfully`);
-                          } catch (error) {
-                            const errorMessage = error instanceof Error ? error.message : "Unknown error";
-                            addLog(`❌ ${test.name} failed: ${errorMessage}`);
-                            setInitTests((prev) =>
-                              prev.map((t) =>
-                                t.id === test.id ? { ...t, status: "error" as const, error: errorMessage } : t
-                              )
-                            );
-                          }
-                          
-                          setCurrentInitTest(null);
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700"
-                      >
-                        <PlayCircle className="h-4 w-4 mr-1" />
-                        Run Init
-                      </Button>
-                    )}
-                    
-                    {test.status === "running" && currentInitTest === test.id && (
-                      <div className="text-xs text-purple-600 font-medium animate-pulse flex items-center gap-1">
-                        <RefreshCw className="h-3 w-3 animate-spin" />
-                        Running...
-                      </div>
-                    )}
-                    
-                    {test.status === "success" && (
-                      <div className="text-xs text-green-600 font-medium flex items-center gap-1">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Complete
-                      </div>
-                    )}
-                    
-                    {test.status === "error" && (
-                      <Button
-                        onClick={async () => {
-                          // Reset and retry the test
-                          setInitTests((prev) =>
-                            prev.map((t) =>
-                              t.id === test.id ? { ...t, status: "pending" as const, error: undefined } : t
-                            )
-                          );
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="bg-red-50 hover:bg-red-100 border-red-300 text-red-700"
-                      >
-                        <RefreshCw className="h-4 w-4 mr-1" />
-                        Retry
-                      </Button>
-                    )}
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            {initTests.map((test) => (
+              <div
+                key={test.id}
+                className={`relative flex items-start gap-3 p-4 rounded-lg border transition-all duration-300 ${
+                  test.status === "running"
+                    ? "border-purple-300 bg-purple-50 dark:bg-purple-900/20"
+                    : test.status === "success"
+                    ? "border-green-300 bg-green-50 dark:bg-green-900/20"
+                    : test.status === "error"
+                    ? "border-red-300 bg-red-50 dark:bg-red-900/20"
+                    : "border-gray-200 bg-gray-50 dark:bg-gray-800/50"
+                }`}
+              >
+                <div className="relative">
+                  <div
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center ${
+                      test.status === "running"
+                        ? "border-purple-500 bg-purple-100"
+                        : test.status === "success"
+                        ? "border-green-500 bg-green-100"
+                        : test.status === "error"
+                        ? "border-red-500 bg-red-100"
+                        : "border-gray-300 bg-white"
+                    }`}
+                  >
+                    {getStatusIcon(test.status)}
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="flex justify-center pt-6 border-t">
-              {!isInitComplete && (
-                <Button
-                  onClick={runInitialization}
-                  disabled={isInitRunning}
-                  size="lg"
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
-                >
-                  {isInitRunning ? (
-                    <>
-                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                      Running All Tests...
-                    </>
-                  ) : (
-                    <>
-                      <Rocket className="h-5 w-5 mr-2" />
-                      Run All Feature Tests
-                    </>
+                <div className="flex-1">
+                  <h4 className={`font-medium ${getStatusColor(test.status)}`}>
+                    {test.name}
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {test.description}
+                  </p>
+                  {test.error && (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-700">{test.error}</p>
+                    </div>
                   )}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+
+                {/* Individual test run button */}
+                <div className="flex flex-col gap-2">
+                  {test.status === "pending" && !isInitRunning && (
+                    <Button
+                      onClick={async () => {
+                        setCurrentInitTest(test.id);
+                        addLog(`🔄 Running individual test: ${test.name}`);
+
+                        setInitTests((prev) =>
+                          prev.map((t) =>
+                            t.id === test.id
+                              ? { ...t, status: "running" as const }
+                              : t
+                          )
+                        );
+
+                        try {
+                          await runFeatureTest(test.id);
+                          setInitTests((prev) =>
+                            prev.map((t) =>
+                              t.id === test.id
+                                ? { ...t, status: "success" as const }
+                                : t
+                            )
+                          );
+                          addLog(`✅ ${test.name} completed successfully`);
+                        } catch (error) {
+                          const errorMessage =
+                            error instanceof Error
+                              ? error.message
+                              : "Unknown error";
+                          addLog(`❌ ${test.name} failed: ${errorMessage}`);
+                          setInitTests((prev) =>
+                            prev.map((t) =>
+                              t.id === test.id
+                                ? {
+                                    ...t,
+                                    status: "error" as const,
+                                    error: errorMessage,
+                                  }
+                                : t
+                            )
+                          );
+                        }
+
+                        setCurrentInitTest(null);
+                      }}
+                      size="sm"
+                      variant="outline"
+                      className="bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700"
+                    >
+                      <PlayCircle className="h-4 w-4 mr-1" />
+                      Run Init
+                    </Button>
+                  )}
+
+                  {test.status === "running" && currentInitTest === test.id && (
+                    <div className="text-xs text-purple-600 font-medium animate-pulse flex items-center gap-1">
+                      <RefreshCw className="h-3 w-3 animate-spin" />
+                      Running...
+                    </div>
+                  )}
+
+                  {test.status === "success" && (
+                    <div className="text-xs text-green-600 font-medium flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Complete
+                    </div>
+                  )}
+
+                  {test.status === "error" && (
+                    <Button
+                      onClick={async () => {
+                        // Reset and retry the test
+                        setInitTests((prev) =>
+                          prev.map((t) =>
+                            t.id === test.id
+                              ? {
+                                  ...t,
+                                  status: "pending" as const,
+                                  error: undefined,
+                                }
+                              : t
+                          )
+                        );
+                      }}
+                      size="sm"
+                      variant="outline"
+                      className="bg-red-50 hover:bg-red-100 border-red-300 text-red-700"
+                    >
+                      <RefreshCw className="h-4 w-4 mr-1" />
+                      Retry
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center pt-6 border-t">
+            {!isInitComplete && (
+              <Button
+                onClick={runInitialization}
+                disabled={isInitRunning}
+                size="lg"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3"
+              >
+                {isInitRunning ? (
+                  <>
+                    <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                    Running All Tests...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Run All Feature Tests
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Complete Setup Button - At the very bottom */}
       {isComplete && !hasErrors && isInitComplete && (
@@ -2989,21 +3604,27 @@ function ValidationStep({
 
       {/* Sticky Log Window at Bottom */}
       {(isRunning || isComplete || logs.length > 0) && (
-        <div className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg transition-transform duration-300 z-50 ${
-          isLogVisible ? 'translate-y-0' : 'translate-y-full'
-        }`}>
+        <div
+          className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg transition-transform duration-300 z-50 ${
+            isLogVisible ? "translate-y-0" : "translate-y-full"
+          }`}
+        >
           {/* Toggle Button */}
           <button
             onClick={() => setIsLogVisible(!isLogVisible)}
             className="absolute -top-10 right-4 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-t-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
           >
             <Monitor className="h-4 w-4" />
-            {isLogVisible ? 'Hide Logs' : 'Show Logs'}
-            <span className={`transform transition-transform duration-200 ${isLogVisible ? 'rotate-180' : ''}`}>
+            {isLogVisible ? "Hide Logs" : "Show Logs"}
+            <span
+              className={`transform transition-transform duration-200 ${
+                isLogVisible ? "rotate-180" : ""
+              }`}
+            >
               ▼
             </span>
           </button>
-          
+
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -3019,12 +3640,16 @@ function ValidationStep({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const logContent = logs.join('\n');
-                      const blob = new Blob([logContent], { type: 'text/plain' });
+                      const logContent = logs.join("\n");
+                      const blob = new Blob([logContent], {
+                        type: "text/plain",
+                      });
                       const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
+                      const a = document.createElement("a");
                       a.href = url;
-                      a.download = `setup-validation-logs-${new Date().toISOString().split('T')[0]}.txt`;
+                      a.download = `setup-validation-logs-${
+                        new Date().toISOString().split("T")[0]
+                      }.txt`;
                       document.body.appendChild(a);
                       a.click();
                       document.body.removeChild(a);
@@ -3037,7 +3662,7 @@ function ValidationStep({
                 )}
               </div>
             </div>
-            
+
             <div className="bg-gray-900 dark:bg-gray-950 rounded-lg p-4 h-48 overflow-y-auto font-mono text-sm">
               {logs.length === 0 ? (
                 <div className="text-gray-500 italic">
@@ -3049,15 +3674,15 @@ function ValidationStep({
                     <div
                       key={index}
                       className={`${
-                        log.includes('❌') 
-                          ? 'text-red-400' 
-                          : log.includes('✅') 
-                          ? 'text-green-400'
-                          : log.includes('🔄')
-                          ? 'text-blue-400'
-                          : log.includes('🔍') || log.includes('🚀')
-                          ? 'text-yellow-400'
-                          : 'text-gray-300'
+                        log.includes("❌")
+                          ? "text-red-400"
+                          : log.includes("✅")
+                          ? "text-green-400"
+                          : log.includes("🔄")
+                          ? "text-blue-400"
+                          : log.includes("🔍") || log.includes("🚀")
+                          ? "text-yellow-400"
+                          : "text-gray-300"
                       }`}
                     >
                       {log}
@@ -3065,7 +3690,8 @@ function ValidationStep({
                   ))}
                   {(isRunning || isInitRunning) && (
                     <div className="text-blue-400 animate-pulse">
-                      <span className="inline-block animate-bounce">▶</span> Running...
+                      <span className="inline-block animate-bounce">▶</span>{" "}
+                      Running...
                     </div>
                   )}
                 </div>

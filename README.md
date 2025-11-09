@@ -82,9 +82,28 @@ Each module can be used independently or as part of the integrated dashboard exp
    - Import existing data or download test samples
    - Set up authentication and storage paths
 
-## 🎯 Try It Out - Test Data Available
+## � Demo Mode - Try Before You Configure
 
-**New to the system?** Download comprehensive test data packages to explore all features:
+**Want to explore the system immediately?** Run in demo mode with pre-configured test data paths:
+
+```bash
+npm run demo
+```
+
+Demo mode automatically populates the setup wizard with paths to test data from all backend modules:
+- **JSON Scanner**: `../JSONScanner/data/test_source_data`
+- **Tool Manager**: `../ToolManager/data/test_source_data`
+- **Clamping Plate Manager**: `../ClampingPlateManager/data/test_source_data`
+
+This lets you:
+- ✅ Complete the setup wizard with working test data paths
+- ✅ Explore all features without manual configuration
+- ✅ See how the system works with real-world sample data
+- ✅ Test the complete workflow from setup to dashboard
+
+## 🎯 Download Individual Test Data Packages
+
+Alternatively, download comprehensive test data packages through the setup wizard:
 
 - **JSON Scanner Samples** (15 MB) - Complete CAD projects with analysis results
 - **Tool Manager Samples** (8 MB) - Excel matrices and tool tracking examples
