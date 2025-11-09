@@ -1,0 +1,356 @@
+{
+  "reportInfo": {
+    "generatedAt": "2025-11-09T17:41:41.925Z",
+    "scanAttempt": 1,
+    "jsonDateRange": {
+      "firstJsonCompleteDate": "2025-11-09T17:41:41.922Z",
+      "lastJsonCompleteDate": "2025-11-09T17:41:41.923Z",
+      "totalDaysSpan": 1,
+      "jsonFilesUsed": [
+        "W5270NS01001A.json",
+        "W5270NS01001B.json",
+        "W5270NS01001C.json",
+        "W5270NS01060A.json",
+        "W5270NS01060B.json"
+      ]
+    },
+    "summary": {
+      "excelFilesProcessed": 1,
+      "jsonFilesProcessed": 5,
+      "matrixToolsUsed": 0,
+      "nonMatrixToolsUsed": 47
+    }
+  },
+  "matrixTools": [],
+  "nonMatrixTools": [
+    {
+      "toolName": "GUH-AF8x420_H63H16L95",
+      "totalUsageTime": 1785.61,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5639-AF12_H63H20L90",
+      "totalUsageTime": 1572.64,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "TGT-VLM16-L70-L_H63Z16L95X",
+      "totalUsageTime": 1459.4,
+      "usageCount": 2,
+      "projectCount": 2,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-6961-S10R0_H63WM10L65X",
+      "totalUsageTime": 921.58,
+      "usageCount": 8,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "TGT-VLM42-L_H63M16L75",
+      "totalUsageTime": 817.87,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-X7624-HF8R1.5-L56_H63ZM8L80",
+      "totalUsageTime": 537.27,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5640-AF8_H63H16L95",
+      "totalUsageTime": 456.8,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-P8420-S11.4R0_H63WM12L80X",
+      "totalUsageTime": 419.28,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-6961-S6R0_H63WM6L120",
+      "totalUsageTime": 363.67,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5678-KPF16_H63W16L80X",
+      "totalUsageTime": 329.44,
+      "usageCount": 14,
+      "projectCount": 2,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "KOM-VL-Letoro_H63W16L80X",
+      "totalUsageTime": 311.42,
+      "usageCount": 8,
+      "projectCount": 2,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "TGT-TOP5-TF17.5_H63W25L90",
+      "totalUsageTime": 286.19,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-P15254-S15.2R0_H63ZM16L95X",
+      "totalUsageTime": 204.95,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "KOM-U11-TF39_H63ABS50",
+      "totalUsageTime": 196.35,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "TGT-TOP5-TF25_H63W25L90",
+      "totalUsageTime": 157.47,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-SP0140-G2R1-N-ES-L25_H63K6L120X",
+      "totalUsageTime": 129.93,
+      "usageCount": 4,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "JJ-T8R1-N-ES_H63ZM8L80",
+      "totalUsageTime": 123.7,
+      "usageCount": 7,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-SP0140-G4R2-N-ES-L25_H63K6L120X",
+      "totalUsageTime": 121.79,
+      "usageCount": 3,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-P15250-S5.7R0_H63ZM6L80",
+      "totalUsageTime": 102.15,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-4630-MF_M12_H63PL100-MF",
+      "totalUsageTime": 94.47,
+      "usageCount": 5,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5740-MF_M14x1.50_hosszabbitoban_H63W20L80X",
+      "totalUsageTime": 94.14,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-P8221-S5.7R0_H63W6L65",
+      "totalUsageTime": 91.89,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "ISC-CSF10.3-8xD_H63H16L95",
+      "totalUsageTime": 79.11,
+      "usageCount": 9,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "D8_HSS_CSF_H63T-D3-D16",
+      "totalUsageTime": 75.69,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF5.1_H63Z6L80",
+      "totalUsageTime": 75.43,
+      "usageCount": 4,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-4630-MF_M6_H63PL100-MF",
+      "totalUsageTime": 73.49,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-6736-S8R0_H63WM8L65X",
+      "totalUsageTime": 71.55,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "G12R6-tisztito_H63Z12L120X",
+      "totalUsageTime": 54.6,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF9_H63Z10L85",
+      "totalUsageTime": 54.19,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5510-BHF12_H63Z12L90",
+      "totalUsageTime": 42.92,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF7_H63Z8L80",
+      "totalUsageTime": 42.7,
+      "usageCount": 3,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "D10.25_HSS_CSF_H63T-D3-D16",
+      "totalUsageTime": 38.2,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "TGT-TCD-FEJSULLY15_H63W20L80X",
+      "totalUsageTime": 30.71,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-6713-D12_H63ZM12L120X",
+      "totalUsageTime": 29.36,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "DMG-TAP100P_H63TASZTER-DMU100P",
+      "totalUsageTime": 28.64,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "D10_HSS_CSF_H63T-D3-D16",
+      "totalUsageTime": 27.65,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-SP0140-G1R0.5-L25_H63K6L120X",
+      "totalUsageTime": 27.17,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-4630-MF_M10_H63PL100-MF",
+      "totalUsageTime": 20.17,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF5_H63Z6L80",
+      "totalUsageTime": 19.38,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-4630-MF_M8_H63PL100-MF",
+      "totalUsageTime": 18.85,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF6.9_H63Z8L80",
+      "totalUsageTime": 18.76,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF8.6_H63Z10L85",
+      "totalUsageTime": 18.16,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-4630-MF_M5_H63PL100-MF",
+      "totalUsageTime": 16.98,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "FRA-EH1260091-MF_M9x1_hosszabbitoban_H63PL100X",
+      "totalUsageTime": 15.75,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5512-BHF4.3_H63Z6L80",
+      "totalUsageTime": 13.32,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-5510-BHF8_H63Z8L120X",
+      "totalUsageTime": 10.27,
+      "usageCount": 2,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    },
+    {
+      "toolName": "GUH-6736-S4R0_H63WM6L65X",
+      "totalUsageTime": 7.23,
+      "usageCount": 1,
+      "projectCount": 1,
+      "status": "NOT_IN_MATRIX"
+    }
+  ]
+}

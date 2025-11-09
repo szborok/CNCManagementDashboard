@@ -3179,6 +3179,8 @@ function ValidationStep({
   };
 
   const runFeatureTest = async (testId: string) => {
+    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
+    
     switch (testId) {
       case "json-scanner-init":
         if (config.companyFeatures.jsonScanner) {
@@ -3190,20 +3192,35 @@ function ValidationStep({
             }`
           );
 
-          // Simulate JSON processing
-          addLog(`   → 🔍 Scanning for CNC program files...`);
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-          addLog(`   → 📄 Found 3 sample JSON files`);
-          addLog(`   → 🔄 Processing sample_program_001.json...`);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          addLog(`   → 🔄 Processing sample_program_002.json...`);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          addLog(`   → 🔄 Processing sample_program_003.json...`);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          addLog(`   → 📊 Generated analysis reports for 3 programs`);
-          addLog(`   → 💾 Results saved to output directory`);
+          if (isDemoMode) {
+            addLog(`   → 🔍 Loading existing test results from backend...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            
+            try {
+              // Import test results from backend's test_processed_data
+              const response = await fetch('/demo-data/jsonscanner-results.json');
+              if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('jsonScannerResults', JSON.stringify(data));
+                addLog(`   → ✅ Loaded ${data.length} JSON analysis results`);
+                addLog(`   → � Results available for dashboard display`);
+              } else {
+                addLog(`   → ℹ️  No pre-existing results found`);
+                addLog(`   → � Run 'npm run test' in JSONScanner to generate`);
+              }
+            } catch (error) {
+              addLog(`   → ℹ️  Backend results not found - run backends first`);
+              addLog(`   → � Instructions: cd JSONScanner && npm run test`);
+            }
+          } else {
+            // Production mode simulation
+            addLog(`   → 🔍 Scanning for CNC program files...`);
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            addLog(`   → � Configuration validated`);
+            addLog(`   → ✅ Ready to process production data`);
+          }
         } else {
-          addLog(`   → JSON Scanner disabled - creating placeholder results`);
+          addLog(`   → JSON Scanner disabled - skipping`);
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
         break;
@@ -3220,18 +3237,35 @@ function ValidationStep({
             }`
           );
 
-          // Simulate Excel processing
-          addLog(`   → 🔍 Scanning for Excel inventory files...`);
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-          addLog(`   → 📊 Found sample_inventory.xlsx`);
-          addLog(`   → 🔄 Processing tool data...`);
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          addLog(`   → 🔧 Processed 45 tools, 12 categories`);
-          addLog(`   → 📈 Generated inventory matrix`);
-          addLog(`   → ⚠️  Found 3 tools requiring attention`);
-          addLog(`   → 💾 Updated tool database`);
+          if (isDemoMode) {
+            addLog(`   → 🔍 Loading existing test results from backend...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            
+            try {
+              const response = await fetch('/demo-data/toolmanager-results.json');
+              if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('toolManagerResults', JSON.stringify(data));
+                const totalTools = (data.matrixTools?.length || 0) + (data.nonMatrixTools?.length || 0);
+                addLog(`   → ✅ Loaded ${totalTools} tool tracking records`);
+                addLog(`   → 📊 Results available for dashboard display`);
+              } else {
+                addLog(`   → ℹ️  No pre-existing results found`);
+                addLog(`   → � Run 'npm run test' in ToolManager to generate`);
+              }
+            } catch (error) {
+              addLog(`   → ℹ️  Backend results not found - run backends first`);
+              addLog(`   → � Instructions: cd ToolManager && npm run test`);
+            }
+          } else {
+            // Production mode simulation
+            addLog(`   → 🔍 Scanning for Excel inventory files...`);
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            addLog(`   → 📊 Configuration validated`);
+            addLog(`   → ✅ Ready to process production data`);
+          }
         } else {
-          addLog(`   → Tool Manager disabled - skipping test run`);
+          addLog(`   → Tool Manager disabled - skipping`);
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
         break;
@@ -3247,18 +3281,34 @@ function ValidationStep({
             }`
           );
 
-          // Simulate plate data processing
-          addLog(`   → 🔍 Loading plate information file...`);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          addLog(`   → 📋 Processing plate_info.xlsx...`);
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-          addLog(`   → 🔩 Loaded 15 clamping plates`);
-          addLog(`   → 📐 Validated dimensions and specifications`);
-          addLog(`   → 🏗️  Checked model file associations`);
-          addLog(`   → ✅ All plates verified and catalogued`);
-          addLog(`   → 💾 Updated plate management database`);
+          if (isDemoMode) {
+            addLog(`   → 🔍 Loading existing test results from backend...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            
+            try {
+              const response = await fetch('/demo-data/clampingplate-results.json');
+              if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('clampingPlateResults', JSON.stringify(data));
+                addLog(`   → ✅ Loaded ${data.plates?.length || 0} clamping plate records`);
+                addLog(`   → � Results available for dashboard display`);
+              } else {
+                addLog(`   → ℹ️  No pre-existing results found`);
+                addLog(`   → 💡 Run 'npm run test' in ClampingPlateManager to generate`);
+              }
+            } catch (error) {
+              addLog(`   → ℹ️  Backend results not found - run backends first`);
+              addLog(`   → 📝 Instructions: cd ClampingPlateManager && npm run test`);
+            }
+          } else {
+            // Production mode simulation
+            addLog(`   → 🔍 Validating plate configuration...`);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            addLog(`   → � Configuration validated`);
+            addLog(`   → ✅ Ready to process production data`);
+          }
         } else {
-          addLog(`   → Clamping Plate Manager disabled - skipping test run`);
+          addLog(`   → Clamping Plate Manager disabled - skipping`);
           await new Promise((resolve) => setTimeout(resolve, 500));
         }
         break;

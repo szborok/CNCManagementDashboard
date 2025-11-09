@@ -95,7 +95,7 @@ npm run demo
 Demo mode automatically populates the setup wizard with paths to test data from all backend modules:
 
 - **JSON Scanner**: `../JSONScanner/data/test_source_data`
-- **Tool Manager**: `../ToolManager/data/test_source_data`  
+- **Tool Manager**: `../ToolManager/data/test_source_data`
 - **Clamping Plate Manager**: `../ClampingPlateManager/data/test_source_data`
 
 **Important**: Demo mode shows **real backend results** from test data processing - no mock data!
@@ -107,10 +107,10 @@ Demo mode automatically populates the setup wizard with paths to test data from 
    ```bash
    # In JSONScanner directory
    npm run test
-   
-   # In ToolManager directory  
+
+   # In ToolManager directory
    npm run test
-   
+
    # In ClampingPlateManager directory
    npm run test
    ```

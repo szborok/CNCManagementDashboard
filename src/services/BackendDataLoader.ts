@@ -206,8 +206,8 @@ export class BackendDataLoader {
             result.status === "passed"
               ? "completed"
               : result.status === "failed"
-                ? "failed"
-                : "processing",
+              ? "failed"
+              : "processing",
           timestamp: result.processedAt,
           details: `${result.results.rulesApplied.length} rules applied, ${result.results.violations.length} violations found`,
         });

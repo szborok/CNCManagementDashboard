@@ -1,0 +1,52 @@
+[
+  {
+    "id": "W5270NS01001A_1762709963161",
+    "filename": "W5270NS01001A",
+    "processedAt": "2025-11-09T17:39:23.161Z",
+    "results": {
+      "rulesApplied": [
+        "GunDrill60MinLimit",
+        "M110Contour",
+        "M110Helical",
+        "SingleToolInNC"
+      ],
+      "violations": []
+    },
+    "status": "passed"
+  },
+  {
+    "id": "W5270NS01003A_1762709963180",
+    "filename": "W5270NS01003A",
+    "processedAt": "2025-11-09T17:39:23.180Z",
+    "results": {
+      "rulesApplied": [
+        "AutoCorrectionContour",
+        "AutoCorrectionPlane",
+        "GunDrill60MinLimit",
+        "M110Contour",
+        "M110Helical",
+        "ReconditionedTool",
+        "SingleToolInNC"
+      ],
+      "violations": []
+    },
+    "status": "passed"
+  },
+  {
+    "id": "W5270NS01060A_1762709963189",
+    "filename": "W5270NS01060A",
+    "processedAt": "2025-11-09T17:39:23.189Z",
+    "results": {
+      "rulesApplied": [
+        "AutoCorrectionContour",
+        "GunDrill60MinLimit",
+        "M110Contour",
+        "M110Helical",
+        "ReconditionedTool",
+        "SingleToolInNC"
+      ],
+      "violations": []
+    },
+    "status": "passed"
+  }
+]
