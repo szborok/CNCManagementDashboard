@@ -37,18 +37,77 @@ Each module can be used independently or as part of the integrated dashboard exp
 
 ### For New Users (Recommended)
 
-1. **Clone with all modules**
+1. **Clone all repositories to the same parent directory**
 
    ```bash
-   git clone --recursive https://github.com/your-org/CNCManagementDashboard.git
-   cd CNCManagementDashboard
+   # Create workspace directory
+   mkdir CNC-Manufacturing-Workspace
+   cd CNC-Manufacturing-Workspace
+
+   # Clone all repositories
+   git clone https://github.com/szborok/JSONScanner.git
+   git clone https://github.com/szborok/ToolManager.git  
+   git clone https://github.com/szborok/ClampingPlateManager.git
+   git clone https://github.com/szborok/CNCManagementDashboard.git
+   git clone https://github.com/szborok/CNC_TestData.git
    ```
 
-2. **Setup all modules**
+2. **Open the complete workspace**
 
    ```bash
-   npm run setup:all
+   # Open the workspace file in VS Code
+   code CNCManagementDashboard/BRK-CNC-Management-Dashboard.code-workspace
    ```
+
+3. **Install all dependencies** (use VS Code Tasks or manually)
+
+   **Via VS Code Tasks:** Press `Ctrl+Shift+P` → `Tasks: Run Task` → `🚀 Install All Dependencies`
+
+   **Or manually:**
+   ```bash
+   # Install each project's dependencies
+   cd JSONScanner && npm install
+   cd ../ToolManager && npm install  
+   cd ../ClampingPlateManager && npm install
+   cd ../CNCManagementDashboard && npm install
+   ```
+
+4. **Start the complete system**
+
+   **Via VS Code Tasks:** Press `Ctrl+Shift+P` → `Tasks: Run Task` → `🚀 Start All Services`
+
+   **Or manually:** Each service will start in its own terminal window
+
+## 🎯 VS Code Workspace Features
+
+The included `BRK-CNC-Management-Dashboard.code-workspace` file provides:
+
+### 📁 **Organized Project Structure**
+- **🔍 JSONScanner** - CNC Quality Control
+- **🔧 ToolManager** - Inventory Tracking  
+- **📋 ClampingPlateManager** - Backend API
+- **🎛️ CNCManagementDashboard** - Frontend
+- **📊 CNC_TestData** - Centralized Test Data
+
+### 🚀 **Ready-to-Use Tasks**
+- `🚀 Install All Dependencies` - One-click setup
+- `🧪 Run All Tests` - Test entire system
+- `🖥️ Start Development Dashboard` - Frontend development
+- `🔍 Start JSONScanner (Auto Mode)` - Background scanning
+- `🔧 Start ToolManager (Auto Mode)` - Background tool processing
+- `📋 Start ClampingPlateManager API` - Backend API server
+- `🚀 Start All Services` - Complete system startup
+
+### 🐛 **Debug Configurations**
+- Individual debugging for each Node.js service
+- Integrated terminal support
+- Breakpoint debugging across the entire system
+
+### ⚙️ **Workspace Settings**
+- Consistent code formatting across all projects
+- ESLint integration for all JavaScript/TypeScript files
+- Git integration with smart commits
+- Extension recommendations for optimal development experience
 
 3. **Download test data (optional)**
 

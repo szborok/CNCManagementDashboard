@@ -1,0 +1,233 @@
+{
+  "folders": [
+    {
+      "name": "🔍 JSONScanner - CNC Quality Control",
+      "path": "./JSONScanner"
+    },
+    {
+      "name": "🔧 ToolManager - Inventory Tracking", 
+      "path": "./ToolManager"
+    },
+    {
+      "name": "📋 ClampingPlateManager - Backend API",
+      "path": "./ClampingPlateManager"
+    },
+    {
+      "name": "🎛️ CNCManagementDashboard - Frontend",
+      "path": "./CNCManagementDashboard"
+    },
+    {
+      "name": "📊 CNC_TestData - Centralized Test Data",
+      "path": "./CNC_TestData"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/logs": true,
+      "**/dist": true,
+      "**/build": true,
+      "**/.git": false,
+      "**/BRK CNC Management Dashboard": true,
+      "**/*.log": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/logs": true,
+      "**/BRK CNC Management Dashboard": true,
+      "**/dist": true,
+      "**/build": true
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "eslint.workingDirectories": [
+      "JSONScanner",
+      "ToolManager", 
+      "ClampingPlateManager",
+      "CNCManagementDashboard"
+    ],
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    "git.autofetch": true
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "dbaeumer.vscode-eslint",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-json",
+      "GitHub.copilot",
+      "ms-vscode.vscode-github-issue-notebooks",
+      "eamodio.gitlens",
+      "ms-vscode.powershell"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "🚀 Install All Dependencies",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Write-Host '🔧 Installing JSONScanner dependencies...' -ForegroundColor Cyan; cd JSONScanner; npm install; Write-Host '🔧 Installing ToolManager dependencies...' -ForegroundColor Cyan; cd ../ToolManager; npm install; Write-Host '🔧 Installing ClampingPlateManager dependencies...' -ForegroundColor Cyan; cd ../ClampingPlateManager; npm install; Write-Host '🔧 Installing CNCManagementDashboard dependencies...' -ForegroundColor Cyan; cd ../CNCManagementDashboard; npm install; Write-Host '✅ All dependencies installed!' -ForegroundColor Green"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": false
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🧪 Run All Tests",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Write-Host '🧪 Testing JSONScanner...' -ForegroundColor Yellow; cd JSONScanner; npm test; Write-Host '🧪 Testing ToolManager...' -ForegroundColor Yellow; cd ../ToolManager; npm test; Write-Host '🧪 Testing ClampingPlateManager...' -ForegroundColor Yellow; cd ../ClampingPlateManager; npm test; Write-Host '✅ All tests completed!' -ForegroundColor Green"
+        ],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "🖥️ Start Development Dashboard",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Write-Host '🎛️ Starting CNC Management Dashboard...' -ForegroundColor Magenta; cd CNCManagementDashboard; npm run dev"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "🔍 Start JSONScanner (Auto Mode)",
+        "type": "shell",
+        "command": "powershell", 
+        "args": [
+          "-Command",
+          "Write-Host '🔍 Starting JSONScanner in auto mode...' -ForegroundColor Cyan; cd JSONScanner; npm run auto"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "🔧 Start ToolManager (Auto Mode)",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command", 
+          "Write-Host '🔧 Starting ToolManager in auto mode...' -ForegroundColor Green; cd ToolManager; npm run auto"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "📋 Start ClampingPlateManager API",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Write-Host '📋 Starting ClampingPlateManager API server...' -ForegroundColor Blue; cd ClampingPlateManager; npm start"
+        ],
+        "group": "build", 
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "🚀 Start All Services",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-Command",
+          "Write-Host '🚀 Starting all CNC management services...' -ForegroundColor Magenta; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd JSONScanner; Write-Host \"🔍 JSONScanner Auto Mode\" -ForegroundColor Cyan; npm run auto' -WindowStyle Normal; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ToolManager; Write-Host \"🔧 ToolManager Auto Mode\" -ForegroundColor Green; npm run auto' -WindowStyle Normal; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ClampingPlateManager; Write-Host \"📋 ClampingPlateManager API\" -ForegroundColor Blue; npm start' -WindowStyle Normal; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd CNCManagementDashboard; Write-Host \"🎛️ Management Dashboard\" -ForegroundColor Magenta; npm run dev' -WindowStyle Normal; Write-Host '✅ All services started in separate windows!' -ForegroundColor Green"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always", 
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "🔍 Debug JSONScanner",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/JSONScanner/main.js",
+        "args": ["--manual"],
+        "cwd": "${workspaceFolder}/JSONScanner",
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "🔧 Debug ToolManager", 
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/ToolManager/main.js",
+        "args": ["--manual"],
+        "cwd": "${workspaceFolder}/ToolManager", 
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "📋 Debug ClampingPlateManager",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/ClampingPlateManager/main.js",
+        "args": ["--serve"],
+        "cwd": "${workspaceFolder}/ClampingPlateManager",
+        "console": "integratedTerminal"
+      }
+    ]
+  }
+}
