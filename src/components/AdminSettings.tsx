@@ -678,23 +678,23 @@ export default function AdminSettings({
                   />
                 </div>
                 <div>
-                  <Label htmlFor="plates-data-path">Data Path</Label>
+                  <Label htmlFor="plates-models-path">Models Path</Label>
                   <div className="flex gap-2">
                     <Input
-                      id="plates-data-path"
-                      value={localConfig.modules.platesManager.dataPath}
+                      id="plates-models-path"
+                      value={localConfig.modules.platesManager.modelsPath || ""}
                       onChange={(e) =>
                         updateLocalConfig({
                           modules: {
                             ...localConfig.modules,
                             platesManager: {
                               ...localConfig.modules.platesManager,
-                              dataPath: e.target.value,
+                              modelsPath: e.target.value,
                             },
                           },
                         })
                       }
-                      placeholder="./data/plates"
+                      placeholder="./data/models"
                     />
                     <Button
                       variant="outline"
@@ -706,18 +706,18 @@ export default function AdminSettings({
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="plates-database">Plate Database Path</Label>
+                  <Label htmlFor="plates-info-file">Plate Info File</Label>
                   <div className="flex gap-2">
                     <Input
-                      id="plates-database"
-                      value={localConfig.modules.platesManager.plateDatabase}
+                      id="plates-info-file"
+                      value={localConfig.modules.platesManager.plateInfoFile || ""}
                       onChange={(e) =>
                         updateLocalConfig({
                           modules: {
                             ...localConfig.modules,
                             platesManager: {
                               ...localConfig.modules.platesManager,
-                              plateDatabase: e.target.value,
+                              plateInfoFile: e.target.value,
                             },
                           },
                         })

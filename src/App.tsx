@@ -11,6 +11,7 @@ import Settings from "./components/Settings";
 import AdminSettings from "./components/AdminSettings";
 import Sidebar from "./components/Sidebar";
 import SetupWizard from "./components/SetupWizard_New";
+import StartupRecovery from "./components/StartupRecovery";
 import ProtectedRoute, { AdminRoute } from "./components/ProtectedRoute";
 import { Toaster } from "./components/ui/sonner";
 
@@ -256,18 +257,30 @@ function WorkingLoginPage() {
           </form>
         </div>
 
-        {/* Setup Wizard Access - Temporary for Testing */}
-        <div className="text-center mt-6">
+        {/* Setup and Recovery Options */}
+        <div className="text-center mt-6 space-y-2">
+          <button
+            onClick={() => {
+              // Trigger startup recovery flow
+              sessionStorage.removeItem("cncDashboardSession");
+              window.location.reload();
+            }}
+            className="block w-full text-sm text-green-600 hover:text-green-800 underline font-medium"
+          >
+            🔄 Check System Status & Recovery
+          </button>
+          
           <button
             onClick={() => {
               localStorage.removeItem("cncDashboardConfig");
               localStorage.removeItem("setupWizardStep");
               localStorage.removeItem("setupWizardProgress");
+              sessionStorage.removeItem("cncDashboardSession");
               window.location.reload();
             }}
-            className="text-sm text-blue-600 hover:text-blue-800 underline font-medium"
+            className="block w-full text-sm text-blue-600 hover:text-blue-800 underline font-medium"
           >
-            🔧 Access Setup Wizard (Reset Configuration)
+            🔧 Reset & Run Setup Wizard
           </button>
         </div>
 
@@ -699,7 +712,21 @@ export default function App() {
 }
 
 function AppWithSetup() {
-  const { config, isLoading, saveConfig, isFirstTimeSetup } = useSetupConfig();
+  const { config, isLoading, saveConfig, isFirstTimeSetup, resetConfig } = useSetupConfig();
+  const [showStartupRecovery, setShowStartupRecovery] = useState(false);
+  const [skipRecovery, setSkipRecovery] = useState(false);
+
+  // Check if we should show startup recovery after config loads
+  useEffect(() => {
+    if (!isLoading && !isFirstTimeSetup && !skipRecovery) {
+      // Check if this is a fresh browser session (not just a page refresh)
+      const lastSession = sessionStorage.getItem("cncDashboardSession");
+      if (!lastSession) {
+        setShowStartupRecovery(true);
+        sessionStorage.setItem("cncDashboardSession", "active");
+      }
+    }
+  }, [isLoading, isFirstTimeSetup, skipRecovery]);
 
   // No sample data initialization - dashboard uses real backend results only
 
@@ -718,6 +745,22 @@ function AppWithSetup() {
 
   if (isFirstTimeSetup) {
     return <SetupWizard initialConfig={config} onComplete={saveConfig} />;
+  }
+
+  if (showStartupRecovery) {
+    return (
+      <StartupRecovery 
+        config={config}
+        onContinue={() => {
+          setShowStartupRecovery(false);
+          setSkipRecovery(true);
+        }}
+        onOpenSetup={() => {
+          resetConfig();
+          setShowStartupRecovery(false);
+        }}
+      />
+    );
   }
 
   return <AppContent />;
