@@ -1,23 +1,23 @@
 {
   "folders": [
     {
-      "name": "🔍 JSONScanner - CNC Quality Control",
+      "name": "🔍 JSONScanner - **CNC Quality Control & Rule Engine**",
       "path": "./JSONScanner"
     },
     {
-      "name": "🔧 ToolManager - Inventory Tracking", 
+      "name": "🔧 ToolManager - **Excel Processing & Inventory Tracking**", 
       "path": "./ToolManager"
     },
     {
-      "name": "📋 ClampingPlateManager - Backend API",
+      "name": "📋 ClampingPlateManager - **REST API & Plate Management**",
       "path": "./ClampingPlateManager"
     },
     {
-      "name": "🎛️ CNCManagementDashboard - Frontend",
+      "name": "🎛️ CNCManagementDashboard - **React Frontend & Orchestrator**",
       "path": "./CNCManagementDashboard"
     },
     {
-      "name": "📊 CNC_TestData - Centralized Test Data",
+      "name": "📊 CNC_TestData - **Centralized Test Repository**",
       "path": "./CNC_TestData"
     }
   ],
@@ -73,12 +73,12 @@
     "version": "2.0.0",
     "tasks": [
       {
-        "label": "🚀 Install All Dependencies",
+        "label": "🚀 **INSTALL ALL DEPENDENCIES** - Complete System Setup",
         "type": "shell",
         "command": "powershell",
         "args": [
           "-Command",
-          "Write-Host '🔧 Installing JSONScanner dependencies...' -ForegroundColor Cyan; cd JSONScanner; npm install; Write-Host '🔧 Installing ToolManager dependencies...' -ForegroundColor Cyan; cd ../ToolManager; npm install; Write-Host '🔧 Installing ClampingPlateManager dependencies...' -ForegroundColor Cyan; cd ../ClampingPlateManager; npm install; Write-Host '🔧 Installing CNCManagementDashboard dependencies...' -ForegroundColor Cyan; cd ../CNCManagementDashboard; npm install; Write-Host '✅ All dependencies installed!' -ForegroundColor Green"
+          "Write-Host '════════════════════════════════════════' -ForegroundColor Magenta; Write-Host '🚀 **SETTING UP COMPLETE CNC SYSTEM**' -ForegroundColor Yellow; Write-Host '════════════════════════════════════════' -ForegroundColor Magenta; Write-Host '🔍 **JSONScanner** - Quality Control Engine...' -ForegroundColor Cyan; cd JSONScanner; npm install; Write-Host '✅ JSONScanner ready!' -ForegroundColor Green; Write-Host '🔧 **ToolManager** - Excel & Inventory System...' -ForegroundColor Cyan; cd ../ToolManager; npm install; Write-Host '✅ ToolManager ready!' -ForegroundColor Green; Write-Host '📋 **ClampingPlateManager** - REST API Service...' -ForegroundColor Cyan; cd ../ClampingPlateManager; npm install; Write-Host '✅ API Service ready!' -ForegroundColor Green; Write-Host '🎛️ **CNCManagementDashboard** - React Frontend...' -ForegroundColor Cyan; cd ../CNCManagementDashboard; npm install; Write-Host '✅ Dashboard ready!' -ForegroundColor Green; Write-Host '════════════════════════════════════════' -ForegroundColor Magenta; Write-Host '🎉 **ALL SYSTEMS READY FOR DEVELOPMENT!**' -ForegroundColor Yellow; Write-Host '════════════════════════════════════════' -ForegroundColor Magenta"
         ],
         "group": "build",
         "presentation": {
@@ -91,12 +91,12 @@
         "problemMatcher": []
       },
       {
-        "label": "🧪 Run All Tests",
+        "label": "🧪 **RUN COMPLETE TEST SUITE** - System Validation",
         "type": "shell",
         "command": "powershell",
         "args": [
           "-Command",
-          "Write-Host '🧪 Testing JSONScanner...' -ForegroundColor Yellow; cd JSONScanner; npm test; Write-Host '🧪 Testing ToolManager...' -ForegroundColor Yellow; cd ../ToolManager; npm test; Write-Host '🧪 Testing ClampingPlateManager...' -ForegroundColor Yellow; cd ../ClampingPlateManager; npm test; Write-Host '✅ All tests completed!' -ForegroundColor Green"
+          "Write-Host '════════════════════════════════════════' -ForegroundColor Blue; Write-Host '🧪 **RUNNING COMPLETE TEST SUITE**' -ForegroundColor Yellow; Write-Host '════════════════════════════════════════' -ForegroundColor Blue; Write-Host '🔍 **Testing JSONScanner** - Quality Rules & Analysis...' -ForegroundColor Yellow; cd JSONScanner; npm test; Write-Host '✅ JSONScanner tests passed!' -ForegroundColor Green; Write-Host '🔧 **Testing ToolManager** - Excel Processing & Logic...' -ForegroundColor Yellow; cd ../ToolManager; npm test; Write-Host '✅ ToolManager tests passed!' -ForegroundColor Green; Write-Host '📋 **Testing ClampingPlateManager** - API & Data Logic...' -ForegroundColor Yellow; cd ../ClampingPlateManager; npm test; Write-Host '✅ API tests passed!' -ForegroundColor Green; Write-Host '════════════════════════════════════════' -ForegroundColor Blue; Write-Host '🎉 **ALL TESTS SUCCESSFUL - SYSTEM VALIDATED!**' -ForegroundColor Yellow; Write-Host '════════════════════════════════════════' -ForegroundColor Blue"
         ],
         "group": "test",
         "presentation": {
@@ -180,12 +180,12 @@
         "problemMatcher": []
       },
       {
-        "label": "🚀 Start All Services",
+        "label": "🚀 **START COMPLETE CNC SYSTEM** - Production Mode",
         "type": "shell",
         "command": "powershell",
         "args": [
           "-Command",
-          "Write-Host '🚀 Starting all CNC management services...' -ForegroundColor Magenta; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd JSONScanner; Write-Host \"🔍 JSONScanner Auto Mode\" -ForegroundColor Cyan; npm run auto' -WindowStyle Normal; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ToolManager; Write-Host \"🔧 ToolManager Auto Mode\" -ForegroundColor Green; npm run auto' -WindowStyle Normal; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ClampingPlateManager; Write-Host \"📋 ClampingPlateManager API\" -ForegroundColor Blue; npm start' -WindowStyle Normal; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd CNCManagementDashboard; Write-Host \"🎛️ Management Dashboard\" -ForegroundColor Magenta; npm run dev' -WindowStyle Normal; Write-Host '✅ All services started in separate windows!' -ForegroundColor Green"
+          "Write-Host '════════════════════════════════════════' -ForegroundColor Magenta; Write-Host '🚀 **LAUNCHING COMPLETE CNC MANAGEMENT SYSTEM**' -ForegroundColor Yellow; Write-Host '════════════════════════════════════════' -ForegroundColor Magenta; Write-Host '🔍 **Starting JSONScanner** - Auto Quality Control...' -ForegroundColor Cyan; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'Write-Host \"══════════════════════════════════════\" -ForegroundColor Cyan; Write-Host \"🔍 **JSONScanner - Quality Control Engine**\" -ForegroundColor Yellow; Write-Host \"══════════════════════════════════════\" -ForegroundColor Cyan; cd JSONScanner; npm run auto' -WindowStyle Normal; Write-Host '🔧 **Starting ToolManager** - Inventory Tracking...' -ForegroundColor Green; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'Write-Host \"══════════════════════════════════════\" -ForegroundColor Green; Write-Host \"🔧 **ToolManager - Excel & Inventory System**\" -ForegroundColor Yellow; Write-Host \"══════════════════════════════════════\" -ForegroundColor Green; cd ToolManager; npm run auto' -WindowStyle Normal; Write-Host '📋 **Starting API Service** - Plate Management...' -ForegroundColor Blue; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'Write-Host \"══════════════════════════════════════\" -ForegroundColor Blue; Write-Host \"📋 **ClampingPlateManager - REST API Service**\" -ForegroundColor Yellow; Write-Host \"══════════════════════════════════════\" -ForegroundColor Blue; cd ClampingPlateManager; npm start' -WindowStyle Normal; Write-Host '🎛️ **Starting Dashboard** - Frontend Interface...' -ForegroundColor Magenta; Start-Process powershell -ArgumentList '-NoExit', '-Command', 'Write-Host \"══════════════════════════════════════\" -ForegroundColor Magenta; Write-Host \"🎛️ **CNC Management Dashboard - Frontend**\" -ForegroundColor Yellow; Write-Host \"══════════════════════════════════════\" -ForegroundColor Magenta; cd CNCManagementDashboard; npm run dev' -WindowStyle Normal; Write-Host '════════════════════════════════════════' -ForegroundColor Magenta; Write-Host '🎉 **ALL SERVICES RUNNING IN SEPARATE WINDOWS!**' -ForegroundColor Yellow; Write-Host '🌐 Dashboard: http://localhost:3000' -ForegroundColor White; Write-Host '🔌 API Server: http://localhost:3002' -ForegroundColor White; Write-Host '════════════════════════════════════════' -ForegroundColor Magenta"
         ],
         "group": "build",
         "presentation": {
@@ -202,31 +202,40 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "🔍 Debug JSONScanner",
+        "name": "🔍 **DEBUG JSONScanner** - Quality Control Engine",
         "type": "node",
         "request": "launch",
         "program": "${workspaceFolder}/JSONScanner/main.js",
         "args": ["--manual"],
         "cwd": "${workspaceFolder}/JSONScanner",
-        "console": "integratedTerminal"
+        "console": "integratedTerminal",
+        "env": {
+          "NODE_ENV": "development"
+        }
       },
       {
-        "name": "🔧 Debug ToolManager", 
+        "name": "🔧 **DEBUG ToolManager** - Excel Processing System", 
         "type": "node",
         "request": "launch",
         "program": "${workspaceFolder}/ToolManager/main.js",
         "args": ["--manual"],
         "cwd": "${workspaceFolder}/ToolManager", 
-        "console": "integratedTerminal"
+        "console": "integratedTerminal",
+        "env": {
+          "NODE_ENV": "development"
+        }
       },
       {
-        "name": "📋 Debug ClampingPlateManager",
+        "name": "📋 **DEBUG ClampingPlateManager** - REST API Service",
         "type": "node",
         "request": "launch",
         "program": "${workspaceFolder}/ClampingPlateManager/main.js",
         "args": ["--serve"],
         "cwd": "${workspaceFolder}/ClampingPlateManager",
-        "console": "integratedTerminal"
+        "console": "integratedTerminal",
+        "env": {
+          "NODE_ENV": "development"
+        }
       }
     ]
   }

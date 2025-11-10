@@ -104,10 +104,33 @@ The included `BRK-CNC-Management-Dashboard.code-workspace` file provides:
 - Breakpoint debugging across the entire system
 
 ### ⚙️ **Workspace Settings**
-- Consistent code formatting across all projects
-- ESLint integration for all JavaScript/TypeScript files
-- Git integration with smart commits
-- Extension recommendations for optimal development experience
+- **✨ Consistent code formatting** across all projects
+- **🔍 ESLint integration** for all JavaScript/TypeScript files  
+- **🔄 Git integration** with smart commits and auto-fetch
+- **📦 Extension recommendations** for optimal development experience
+
+## 🎯 **What Each Project Contains in VS Code:**
+
+### **🔍 JSONScanner - Quality Control Engine**
+- **📊 Automated Rule Discovery** - Business rules from `/rules/` directory
+- **⚡ Live File Monitoring** - Auto-scanning with 60-second intervals
+- **📈 Progress Tracking** - Real-time bulk operation reporting
+- **🛡️ Read-Only Processing** - Safe temp structure, originals untouched
+- **📝 Advanced Logging** - Daily rotation with structured context
+
+### **🔧 ToolManager - Excel Processing System**  
+- **📊 Smart Excel Engine** - ECUT/MFC/XF/XFEED categorization
+- **🏭 Manufacturing Integration** - Work tracking JSON generation
+- **📈 Real-Time Inventory** - Live tool availability tracking
+- **🔄 Automated Pipeline** - Excel-to-JSON conversion workflows
+- **🎯 Intelligent Matching** - Advanced inventory-to-requirement logic
+
+### **📋 ClampingPlateManager - REST API Service**
+- **🌐 Production API Server** - RESTful endpoints for all operations
+- **💾 Dual Storage Support** - Local JSON and MongoDB integration
+- **📊 Complete Audit Trail** - Full lifecycle and history tracking
+- **🔄 Real-Time Updates** - Live inventory status management
+- **🛡️ Data Validation** - Comprehensive input validation and error handling
 
 3. **Download test data (optional)**
 
