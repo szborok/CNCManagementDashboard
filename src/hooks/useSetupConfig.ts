@@ -37,6 +37,8 @@ export interface SetupConfig {
       mode: "auto" | "manual";
       modelsPath?: string;
       plateInfoFile?: string;
+      dataPath?: string;
+      plateDatabase?: string;
     };
   };
   authentication: {
@@ -112,6 +114,8 @@ const defaultConfig: SetupConfig = {
       mode: "auto",
       modelsPath: "",
       plateInfoFile: "",
+      dataPath: "",
+      plateDatabase: "",
     },
   },
   authentication: {

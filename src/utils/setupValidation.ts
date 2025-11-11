@@ -283,7 +283,7 @@ export class SetupValidation {
     }
 
     // Basic LDAP server validation
-    const ldapPattern = /^ldaps?:\/\/[\w\.-]+(?::\d+)?$/i;
+    const ldapPattern = /^ldaps?:\/\/[\w.-]+(?::\d+)?$/i;
 
     if (!ldapPattern.test(serverAddress)) {
       return {

@@ -18,6 +18,8 @@ import {
   AlertCircle,
   CheckCircle2,
   RefreshCw,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { User as UserType } from "../App";
 import {
@@ -25,6 +27,9 @@ import {
   DashboardData,
 } from "../services/DashboardDataService";
 import { BackendDataLoader } from "../services/BackendDataLoader";
+import jsonScannerAPI from "../services/api/jsonScanner";
+import toolManagerAPI from "../services/api/toolManager";
+import platesManagerAPI from "../services/api/platesManager";
 
 interface DashboardProps {
   user: UserType;
@@ -36,26 +41,188 @@ export default function Dashboard({ user }: DashboardProps) {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [useAPIMode, setUseAPIMode] = useState(() => {
+    // Load API mode preference from localStorage
+    const saved = localStorage.getItem("dashboardAPIMode");
+    return saved === "true";
+  });
+  const [apiStatus, setApiStatus] = useState<{
+    jsonScanner: boolean;
+    toolManager: boolean;
+    platesManager: boolean;
+  }>({
+    jsonScanner: false,
+    toolManager: false,
+    platesManager: false,
+  });
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [useAPIMode]); // Reload when API mode changes
+
+  const checkAPIStatus = async () => {
+    const status = {
+      jsonScanner: false,
+      toolManager: false,
+      platesManager: false,
+    };
+
+    try {
+      await jsonScannerAPI.getStatus();
+      status.jsonScanner = true;
+    } catch {}
+
+    try {
+      await toolManagerAPI.getStatus();
+      status.toolManager = true;
+    } catch {}
+
+    try {
+      await platesManagerAPI.getStatus();
+      status.platesManager = true;
+    } catch {}
+
+    setApiStatus(status);
+    return status;
+  };
 
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
 
-      // Ensure demo data is fresh (only in demo mode)
-      await BackendDataLoader.ensureDemoDataLoaded();
+      if (useAPIMode) {
+        // API MODE: Load data from real backend services
+        console.log("📡 Loading data from API backends...");
+        const status = await checkAPIStatus();
 
-      const data = await DashboardDataService.loadDashboardData();
-      setDashboardData(data || DashboardDataService.generateFallbackData());
+        if (
+          !status.jsonScanner &&
+          !status.toolManager &&
+          !status.platesManager
+        ) {
+          console.warn(
+            "⚠️ No API backends available, falling back to demo mode"
+          );
+          setDashboardData(DashboardDataService.generateFallbackData());
+          return;
+        }
+
+        // Fetch data from APIs
+        const [projectsData, toolsData, platesData] = await Promise.all([
+          status.jsonScanner
+            ? jsonScannerAPI
+                .getProjects()
+                .catch(() => ({ projects: [], total: 0 }))
+            : Promise.resolve({ projects: [], total: 0 }),
+          status.toolManager
+            ? toolManagerAPI
+                .getTools()
+                .catch(() => ({ tools: [], total: 0, stats: {} }))
+            : Promise.resolve({ tools: [], total: 0, stats: {} }),
+          status.platesManager
+            ? platesManagerAPI
+                .getPlates()
+                .catch(() => ({ plates: [], total: 0 }))
+            : Promise.resolve({ plates: [], total: 0 }),
+        ]);
+
+        // Transform API data to DashboardData format
+        const apiData: any = {
+          overview: {
+            totalProjects: projectsData.total || 0,
+            activeProjects:
+              projectsData.projects?.filter((p: any) => p.status !== "passed")
+                .length || 0,
+            completedToday: 0, // TODO: Calculate from project data
+            toolsInUse:
+              toolsData.tools?.filter((t: any) => t.status === "in_use")
+                .length || 0,
+            lastUpdate: new Date().toISOString(),
+          },
+          jsonScanner: {
+            totalProjects: projectsData.total || 0,
+            passedProjects:
+              projectsData.projects?.filter((p: any) => p.status === "passed")
+                .length || 0,
+            failedProjects:
+              projectsData.projects?.filter((p: any) => p.status === "failed")
+                .length || 0,
+            warningProjects:
+              projectsData.projects?.filter((p: any) => p.status === "warning")
+                .length || 0,
+            recentProjects:
+              projectsData.projects?.slice(0, 5).map((p: any) => ({
+                id: p.id,
+                name: p.name,
+                status: p.status,
+                timestamp: p.lastAnalyzed || new Date().toISOString(),
+              })) || [],
+          },
+          toolManager: {
+            totalTools: toolsData.total || 0,
+            toolsInUse: (toolsData as any).stats?.toolsInUse || 0,
+            availableTools: (toolsData as any).stats?.toolsAvailable || 0,
+            upcomingRequirements: [],
+          },
+          clampingPlateManager: {
+            totalPlates: platesData.total || 0,
+            inUse:
+              platesData.plates?.filter((p: any) => p.occupancy === "in-use")
+                .length || 0,
+            available:
+              platesData.plates?.filter((p: any) => p.occupancy === "free")
+                .length || 0,
+            locked:
+              platesData.plates?.filter((p: any) => p.health === "locked")
+                .length || 0,
+            recentActivity: [],
+          },
+          recentActivity: [],
+          charts: {
+            projectCompletion: [],
+            toolUsage: [],
+          },
+          modules: {
+            jsonScanner: {
+              status: status.jsonScanner ? "active" : "disabled",
+              lastScan: new Date().toISOString(),
+              filesProcessed: projectsData.total || 0,
+            },
+            toolManager: {
+              status: status.toolManager ? "active" : "disabled",
+              lastUpdate: new Date().toISOString(),
+              toolsTracked: toolsData.total || 0,
+            },
+            clampingPlateManager: {
+              status: status.platesManager ? "active" : "disabled",
+              lastUpdate: new Date().toISOString(),
+              platesManaged: platesData.total || 0,
+            },
+          },
+        };
+
+        console.log("✅ Loaded data from API backends:", apiData);
+        setDashboardData(apiData);
+      } else {
+        // DEMO MODE: Load data from localStorage/demo files
+        console.log("💾 Loading data from demo mode (localStorage)...");
+        await BackendDataLoader.ensureDemoDataLoaded();
+        const data = await DashboardDataService.loadDashboardData();
+        setDashboardData(data || DashboardDataService.generateFallbackData());
+      }
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
       setDashboardData(DashboardDataService.generateFallbackData());
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const toggleAPIMode = () => {
+    const newMode = !useAPIMode;
+    setUseAPIMode(newMode);
+    localStorage.setItem("dashboardAPIMode", String(newMode));
+    console.log(`🔄 Switched to ${newMode ? "API" : "Demo"} mode`);
   };
 
   const handleRefresh = async () => {
@@ -178,19 +345,74 @@ export default function Dashboard({ user }: DashboardProps) {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Last updated: {formatTimestamp(dashboardData.overview.lastUpdate)}
             </p>
+            <div className="flex items-center gap-2 mt-3">
+              <Badge
+                variant={useAPIMode ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {useAPIMode ? (
+                  <>
+                    <Wifi className="h-3 w-3 mr-1" />
+                    API Mode
+                  </>
+                ) : (
+                  <>
+                    <WifiOff className="h-3 w-3 mr-1" />
+                    Demo Mode
+                  </>
+                )}
+              </Badge>
+              {useAPIMode && (
+                <div className="flex items-center gap-1 text-xs">
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      apiStatus.jsonScanner ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    title="JSONScanner"
+                  />
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      apiStatus.toolManager ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    title="ToolManager"
+                  />
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      apiStatus.platesManager ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    title="PlatesManager"
+                  />
+                </div>
+              )}
+            </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleAPIMode}
+              className="flex items-center gap-2"
+            >
+              {useAPIMode ? (
+                <WifiOff className="h-4 w-4" />
+              ) : (
+                <Wifi className="h-4 w-4" />
+              )}
+              {useAPIMode ? "Use Demo" : "Use API"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
 
