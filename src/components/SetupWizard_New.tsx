@@ -3138,6 +3138,83 @@ function ValidationStep({
     setCurrentInitTest(null);
   };
 
+  const handleCompleteSetup = async () => {
+    addLog("🚀 Triggering backend data processing...");
+    
+    // Send autoRun: true to all backends to start processing
+    const backends = [];
+    
+    if (config.companyFeatures.jsonScanner) {
+      backends.push({
+        name: "JSONScanner",
+        url: "http://localhost:3001/api/config",
+        config: {
+          testMode: config.demoMode,
+          workingFolder: config.storage.basePath || null,
+          scanPaths: { jsonFiles: config.modules.jsonAnalyzer.dataPath || null },
+          autoRun: true
+        }
+      });
+    }
+    
+    if (config.companyFeatures.toolManager) {
+      backends.push({
+        name: "ToolManager",
+        url: "http://localhost:3002/api/config",
+        config: {
+          testMode: config.demoMode,
+          workingFolder: config.storage.basePath || null,
+          scanPaths: {
+            jsonFiles: config.modules.matrixTools.paths.jsonInputPath || config.modules.jsonAnalyzer.dataPath || null,
+            excelFiles: config.modules.matrixTools.features.excelProcessing
+              ? config.modules.matrixTools.paths.excelInputPath || null
+              : null
+          },
+          autoRun: true
+        }
+      });
+    }
+    
+    if (config.companyFeatures.clampingPlateManager) {
+      backends.push({
+        name: "ClampingPlateManager",
+        url: "http://localhost:3003/api/config",
+        config: {
+          testMode: config.demoMode,
+          workingFolder: config.storage.basePath || null,
+          platesPath: config.modules.platesManager.modelsPath || null,
+          autoRun: true
+        }
+      });
+    }
+    
+    // Activate all backends
+    for (const backend of backends) {
+      try {
+        addLog(`   → Activating ${backend.name}...`);
+        const response = await fetch(backend.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(backend.config)
+        });
+        
+        if (response.ok) {
+          addLog(`   → ✅ ${backend.name} processing started`);
+        } else {
+          addLog(`   → ⚠️ ${backend.name} activation failed`);
+        }
+      } catch (error) {
+        addLog(`   → ❌ ${backend.name} error: ${error instanceof Error ? error.message : 'Unknown'}`);
+      }
+    }
+    
+    addLog("✅ Backend processing activated - data will be ready shortly!");
+    addLog("🎉 Launching dashboard...");
+    
+    // Call the original onComplete to navigate to dashboard
+    onComplete(config);
+  };
+
   const runFeatureTest = async (testId: string) => {
     // All modes require backends running
     switch (testId) {
@@ -3166,7 +3243,7 @@ function ValidationStep({
             const status = await statusResponse.json();
             addLog(`   → ✅ JSONScanner backend is running (${status.mode} mode)`);
             
-            // Send configuration to activate backend
+            // Send configuration to backend (without starting auto-run)
             addLog(`   → 📡 Sending configuration to backend...`);
             const configResponse = await fetch("http://localhost:3001/api/config", {
               method: "POST",
@@ -3176,7 +3253,8 @@ function ValidationStep({
                 workingFolder: config.storage.basePath || null,
                 scanPaths: {
                   jsonFiles: config.modules.jsonAnalyzer.dataPath || null
-                }
+                },
+                autoRun: false // Don't start processing yet
               })
             });
             
@@ -3184,21 +3262,11 @@ function ValidationStep({
               throw new Error("Failed to configure backend");
             }
             
-            addLog(`   → ✅ Backend configured and activated`);
-            addLog(`   → 🔄 Waiting for initial data processing...`);
+            addLog(`   → ✅ Backend configured (processing will start when setup completes)`);
+            addLog(`   → ℹ️  Ready to process data on final setup completion`);
             
-            // Wait for backend to process
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-            
-            // Check for processed data
-            const projectsResponse = await fetch("http://localhost:3001/api/projects");
-            if (projectsResponse.ok) {
-              const projectsData = await projectsResponse.json();
-              addLog(`   → ✅ Found ${projectsData.projects?.length || 0} analyzed projects`);
-              addLog(`   → 📊 Backend initialized successfully`);
-            } else {
-              addLog(`   → ℹ️  Backend processing - data will appear shortly`);
-            }
+            // Don't wait for processing or check data - that happens after "Complete Setup"
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           } catch (error) {
             addLog(`   → ⚠️  JSONScanner backend error: ${error instanceof Error ? error.message : 'Unknown'}`);
             throw new Error("JSONScanner backend initialization failed");
@@ -3236,7 +3304,7 @@ function ValidationStep({
             const status = await statusResponse.json();
             addLog(`   → ✅ ToolManager backend is running (${status.mode} mode)`);
             
-            // Send configuration to activate backend
+            // Send configuration to backend (without starting auto-run)
             addLog(`   → 📡 Sending configuration to backend...`);
             const configResponse = await fetch("http://localhost:3002/api/config", {
               method: "POST",
@@ -3245,11 +3313,12 @@ function ValidationStep({
                 testMode: config.demoMode,
                 workingFolder: config.storage.basePath || null,
                 scanPaths: {
-                  jsonFiles: config.modules.jsonAnalyzer.dataPath || null,
+                  jsonFiles: config.modules.matrixTools.paths.jsonInputPath || config.modules.jsonAnalyzer.dataPath || null,
                   excelFiles: config.modules.matrixTools.features.excelProcessing
-                    ? config.modules.matrixTools.dataPath || null
+                    ? config.modules.matrixTools.paths.excelInputPath || null
                     : null
-                }
+                },
+                autoRun: false // Don't start processing yet
               })
             });
             
@@ -3257,22 +3326,11 @@ function ValidationStep({
               throw new Error("Failed to configure backend");
             }
             
-            addLog(`   → ✅ Backend configured and activated`);
-            addLog(`   → 🔄 Waiting for initial data processing...`);
+            addLog(`   → ✅ Backend configured (processing will start when setup completes)`);
+            addLog(`   → ℹ️  Ready to process data on final setup completion`);
             
-            // Wait for backend to process
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-            
-            // Check for processed data
-            const toolsResponse = await fetch("http://localhost:3002/api/tools");
-            if (toolsResponse.ok) {
-              const toolsData = await toolsResponse.json();
-              const totalTools = (toolsData.matrixTools?.length || 0) + (toolsData.nonMatrixTools?.length || 0);
-              addLog(`   → ✅ Found ${totalTools} tool records`);
-              addLog(`   → 📊 Backend initialized successfully`);
-            } else {
-              addLog(`   → ℹ️  Backend processing - data will appear shortly`);
-            }
+            // Don't wait for processing or check data - that happens after "Complete Setup"
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           } catch (error) {
             addLog(`   → ⚠️  ToolManager backend error: ${error instanceof Error ? error.message : 'Unknown'}`);
             throw new Error("ToolManager backend initialization failed");
@@ -3309,7 +3367,7 @@ function ValidationStep({
             await healthResponse.json();
             addLog(`   → ✅ ClampingPlateManager backend is running`);
             
-            // Send configuration to activate backend
+            // Send configuration to backend (without starting auto-run)
             addLog(`   → 📡 Sending configuration to backend...`);
             const configResponse = await fetch("http://localhost:3003/api/config", {
               method: "POST",
@@ -3317,7 +3375,8 @@ function ValidationStep({
               body: JSON.stringify({
                 testMode: config.demoMode,
                 workingFolder: config.storage.basePath || null,
-                platesPath: config.modules.platesManager.modelsPath || null
+                platesPath: config.modules.platesManager.modelsPath || null,
+                autoRun: false // Don't start processing yet
               })
             });
             
@@ -3325,21 +3384,11 @@ function ValidationStep({
               throw new Error("Failed to configure backend");
             }
             
-            addLog(`   → ✅ Backend configured and activated`);
-            addLog(`   → 📦 Loading plate inventory...`);
+            addLog(`   → ✅ Backend configured (processing will start when setup completes)`);
+            addLog(`   → ℹ️  Ready to load plates on final setup completion`);
             
-            // Wait for backend to load plates
-            await new Promise((resolve) => setTimeout(resolve, 3000));
-            
-            // Check for loaded plates
-            const platesResponse = await fetch("http://localhost:3003/api/plates");
-            if (platesResponse.ok) {
-              const platesData = await platesResponse.json();
-              addLog(`   → ✅ Found ${platesData.plates?.length || 0} clamping plates`);
-              addLog(`   → 📊 Backend initialized successfully`);
-            } else {
-              addLog(`   → ℹ️  Backend processing - data will appear shortly`);
-            }
+            // Don't wait for processing or check data - that happens after "Complete Setup"
+            await new Promise((resolve) => setTimeout(resolve, 1000));
           } catch (error) {
             addLog(`   → ⚠️  ClampingPlateManager backend error: ${error instanceof Error ? error.message : 'Unknown'}`);
             throw new Error("ClampingPlateManager backend initialization failed");
@@ -3679,7 +3728,7 @@ function ValidationStep({
       {isComplete && !hasErrors && isInitComplete && (
         <div className="flex justify-center pt-8">
           <Button
-            onClick={onComplete}
+            onClick={handleCompleteSetup}
             size="lg"
             className="bg-green-600 hover:bg-green-700 text-white px-12 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >

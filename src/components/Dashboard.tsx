@@ -125,6 +125,45 @@ export default function Dashboard({ user }: DashboardProps) {
             : Promise.resolve({ plates: [], total: 0 }),
         ]);
 
+        // Save API data to localStorage in legacy format for ToolManager component
+        if (toolsData.tools && toolsData.tools.length > 0) {
+          const matrixTools = toolsData.tools.filter((t: any) => t.isMatrix);
+          const nonMatrixTools = toolsData.tools.filter((t: any) => !t.isMatrix);
+          
+          const legacyFormat = {
+            reportInfo: {
+              generatedAt: new Date().toISOString(),
+              summary: {
+                excelFilesProcessed: 1,
+                jsonFilesProcessed: (toolsData as any).stats?.jsonFilesProcessed || 18,
+                matrixToolsUsed: matrixTools.length,
+                nonMatrixToolsUsed: nonMatrixTools.length,
+                totalMatrixTools: matrixTools.length,
+                unusedMatrixTools: 0
+              }
+            },
+            matrixTools: matrixTools.map((t: any) => ({
+              toolName: t.name,
+              totalUsageTime: t.usageTime || 0,
+              usageCount: t.usageCount || 0,
+              projectCount: t.projectCount || 0,
+              status: "IN_USE"
+            })),
+            nonMatrixTools: nonMatrixTools.map((t: any) => ({
+              toolName: t.name,
+              totalUsageTime: t.usageTime || 0,
+              usageCount: t.usageCount || 0,
+              projectCount: t.projectCount || 0,
+              status: "NOT_IN_MATRIX"
+            })),
+            allMatrixTools: [],
+            unusedMatrixTools: []
+          };
+          
+          localStorage.setItem("toolManagerResults", JSON.stringify(legacyFormat));
+          console.log(`✅ Saved ${toolsData.tools.length} tools to localStorage (${matrixTools.length} matrix, ${nonMatrixTools.length} non-matrix)`);
+        }
+
         // Transform API data to DashboardData format
         const apiData: any = {
           overview: {

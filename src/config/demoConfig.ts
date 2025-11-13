@@ -23,22 +23,22 @@ export const demoConfig: Partial<SetupConfig> = {
     jsonAnalyzer: {
       enabled: true,
       mode: "auto",
-      dataPath: "../JSONScanner/data/test_source_data",
+      dataPath: "../BRK_CNC_CORE/test-data/source_data/json_files",
       autoProcessing: true,
     },
     matrixTools: {
       enabled: true,
       mode: "auto",
-      dataPath: "../ToolManager/data/test_source_data",
+      dataPath: "../BRK_CNC_CORE/test-data/source_data/json_files",
       inventoryFile:
-        "../ToolManager/data/test_source_data/testExcel/Euroform_Matrix_2024-01-15.xlsx",
+        "../BRK_CNC_CORE/train-data/matrix_tools/E-Cut készlet.xlsx",
       features: {
         excelProcessing: true,
         jsonScanning: true,
       },
       paths: {
-        excelInputPath: "../ToolManager/data/test_source_data/testExcel",
-        jsonInputPath: "../JSONScanner/data/test_source_data",
+        excelInputPath: "../BRK_CNC_CORE/train-data/matrix_tools",
+        jsonInputPath: "../BRK_CNC_CORE/test-data/source_data/json_files",
       },
     },
     platesManager: {
@@ -55,11 +55,11 @@ export const demoConfig: Partial<SetupConfig> = {
   },
   storage: {
     mode: "simple",
-    basePath: "./data",
-    logsPath: "./logs",
-    backupPath: "./backups",
-    tempPath: "./temp",
-    outputPath: "./output",
+    basePath: "../BRK_CNC_CORE/test-data/working_data/BRK CNC Management Dashboard/dashboard",
+    logsPath: "../BRK_CNC_CORE/test-data/working_data/BRK CNC Management Dashboard/logs",
+    backupPath: "../BRK_CNC_CORE/test-data/working_data/BRK CNC Management Dashboard/backups",
+    tempPath: "../BRK_CNC_CORE/test-data/working_data/BRK CNC Management Dashboard/temp",
+    outputPath: "../BRK_CNC_CORE/test-data/working_data/BRK CNC Management Dashboard/output",
   },
   features: {
     themeMode: "system",
