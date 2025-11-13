@@ -424,7 +424,7 @@ function IntroductionStep({
             Demo Mode
           </CardTitle>
           <CardDescription className="text-blue-700 dark:text-blue-300">
-            Use built-in test data for evaluation and testing
+            Uses BRK_CNC_CORE/test-data folder - backends must be running
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -820,23 +820,23 @@ function ModulesStep({
           ...config.modules,
           jsonAnalyzer: {
             ...config.modules.jsonAnalyzer,
-            dataPath: "../CNC_TestData/source_data/json_files",
+            dataPath: "../BRK_CNC_CORE/test-data/source_data/json_files",
           },
           matrixTools: {
             ...config.modules.matrixTools,
-            dataPath: "../CNC_TestData/source_data/matrix_excel_files",
+            dataPath: "../BRK_CNC_CORE/test-data/source_data/matrix_excel_files",
             inventoryFile:
-              "../CNC_TestData/source_data/matrix_excel_files/E-Cut,MFC,XF,XFeed készlet.xlsx",
+              "../BRK_CNC_CORE/test-data/source_data/matrix_excel_files/E-Cut,MFC,XF,XFeed készlet.xlsx",
             paths: {
-              excelInputPath: "../CNC_TestData/source_data/matrix_excel_files",
-              jsonInputPath: "../CNC_TestData/source_data/json_files",
+              excelInputPath: "../BRK_CNC_CORE/test-data/source_data/matrix_excel_files",
+              jsonInputPath: "../BRK_CNC_CORE/test-data/source_data/json_files",
             },
           },
           platesManager: {
             ...config.modules.platesManager,
-            modelsPath: "../CNC_TestData/source_data/clamping_plates/models",
+            modelsPath: "../BRK_CNC_CORE/test-data/source_data/clamping_plates/models",
             plateInfoFile:
-              "../CNC_TestData/source_data/clamping_plates/Készülékek.xlsx",
+              "../BRK_CNC_CORE/test-data/source_data/clamping_plates/Készülékek.xlsx",
           },
         },
       });
@@ -1584,7 +1584,7 @@ function AuthenticationStep({
         authentication: {
           ...config.authentication,
           method: "file",
-          employeeFile: "../CNC_TestData/source_data/employees.json",
+          employeeFile: "../BRK_CNC_CORE/test-data/source_data/employees.json",
         },
       });
     }
@@ -2029,10 +2029,10 @@ function StorageStep({
         storage: {
           ...config.storage,
           mode: "simple",
-          basePath: "../CNC_TestData/working_data",
-          backupPath: "../CNC_TestData/working_data/Backups",
-          logsPath: "../CNC_TestData/working_data/Logs",
-          tempPath: "../CNC_TestData/working_data/Temp",
+          basePath: "../BRK_CNC_CORE/test-data/working_data",
+          backupPath: "../BRK_CNC_CORE/test-data/working_data/Backups",
+          logsPath: "../BRK_CNC_CORE/test-data/working_data/Logs",
+          tempPath: "../BRK_CNC_CORE/test-data/working_data/Temp",
         },
       });
     }
@@ -2905,23 +2905,23 @@ function ValidationStep({
   const [initTests, setInitTests] = useState<ValidationTest[]>([
     {
       id: "json-scanner-init",
-      name: "JSON Scanner - Test Run",
+      name: "JSON Scanner - Backend Initialization",
       description:
-        "Run JSON Scanner to process sample CNC program files and validate functionality.",
+        "Check if JSONScanner backend service is running and has initial data ready.",
       status: "pending",
     },
     {
       id: "tool-manager-init",
-      name: "Tool Manager - Test Run",
+      name: "Tool Manager - Backend Initialization",
       description:
-        "Process sample Excel files and perform tool inventory analysis.",
+        "Check if ToolManager backend service is running and has tool inventory loaded.",
       status: "pending",
     },
     {
       id: "clamping-plate-init",
-      name: "Clamping Plate Manager - Test Run",
+      name: "Clamping Plate Manager - Backend Initialization",
       description:
-        "Load sample plate data and test plate management functionality.",
+        "Check if ClampingPlateManager backend service is running and has plate data loaded.",
       status: "pending",
     },
   ]);
@@ -3061,13 +3061,13 @@ function ValidationStep({
     setIsInitRunning(true);
     setIsInitComplete(false);
     addLog(
-      "🚀 Starting feature test runs - each module will process sample data..."
+      "🚀 Checking backend services and initializing data..."
     );
 
     for (let i = 0; i < initTests.length; i++) {
       const test = initTests[i];
       setCurrentInitTest(test.id);
-      addLog(`🔄 Running test ${i + 1}/${initTests.length}: ${test.name}`);
+      addLog(`🔄 Checking ${i + 1}/${initTests.length}: ${test.name}`);
 
       setInitTests((prev) =>
         prev.map((t) =>
@@ -3085,7 +3085,7 @@ function ValidationStep({
           )
         );
 
-        addLog(`✅ ${test.name} completed successfully`);
+        addLog(`✅ ${test.name} initialized successfully`);
 
         // Add a pause between tests for better UX
         if (i < initTests.length - 1) {
@@ -3107,20 +3107,19 @@ function ValidationStep({
       }
     }
 
-    addLog("✅ All feature test runs completed!");
-    addLog("🎉 Setup validation finished - System ready for production use!");
+    addLog("✅ All backend services checked and initialized!");
+    addLog("🎉 Setup complete - Dashboard is ready to use!");
     setIsInitRunning(false);
     setIsInitComplete(true);
     setCurrentInitTest(null);
   };
 
   const runFeatureTest = async (testId: string) => {
-    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
-
+    // All modes require backends running
     switch (testId) {
       case "json-scanner-init":
         if (config.companyFeatures.jsonScanner) {
-          addLog(`   → Starting JSON Scanner test run...`);
+          addLog(`   → Initializing JSON Scanner backend service...`);
           addLog(`   → Mode: ${config.modules.jsonAnalyzer.mode}`);
           addLog(
             `   → Data path: ${
@@ -3128,37 +3127,38 @@ function ValidationStep({
             }`
           );
 
-          if (isDemoMode) {
-            addLog(`   → 🔍 Loading existing test results from backend...`);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            try {
-              // Import test results from backend's test_processed_data
-              const response = await fetch(
-                "/demo-data/jsonscanner-results.json"
-              );
-              if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem(
-                  "jsonScannerResults",
-                  JSON.stringify(data)
-                );
-                addLog(`   → ✅ Loaded ${data.length} JSON analysis results`);
-                addLog(`   → � Results available for dashboard display`);
+          // Check if backend is running
+          addLog(`   → 🔍 Checking if JSONScanner backend is running...`);
+          try {
+            const response = await fetch("http://localhost:3001/api/status", {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            
+            if (response.ok) {
+              const status = await response.json();
+              addLog(`   → ✅ JSONScanner backend is running (${status.mode} mode)`);
+              addLog(`   → � Waiting for initial data processing...`);
+              
+              // Wait a bit for initial scan
+              await new Promise((resolve) => setTimeout(resolve, 3000));
+              
+              // Try to fetch projects
+              const projectsResponse = await fetch("http://localhost:3001/api/projects");
+              if (projectsResponse.ok) {
+                const projectsData = await projectsResponse.json();
+                addLog(`   → ✅ Found ${projectsData.projects?.length || 0} analyzed projects`);
+                addLog(`   → 📊 Backend initialized successfully`);
               } else {
-                addLog(`   → ℹ️  No pre-existing results found`);
-                addLog(`   → � Run 'npm run test' in JSONScanner to generate`);
+                addLog(`   → ℹ️  No projects analyzed yet - backend starting up`);
               }
-            } catch (error) {
-              addLog(`   → ℹ️  Backend results not found - run backends first`);
-              addLog(`   → � Instructions: cd JSONScanner && npm run test`);
+            } else {
+              throw new Error("Backend not responding");
             }
-          } else {
-            // Production mode simulation
-            addLog(`   → 🔍 Scanning for CNC program files...`);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            addLog(`   → � Configuration validated`);
-            addLog(`   → ✅ Ready to process production data`);
+          } catch (error) {
+            addLog(`   → ⚠️  JSONScanner backend not running on port 3001`);
+            addLog(`   → 💡 Start backend: cd JSONScanner && npm run serve`);
+            throw new Error("JSONScanner backend must be running. Start with: cd JSONScanner && npm run serve");
           }
         } else {
           addLog(`   → JSON Scanner disabled - skipping`);
@@ -3168,7 +3168,7 @@ function ValidationStep({
 
       case "tool-manager-init":
         if (config.companyFeatures.toolManager) {
-          addLog(`   → Starting Tool Manager test run...`);
+          addLog(`   → Initializing Tool Manager backend service...`);
           addLog(`   → Mode: ${config.modules.matrixTools.mode}`);
           addLog(
             `   → Excel processing: ${
@@ -3178,39 +3178,39 @@ function ValidationStep({
             }`
           );
 
-          if (isDemoMode) {
-            addLog(`   → 🔍 Loading existing test results from backend...`);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            try {
-              const response = await fetch(
-                "/demo-data/toolmanager-results.json"
-              );
-              if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem(
-                  "toolManagerResults",
-                  JSON.stringify(data)
-                );
-                const totalTools =
-                  (data.matrixTools?.length || 0) +
-                  (data.nonMatrixTools?.length || 0);
-                addLog(`   → ✅ Loaded ${totalTools} tool tracking records`);
-                addLog(`   → 📊 Results available for dashboard display`);
+          // Check if backend is running
+          addLog(`   → 🔍 Checking if ToolManager backend is running...`);
+          try {
+            const response = await fetch("http://localhost:3002/api/status", {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            
+            if (response.ok) {
+              const status = await response.json();
+              addLog(`   → ✅ ToolManager backend is running (${status.mode} mode)`);
+              addLog(`   → 📊 Waiting for initial data processing...`);
+              
+              // Wait a bit for initial scan
+              await new Promise((resolve) => setTimeout(resolve, 3000));
+              
+              // Try to fetch tools
+              const toolsResponse = await fetch("http://localhost:3002/api/tools");
+              if (toolsResponse.ok) {
+                const toolsData = await toolsResponse.json();
+                const totalTools = (toolsData.matrixTools?.length || 0) + (toolsData.nonMatrixTools?.length || 0);
+                addLog(`   → ✅ Found ${totalTools} tool records`);
+                addLog(`   → 📊 Backend initialized successfully`);
               } else {
-                addLog(`   → ℹ️  No pre-existing results found`);
-                addLog(`   → � Run 'npm run test' in ToolManager to generate`);
+                addLog(`   → ℹ️  No tools processed yet - backend starting up`);
               }
-            } catch (error) {
-              addLog(`   → ℹ️  Backend results not found - run backends first`);
-              addLog(`   → � Instructions: cd ToolManager && npm run test`);
+            } else {
+              throw new Error("Backend not responding");
             }
-          } else {
-            // Production mode simulation
-            addLog(`   → 🔍 Scanning for Excel inventory files...`);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            addLog(`   → 📊 Configuration validated`);
-            addLog(`   → ✅ Ready to process production data`);
+          } catch (error) {
+            addLog(`   → ⚠️  ToolManager backend not running on port 3002`);
+            addLog(`   → 💡 Start backend: cd ToolManager && npm run serve`);
+            throw new Error("ToolManager backend must be running. Start with: cd ToolManager && npm run serve");
           }
         } else {
           addLog(`   → Tool Manager disabled - skipping`);
@@ -3220,7 +3220,7 @@ function ValidationStep({
 
       case "clamping-plate-init":
         if (config.companyFeatures.clampingPlateManager) {
-          addLog(`   → Starting Clamping Plate Manager test run...`);
+          addLog(`   → Initializing Clamping Plate Manager backend service...`);
           addLog(`   → Mode: ${config.modules.platesManager.mode}`);
           addLog(
             `   → Models path: ${
@@ -3229,44 +3229,38 @@ function ValidationStep({
             }`
           );
 
-          if (isDemoMode) {
-            addLog(`   → 🔍 Loading existing test results from backend...`);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-
-            try {
-              const response = await fetch(
-                "/demo-data/clampingplate-results.json"
-              );
-              if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem(
-                  "clampingPlateResults",
-                  JSON.stringify(data)
-                );
-                addLog(
-                  `   → ✅ Loaded ${
-                    data.plates?.length || 0
-                  } clamping plate records`
-                );
-                addLog(`   → � Results available for dashboard display`);
+          // Check if backend is running
+          addLog(`   → 🔍 Checking if ClampingPlateManager backend is running...`);
+          try {
+            const response = await fetch("http://localhost:3003/api/health", {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
+            
+            if (response.ok) {
+              await response.json(); // Verify JSON response
+              addLog(`   → ✅ ClampingPlateManager backend is running`);
+              addLog(`   → 📦 Loading plate inventory...`);
+              
+              // Wait a bit for initialization
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+              
+              // Try to fetch plates
+              const platesResponse = await fetch("http://localhost:3003/api/plates");
+              if (platesResponse.ok) {
+                const platesData = await platesResponse.json();
+                addLog(`   → ✅ Found ${platesData.plates?.length || 0} clamping plates`);
+                addLog(`   → 📊 Backend initialized successfully`);
               } else {
-                addLog(`   → ℹ️  No pre-existing results found`);
-                addLog(
-                  `   → 💡 Run 'npm run test' in ClampingPlateManager to generate`
-                );
+                addLog(`   → ℹ️  No plates loaded yet - backend starting up`);
               }
-            } catch (error) {
-              addLog(`   → ℹ️  Backend results not found - run backends first`);
-              addLog(
-                `   → 📝 Instructions: cd ClampingPlateManager && npm run test`
-              );
+            } else {
+              throw new Error("Backend not responding");
             }
-          } else {
-            // Production mode simulation
-            addLog(`   → 🔍 Validating plate configuration...`);
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            addLog(`   → � Configuration validated`);
-            addLog(`   → ✅ Ready to process production data`);
+          } catch (error) {
+            addLog(`   → ⚠️  ClampingPlateManager backend not running on port 3003`);
+            addLog(`   → 💡 Start backend: cd ClampingPlateManager && npm run serve`);
+            throw new Error("ClampingPlateManager backend must be running. Start with: cd ClampingPlateManager && npm run serve");
           }
         } else {
           addLog(`   → Clamping Plate Manager disabled - skipping`);
@@ -3420,15 +3414,15 @@ function ValidationStep({
         </CardContent>
       </Card>
 
-      {/* Feature Initialization Section */}
+      {/* Backend Services Initialization Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Rocket className="h-6 w-6 text-purple-600" />
-            Feature Initialization
+            Backend Services Initialization
           </CardTitle>
           <CardDescription>
-            Initialize and test each feature module
+            Check and initialize all backend services to prepare data for the dashboard
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -3585,12 +3579,12 @@ function ValidationStep({
                 {isInitRunning ? (
                   <>
                     <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                    Running All Tests...
+                    Checking Services...
                   </>
                 ) : (
                   <>
                     <Rocket className="h-5 w-5 mr-2" />
-                    Run All Feature Tests
+                    Initialize Backend Services
                   </>
                 )}
               </Button>

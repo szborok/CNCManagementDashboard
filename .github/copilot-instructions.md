@@ -9,7 +9,7 @@ CNCManagementDashboard is a unified TypeScript/React frontend with **hybrid data
 **User Directive**: "the main thing for me is to have 0 mock data, if we test then use test data"
 
 **Implementation**:
-- ✅ Demo mode uses real CNC_TestData files from actual test runs
+- ✅ Demo mode uses real BRK_CNC_CORE/test-data files from actual test runs
 - ✅ API mode uses live backend REST APIs reading real processing results  
 - ✅ No hardcoded fake data anywhere
 - ✅ No "C:/Demo" paths - all data from real CNC workflows
@@ -56,7 +56,7 @@ CNCManagementDashboard is a unified TypeScript/React frontend with **hybrid data
 **Data Paths**:
 - Demo data: `/public/demo-data/*.json` (real test data)
 - API data: Backend temp/results structures
-- CNC_TestData: Shared test data location
+- BRK_CNC_CORE/test-data: Shared test data location
 
 ## Development Workflows
 
@@ -79,9 +79,9 @@ cd CNCManagementDashboard && npm run dev
 **Demo data comes from real test runs**:
 ```bash
 # Refresh demo data with latest real data
-cp CNC_TestData/.../jsonscanner/results/*.json public/demo-data/jsonscanner-results.json
-cp CNC_TestData/.../toolmanager/results/ToolManager_Result.json public/demo-data/toolmanager-results.json  
-cp ClampingPlateManager/data/plates.json public/demo-data/clampingplate-results.json
+cp ../BRK_CNC_CORE/test-data/working_data/BRK\ CNC\ Management\ Dashboard/jsonscanner/results/*.json public/demo-data/jsonscanner-results.json
+cp ../BRK_CNC_CORE/test-data/working_data/BRK\ CNC\ Management\ Dashboard/toolmanager/results/ToolManager_Result.json public/demo-data/toolmanager-results.json  
+cp ../ClampingPlateManager/data/plates.json public/demo-data/clampingplate-results.json
 ```
 
 ### API Integration Pattern
@@ -195,7 +195,7 @@ All API responses fully typed in `src/services/types/`:
 
 4. **"C:/Demo paths showing"**:
    - Demo data needs refresh - copy latest real data
-   - Verify demo files contain actual CNC_TestData paths
+   - Verify demo files contain actual BRK_CNC_CORE/test-data paths
 
 ## CRITICAL Rules for AI Agents
 

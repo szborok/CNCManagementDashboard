@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CNC Management Dashboard</title>
+    <script>
+      // Handle reset mode - check URL parameter
+      if (window.location.search.includes('reset=true')) {
+        console.log('🔄 Reset mode: Clearing localStorage');
+        localStorage.removeItem('cncDashboardConfig');
+        localStorage.removeItem('setupWizardStep');
+        localStorage.removeItem('setupWizardProgress');
+        // Remove reset param from URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

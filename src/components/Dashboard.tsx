@@ -26,7 +26,6 @@ import {
   DashboardDataService,
   DashboardData,
 } from "../services/DashboardDataService";
-import { BackendDataLoader } from "../services/BackendDataLoader";
 import jsonScannerAPI from "../services/api/jsonScanner";
 import toolManagerAPI from "../services/api/toolManager";
 import platesManagerAPI from "../services/api/platesManager";
@@ -204,11 +203,10 @@ export default function Dashboard({ user }: DashboardProps) {
         console.log("✅ Loaded data from API backends:", apiData);
         setDashboardData(apiData);
       } else {
-        // DEMO MODE: Load data from localStorage/demo files
-        console.log("💾 Loading data from demo mode (localStorage)...");
-        await BackendDataLoader.ensureDemoDataLoaded();
-        const data = await DashboardDataService.loadDashboardData();
-        setDashboardData(data || DashboardDataService.generateFallbackData());
+        // No backends available - must start them
+        console.warn("⚠️ All backends offline");
+        console.log("💡 Start backends: cd JSONScanner/ToolManager/ClampingPlateManager && npm run serve");
+        setDashboardData(DashboardDataService.generateFallbackData());
       }
     } catch (error) {
       console.error("Failed to load dashboard data:", error);

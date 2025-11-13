@@ -69,80 +69,12 @@ export interface ClampingPlateResult {
 
 export class BackendDataLoader {
   /**
-   * Ensure demo data is loaded from demo-data files if in demo mode
-   * This runs on app startup to sync localStorage with latest demo files
+   * REMOVED: Demo data sync - Dashboard always uses backend APIs
+   * Demo mode = backends configured with BRK_CNC_CORE/test-data paths
    */
   static async ensureDemoDataLoaded(): Promise<void> {
-    const isDemoMode = (import.meta as any).env?.VITE_DEMO_MODE === "true";
-
-    if (!isDemoMode) {
-      return; // Only auto-sync in demo mode
-    }
-
-    try {
-      console.log("🔄 Checking demo data freshness...");
-
-      const [jsonResponse, toolResponse, plateResponse] = await Promise.all([
-        fetch("/demo-data/jsonscanner-results.json"),
-        fetch("/demo-data/toolmanager-results.json"),
-        fetch("/demo-data/clampingplate-results.json"),
-      ]);
-
-      let updated = false;
-
-      if (jsonResponse.ok) {
-        const jsonData = await jsonResponse.json();
-        const stored = localStorage.getItem("jsonScannerResults");
-        const storedData = stored ? JSON.parse(stored) : null;
-
-        // Update if not present or different length (simple freshness check)
-        if (!storedData || storedData.length !== jsonData.length) {
-          localStorage.setItem("jsonScannerResults", JSON.stringify(jsonData));
-          console.log(
-            `✅ Synced ${jsonData.length} JSON Scanner results from demo-data`
-          );
-          updated = true;
-        }
-      }
-
-      if (toolResponse.ok) {
-        const toolData = await toolResponse.json();
-        const stored = localStorage.getItem("toolManagerResults");
-        if (!stored) {
-          localStorage.setItem("toolManagerResults", JSON.stringify(toolData));
-          console.log("✅ Synced Tool Manager results from demo-data");
-          updated = true;
-        }
-      }
-
-      if (plateResponse.ok) {
-        const plateData = await plateResponse.json();
-        const stored = localStorage.getItem("clampingPlateResults");
-        const storedData = stored ? JSON.parse(stored) : null;
-
-        if (
-          !storedData ||
-          storedData.plates?.length !== plateData.plates?.length
-        ) {
-          localStorage.setItem(
-            "clampingPlateResults",
-            JSON.stringify(plateData)
-          );
-          console.log(
-            `✅ Synced ${
-              plateData.plates?.length || 0
-            } Clamping Plate results from demo-data`
-          );
-          updated = true;
-        }
-      }
-
-      if (!updated) {
-        console.log("✓ Demo data is up to date");
-      }
-    } catch (error) {
-      console.warn("Could not sync demo data:", error);
-    }
+    // No longer needed - backends must be running in both demo and production modes
+    console.log("✓ Dashboard uses backend APIs only");
   }
 
   /**
@@ -169,12 +101,50 @@ export class BackendDataLoader {
 
   /**
    * Load ToolManager results from consolidated report
+   * Handles both new format {tools: [...]} and old format {matrixTools: [], nonMatrixTools: [], reportInfo: {...}}
    */
   static async loadToolManagerData(): Promise<ToolManagerResult | null> {
     try {
       const storedData = localStorage.getItem("toolManagerResults");
       if (storedData) {
-        return JSON.parse(storedData);
+        const parsed = JSON.parse(storedData);
+        
+        // Check if it's the new format {tools: [...]}
+        if (parsed.tools && !parsed.matrixTools && !parsed.nonMatrixTools) {
+          console.log("📦 Converting new ToolManager format to legacy format for backward compatibility");
+          
+          // Convert new format to legacy format
+          const matrixTools = parsed.tools.filter((t: any) => t.isMatrix);
+          const nonMatrixTools = parsed.tools.filter((t: any) => !t.isMatrix);
+          
+          return {
+            reportInfo: {
+              generatedAt: new Date().toISOString(),
+              summary: {
+                matrixToolsUsed: matrixTools.length,
+                nonMatrixToolsUsed: nonMatrixTools.length,
+                jsonFilesProcessed: 0 // Not available in new format
+              }
+            },
+            matrixTools: matrixTools.map((t: any) => ({
+              toolName: t.name,
+              totalUsageTime: t.usageTime || 0,
+              usageCount: t.usageCount || 0,
+              projectCount: t.projectCount || 0,
+              status: t.status.toUpperCase()
+            })),
+            nonMatrixTools: nonMatrixTools.map((t: any) => ({
+              toolName: t.name,
+              totalUsageTime: t.usageTime || 0,
+              usageCount: t.usageCount || 0,
+              projectCount: t.projectCount || 0,
+              status: t.status.toUpperCase()
+            }))
+          };
+        }
+        
+        // Already in legacy format
+        return parsed;
       }
 
       console.warn(
