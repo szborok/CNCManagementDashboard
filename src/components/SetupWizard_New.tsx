@@ -2220,64 +2220,72 @@ function StorageStep({
                       </div>
                       <div className="ml-6 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-green-600 dark:text-green-400">
-                            📁
-                          </span>
-                          JSON_Scanner_Data (CNC program analysis)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-green-600 dark:text-green-400">
-                            📁
-                          </span>
-                          Tool_Manager_Data (Excel processing & inventory)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-green-600 dark:text-green-400">
-                            📁
-                          </span>
-                          Clamping_Plates_Data (Plate management)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-orange-600 dark:text-orange-400">
-                            📁
-                          </span>
-                          JSON_Found (Original JSON files found)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-cyan-600 dark:text-cyan-400">
-                            📁
-                          </span>
-                          JSON_Fixed (Corrected JSON files)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-pink-600 dark:text-pink-400">
-                            📁
-                          </span>
-                          Results (Analysis results & reports)
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-yellow-600 dark:text-yellow-400">
-                            📁
-                          </span>
-                          Backups (Automatic backups)
-                        </div>
-                        <div className="flex items-center gap-2">
                           <span className="text-purple-600 dark:text-purple-400">
                             📁
                           </span>
-                          Logs (Application logs)
+                          BRK CNC Management Dashboard
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-600 dark:text-gray-400">
-                            📁
-                          </span>
-                          Temp (Temporary files)
+                        <div className="ml-6 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-600 dark:text-green-400">
+                              📁
+                            </span>
+                            JSONScanner (CNC program analysis)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-600 dark:text-green-400">
+                              📁
+                            </span>
+                            ToolManager (Excel processing & inventory)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-600 dark:text-green-400">
+                              📁
+                            </span>
+                            ClampingPlateManager (Plate management)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-orange-600 dark:text-orange-400">
+                              📁
+                            </span>
+                            JSON_Found (Original JSON files found)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-cyan-600 dark:text-cyan-400">
+                              📁
+                            </span>
+                            JSON_Fixed (Corrected JSON files)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-pink-600 dark:text-pink-400">
+                              📁
+                            </span>
+                            Results (Analysis results & reports)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-yellow-600 dark:text-yellow-400">
+                              📁
+                            </span>
+                            Backups (Automatic backups)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-purple-600 dark:text-purple-400">
+                              📁
+                            </span>
+                            Logs (Application logs)
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              📁
+                            </span>
+                            Temp (Temporary files)
+                          </div>
                         </div>
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                      All subdirectories will be created automatically when
-                      needed
+                      All subdirectories will be created automatically when needed
+                      {config.demoMode && " (Demo Mode: Using test data locations)"}
                     </p>
                   </div>
                 )}
@@ -3120,7 +3128,7 @@ function ValidationStep({
       case "json-scanner-init":
         if (config.companyFeatures.jsonScanner) {
           addLog(`   → Initializing JSON Scanner backend service...`);
-          addLog(`   → Mode: ${config.modules.jsonAnalyzer.mode}`);
+          addLog(`   → Mode: ${config.demoMode ? 'Demo' : 'Production'}`);
           addLog(
             `   → Data path: ${
               config.modules.jsonAnalyzer.dataPath || "Will request at runtime"
@@ -3130,35 +3138,54 @@ function ValidationStep({
           // Check if backend is running
           addLog(`   → 🔍 Checking if JSONScanner backend is running...`);
           try {
-            const response = await fetch("http://localhost:3001/api/status", {
+            const statusResponse = await fetch("http://localhost:3001/api/status", {
               method: "GET",
               headers: { "Content-Type": "application/json" },
             });
             
-            if (response.ok) {
-              const status = await response.json();
-              addLog(`   → ✅ JSONScanner backend is running (${status.mode} mode)`);
-              addLog(`   → � Waiting for initial data processing...`);
-              
-              // Wait a bit for initial scan
-              await new Promise((resolve) => setTimeout(resolve, 3000));
-              
-              // Try to fetch projects
-              const projectsResponse = await fetch("http://localhost:3001/api/projects");
-              if (projectsResponse.ok) {
-                const projectsData = await projectsResponse.json();
-                addLog(`   → ✅ Found ${projectsData.projects?.length || 0} analyzed projects`);
-                addLog(`   → 📊 Backend initialized successfully`);
-              } else {
-                addLog(`   → ℹ️  No projects analyzed yet - backend starting up`);
-              }
-            } else {
+            if (!statusResponse.ok) {
               throw new Error("Backend not responding");
             }
+            
+            const status = await statusResponse.json();
+            addLog(`   → ✅ JSONScanner backend is running (${status.mode} mode)`);
+            
+            // Send configuration to activate backend
+            addLog(`   → 📡 Sending configuration to backend...`);
+            const configResponse = await fetch("http://localhost:3001/api/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                testMode: config.demoMode,
+                workingFolder: config.storage.basePath || null,
+                scanPaths: {
+                  jsonFiles: config.modules.jsonAnalyzer.dataPath || null
+                }
+              })
+            });
+            
+            if (!configResponse.ok) {
+              throw new Error("Failed to configure backend");
+            }
+            
+            addLog(`   → ✅ Backend configured and activated`);
+            addLog(`   → 🔄 Waiting for initial data processing...`);
+            
+            // Wait for backend to process
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            
+            // Check for processed data
+            const projectsResponse = await fetch("http://localhost:3001/api/projects");
+            if (projectsResponse.ok) {
+              const projectsData = await projectsResponse.json();
+              addLog(`   → ✅ Found ${projectsData.projects?.length || 0} analyzed projects`);
+              addLog(`   → 📊 Backend initialized successfully`);
+            } else {
+              addLog(`   → ℹ️  Backend processing - data will appear shortly`);
+            }
           } catch (error) {
-            addLog(`   → ⚠️  JSONScanner backend not running on port 3001`);
-            addLog(`   → 💡 Start backend: cd JSONScanner && npm run serve`);
-            throw new Error("JSONScanner backend must be running. Start with: cd JSONScanner && npm run serve");
+            addLog(`   → ⚠️  JSONScanner backend error: ${error instanceof Error ? error.message : 'Unknown'}`);
+            throw new Error("JSONScanner backend initialization failed");
           }
         } else {
           addLog(`   → JSON Scanner disabled - skipping`);
@@ -3169,7 +3196,7 @@ function ValidationStep({
       case "tool-manager-init":
         if (config.companyFeatures.toolManager) {
           addLog(`   → Initializing Tool Manager backend service...`);
-          addLog(`   → Mode: ${config.modules.matrixTools.mode}`);
+          addLog(`   → Mode: ${config.demoMode ? 'Demo' : 'Production'}`);
           addLog(
             `   → Excel processing: ${
               config.modules.matrixTools.features.excelProcessing
@@ -3181,36 +3208,58 @@ function ValidationStep({
           // Check if backend is running
           addLog(`   → 🔍 Checking if ToolManager backend is running...`);
           try {
-            const response = await fetch("http://localhost:3002/api/status", {
+            const statusResponse = await fetch("http://localhost:3002/api/status", {
               method: "GET",
               headers: { "Content-Type": "application/json" },
             });
             
-            if (response.ok) {
-              const status = await response.json();
-              addLog(`   → ✅ ToolManager backend is running (${status.mode} mode)`);
-              addLog(`   → 📊 Waiting for initial data processing...`);
-              
-              // Wait a bit for initial scan
-              await new Promise((resolve) => setTimeout(resolve, 3000));
-              
-              // Try to fetch tools
-              const toolsResponse = await fetch("http://localhost:3002/api/tools");
-              if (toolsResponse.ok) {
-                const toolsData = await toolsResponse.json();
-                const totalTools = (toolsData.matrixTools?.length || 0) + (toolsData.nonMatrixTools?.length || 0);
-                addLog(`   → ✅ Found ${totalTools} tool records`);
-                addLog(`   → 📊 Backend initialized successfully`);
-              } else {
-                addLog(`   → ℹ️  No tools processed yet - backend starting up`);
-              }
-            } else {
+            if (!statusResponse.ok) {
               throw new Error("Backend not responding");
             }
+            
+            const status = await statusResponse.json();
+            addLog(`   → ✅ ToolManager backend is running (${status.mode} mode)`);
+            
+            // Send configuration to activate backend
+            addLog(`   → 📡 Sending configuration to backend...`);
+            const configResponse = await fetch("http://localhost:3002/api/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                testMode: config.demoMode,
+                workingFolder: config.storage.basePath || null,
+                scanPaths: {
+                  jsonFiles: config.modules.jsonAnalyzer.dataPath || null,
+                  excelFiles: config.modules.matrixTools.features.excelProcessing
+                    ? config.modules.matrixTools.dataPath || null
+                    : null
+                }
+              })
+            });
+            
+            if (!configResponse.ok) {
+              throw new Error("Failed to configure backend");
+            }
+            
+            addLog(`   → ✅ Backend configured and activated`);
+            addLog(`   → 🔄 Waiting for initial data processing...`);
+            
+            // Wait for backend to process
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            
+            // Check for processed data
+            const toolsResponse = await fetch("http://localhost:3002/api/tools");
+            if (toolsResponse.ok) {
+              const toolsData = await toolsResponse.json();
+              const totalTools = (toolsData.matrixTools?.length || 0) + (toolsData.nonMatrixTools?.length || 0);
+              addLog(`   → ✅ Found ${totalTools} tool records`);
+              addLog(`   → 📊 Backend initialized successfully`);
+            } else {
+              addLog(`   → ℹ️  Backend processing - data will appear shortly`);
+            }
           } catch (error) {
-            addLog(`   → ⚠️  ToolManager backend not running on port 3002`);
-            addLog(`   → 💡 Start backend: cd ToolManager && npm run serve`);
-            throw new Error("ToolManager backend must be running. Start with: cd ToolManager && npm run serve");
+            addLog(`   → ⚠️  ToolManager backend error: ${error instanceof Error ? error.message : 'Unknown'}`);
+            throw new Error("ToolManager backend initialization failed");
           }
         } else {
           addLog(`   → Tool Manager disabled - skipping`);
@@ -3221,7 +3270,7 @@ function ValidationStep({
       case "clamping-plate-init":
         if (config.companyFeatures.clampingPlateManager) {
           addLog(`   → Initializing Clamping Plate Manager backend service...`);
-          addLog(`   → Mode: ${config.modules.platesManager.mode}`);
+          addLog(`   → Mode: ${config.demoMode ? 'Demo' : 'Production'}`);
           addLog(
             `   → Models path: ${
               config.modules.platesManager.modelsPath ||
@@ -3232,35 +3281,52 @@ function ValidationStep({
           // Check if backend is running
           addLog(`   → 🔍 Checking if ClampingPlateManager backend is running...`);
           try {
-            const response = await fetch("http://localhost:3003/api/health", {
+            const healthResponse = await fetch("http://localhost:3003/api/health", {
               method: "GET",
               headers: { "Content-Type": "application/json" },
             });
             
-            if (response.ok) {
-              await response.json(); // Verify JSON response
-              addLog(`   → ✅ ClampingPlateManager backend is running`);
-              addLog(`   → 📦 Loading plate inventory...`);
-              
-              // Wait a bit for initialization
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-              
-              // Try to fetch plates
-              const platesResponse = await fetch("http://localhost:3003/api/plates");
-              if (platesResponse.ok) {
-                const platesData = await platesResponse.json();
-                addLog(`   → ✅ Found ${platesData.plates?.length || 0} clamping plates`);
-                addLog(`   → 📊 Backend initialized successfully`);
-              } else {
-                addLog(`   → ℹ️  No plates loaded yet - backend starting up`);
-              }
-            } else {
+            if (!healthResponse.ok) {
               throw new Error("Backend not responding");
             }
+            
+            await healthResponse.json();
+            addLog(`   → ✅ ClampingPlateManager backend is running`);
+            
+            // Send configuration to activate backend
+            addLog(`   → 📡 Sending configuration to backend...`);
+            const configResponse = await fetch("http://localhost:3003/api/config", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                testMode: config.demoMode,
+                workingFolder: config.storage.basePath || null,
+                platesPath: config.modules.platesManager.modelsPath || null
+              })
+            });
+            
+            if (!configResponse.ok) {
+              throw new Error("Failed to configure backend");
+            }
+            
+            addLog(`   → ✅ Backend configured and activated`);
+            addLog(`   → 📦 Loading plate inventory...`);
+            
+            // Wait for backend to load plates
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            
+            // Check for loaded plates
+            const platesResponse = await fetch("http://localhost:3003/api/plates");
+            if (platesResponse.ok) {
+              const platesData = await platesResponse.json();
+              addLog(`   → ✅ Found ${platesData.plates?.length || 0} clamping plates`);
+              addLog(`   → 📊 Backend initialized successfully`);
+            } else {
+              addLog(`   → ℹ️  Backend processing - data will appear shortly`);
+            }
           } catch (error) {
-            addLog(`   → ⚠️  ClampingPlateManager backend not running on port 3003`);
-            addLog(`   → 💡 Start backend: cd ClampingPlateManager && npm run serve`);
-            throw new Error("ClampingPlateManager backend must be running. Start with: cd ClampingPlateManager && npm run serve");
+            addLog(`   → ⚠️  ClampingPlateManager backend error: ${error instanceof Error ? error.message : 'Unknown'}`);
+            throw new Error("ClampingPlateManager backend initialization failed");
           }
         } else {
           addLog(`   → Clamping Plate Manager disabled - skipping`);

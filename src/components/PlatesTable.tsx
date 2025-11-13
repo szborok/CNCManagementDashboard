@@ -83,133 +83,10 @@ const loadRealPlateData = (): Plate[] => {
       }
     }
   } catch (error) {
-    console.warn("Failed to load real plate data, using mock data:", error);
+    console.warn("Failed to load real plate data:", error);
   }
   return [];
 };
-
-// Mock data
-const mockPlates: Plate[] = [
-  {
-    id: "P001",
-    name: "Standard Clamp A1",
-    shelf: "A-12",
-    previewImage:
-      "https://images.unsplash.com/photo-1581092916314-4c7d08839806?w=100&h=100&fit=crop",
-    xtFile: "/files/P001.x_t",
-    health: "used",
-    occupancy: "in-use",
-    notes: "Regular maintenance completed",
-    lastWorkName: "W5222NS01_233",
-    lastModifiedBy: "John Smith",
-    lastModifiedDate: new Date("2025-01-27T14:30:00"),
-    history: [
-      {
-        id: "1",
-        action: "Work started",
-        user: "John Smith",
-        date: new Date("2025-01-27T14:30:00"),
-        details: "Started work W5222NS01_233",
-      },
-      {
-        id: "2",
-        action: "File uploaded",
-        user: "John Smith",
-        date: new Date("2025-01-27T14:00:00"),
-        details: "Uploaded new X_T file",
-      },
-    ],
-  },
-  {
-    id: "P002",
-    name: "Heavy Duty B3",
-    shelf: "B-05",
-    previewImage:
-      "https://images.unsplash.com/photo-1581092804894-f7058d0d4723?w=100&h=100&fit=crop",
-    xtFile: "/files/P002.x_t",
-    health: "new",
-    occupancy: "free",
-    lastWorkName: "",
-    lastModifiedBy: "Admin",
-    lastModifiedDate: new Date("2025-01-26T10:15:00"),
-    history: [
-      {
-        id: "1",
-        action: "Plate created",
-        user: "Admin",
-        date: new Date("2025-01-26T10:15:00"),
-        details: "New plate added to system",
-      },
-    ],
-  },
-  {
-    id: "P003",
-    name: "Precision C2",
-    shelf: "C-08",
-    previewImage:
-      "https://images.unsplash.com/photo-1581092786450-c0aea6c8c2b4?w=100&h=100&fit=crop",
-    xtFile: "/files/P003.x_t",
-    health: "used",
-    occupancy: "free",
-    lastWorkName: "W5220NS01_554",
-    lastModifiedBy: "Sarah Johnson",
-    lastModifiedDate: new Date("2025-01-25T16:45:00"),
-    history: [
-      {
-        id: "1",
-        action: "Work completed",
-        user: "Sarah Johnson",
-        date: new Date("2025-01-25T16:45:00"),
-        details: "Completed work W5220NS01_554",
-      },
-    ],
-  },
-  {
-    id: "P004",
-    name: "Compact D1",
-    shelf: "D-03",
-    previewImage:
-      "https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=100&h=100&fit=crop",
-    xtFile: "/files/P004.x_t",
-    health: "locked",
-    occupancy: "free",
-    notes: "Damaged - requires inspection",
-    lastWorkName: "W5219NS01_332",
-    lastModifiedBy: "Admin",
-    lastModifiedDate: new Date("2025-01-24T09:20:00"),
-    history: [
-      {
-        id: "1",
-        action: "Plate locked",
-        user: "Admin",
-        date: new Date("2025-01-24T09:20:00"),
-        details: "Locked due to damage report",
-      },
-    ],
-  },
-  {
-    id: "P005",
-    name: "Universal E5",
-    shelf: "E-10",
-    previewImage:
-      "https://images.unsplash.com/photo-1581092513210-45d4b8e7f5a3?w=100&h=100&fit=crop",
-    xtFile: "/files/P005.x_t",
-    health: "used",
-    occupancy: "free",
-    lastWorkName: "W5218NS01_776",
-    lastModifiedBy: "Mike Wilson",
-    lastModifiedDate: new Date("2025-01-23T13:30:00"),
-    history: [
-      {
-        id: "1",
-        action: "Work paused",
-        user: "Mike Wilson",
-        date: new Date("2025-01-23T13:30:00"),
-        details: "Work paused for maintenance",
-      },
-    ],
-  },
-];
 
 const getHealthBadge = (health: string) => {
   switch (health) {
@@ -297,13 +174,8 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
   useEffect(() => {
     const loadPlates = () => {
       const realPlates = loadRealPlateData();
-      if (realPlates.length > 0) {
-        console.log(`✅ Loaded ${realPlates.length} real plates from backend`);
-        setPlates(realPlates);
-      } else {
-        console.log("ℹ️ No real plate data found, using mock data");
-        setPlates(mockPlates);
-      }
+      console.log(`Loaded ${realPlates.length} plates from backend`);
+      setPlates(realPlates);
     };
 
     loadPlates();
