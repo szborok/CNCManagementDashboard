@@ -820,21 +820,23 @@ function ModulesStep({
           ...config.modules,
           jsonAnalyzer: {
             ...config.modules.jsonAnalyzer,
-            dataPath: "C:\\Demo\\JsonData",
+            dataPath: "../CNC_TestData/source_data/json_files",
           },
           matrixTools: {
             ...config.modules.matrixTools,
-            dataPath: "C:\\Demo\\ToolData",
-            inventoryFile: "C:\\Demo\\ToolData\\inventory.xlsx",
+            dataPath: "../CNC_TestData/source_data/matrix_excel_files",
+            inventoryFile:
+              "../CNC_TestData/source_data/matrix_excel_files/E-Cut,MFC,XF,XFeed készlet.xlsx",
             paths: {
-              excelInputPath: "C:\\Demo\\ToolData\\Excel",
-              jsonInputPath: "C:\\Demo\\ToolData\\Json",
+              excelInputPath: "../CNC_TestData/source_data/matrix_excel_files",
+              jsonInputPath: "../CNC_TestData/source_data/json_files",
             },
           },
           platesManager: {
             ...config.modules.platesManager,
-            modelsPath: "C:\\Demo\\PlateModels",
-            plateInfoFile: "C:\\Demo\\PlateData\\plate_info.xlsx",
+            modelsPath: "../CNC_TestData/source_data/clamping_plates/models",
+            plateInfoFile:
+              "../CNC_TestData/source_data/clamping_plates/Készülékek.xlsx",
           },
         },
       });
@@ -1582,7 +1584,7 @@ function AuthenticationStep({
         authentication: {
           ...config.authentication,
           method: "file",
-          employeeFile: "/demo/employees.json",
+          employeeFile: "../CNC_TestData/source_data/employees.json",
         },
       });
     }
@@ -2027,10 +2029,10 @@ function StorageStep({
         storage: {
           ...config.storage,
           mode: "simple",
-          basePath: "C:\\Demo\\CNCManagement",
-          backupPath: "C:\\Demo\\CNCManagement\\Backups",
-          logsPath: "C:\\Demo\\CNCManagement\\Logs",
-          tempPath: "C:\\Demo\\CNCManagement\\Temp",
+          basePath: "../CNC_TestData/working_data",
+          backupPath: "../CNC_TestData/working_data/Backups",
+          logsPath: "../CNC_TestData/working_data/Logs",
+          tempPath: "../CNC_TestData/working_data/Temp",
         },
       });
     }
@@ -2932,6 +2934,14 @@ function ValidationStep({
   const [isInitComplete, setIsInitComplete] = useState(false);
   const [isLogVisible, setIsLogVisible] = useState(true);
   const [currentInitTest, setCurrentInitTest] = useState<string | null>(null);
+
+  // Check if all init tests are complete (either by individual runs or "Run All")
+  React.useEffect(() => {
+    const allComplete = initTests.every((test) => test.status === "success");
+    if (allComplete && initTests.length > 0) {
+      setIsInitComplete(true);
+    }
+  }, [initTests]);
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
