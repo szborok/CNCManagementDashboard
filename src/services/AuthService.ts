@@ -69,6 +69,8 @@ class AuthService {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
+      console.log('🔐 Login attempt:', { username: credentials.username, hasPassword: !!credentials.password });
+      
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -85,6 +87,7 @@ class AuthService {
       );
 
       if (!user) {
+        console.error('❌ User not found:', credentials.username);
         return {
           success: false,
           message: 'Invalid credentials or user not found'
@@ -93,11 +96,14 @@ class AuthService {
 
       // Check password
       if (validCredentials[credentials.username] !== credentials.password) {
+        console.error('❌ Invalid password for user:', credentials.username);
         return {
           success: false,
           message: 'Invalid credentials'
         };
       }
+
+      console.log('✅ User authenticated:', user);
 
       // Validate machine authorization if specified
       if (credentials.machineId && !this.canAccessMachine(user, credentials.machineId)) {
@@ -123,6 +129,9 @@ class AuthService {
       localStorage.setItem(this.TOKEN_KEY, accessToken);
       localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
       localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      
+      console.log('💾 User data stored in localStorage');
+      console.log('👤 Current user:', user);
 
       return {
         success: true,

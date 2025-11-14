@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useSetupConfig } from "./hooks/useSetupConfig";
+import { configureAllBackends } from "./services/backendConfig";
 import Dashboard from "./components/Dashboard";
 import PlatesTable from "./components/PlatesTable";
 import ScannerResults from "./components/ScannerResults";
@@ -260,10 +261,9 @@ function WorkingLoginPage() {
         <div className="text-center mt-6">
           <button
             onClick={() => {
-              localStorage.removeItem("cncDashboardConfig");
-              localStorage.removeItem("setupWizardStep");
-              localStorage.removeItem("setupWizardProgress");
-              window.location.reload();
+              console.log('🔄 Clearing all localStorage');
+              localStorage.clear();
+              window.location.href = '/?reset=true';
             }}
             className="block w-full text-sm text-blue-600 hover:text-blue-800 underline font-medium"
           >
@@ -351,6 +351,7 @@ interface LegacyUser {
 // Main App Content Component (authenticated app)
 function AppContent() {
   const { user, logout, isAuthenticated } = useAuth();
+  const { config } = useSetupConfig();
   const [currentView, setCurrentView] = useState<AppView>("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [theme, setTheme] = useState<"auto" | "light" | "dark">("auto");
@@ -358,6 +359,20 @@ function AppContent() {
     "normal"
   );
   const [highContrast, setHighContrast] = useState(false);
+
+  // Configure backends with setup config on mount
+  useEffect(() => {
+    if (config.isConfigured) {
+      console.log("📡 Sending configuration to backends...");
+      configureAllBackends(config)
+        .then((results) => {
+          console.log("✅ Backends configured:", results);
+        })
+        .catch((error) => {
+          console.error("❌ Failed to configure backends:", error);
+        });
+    }
+  }, [config]);
 
   // Load settings from localStorage
   useEffect(() => {

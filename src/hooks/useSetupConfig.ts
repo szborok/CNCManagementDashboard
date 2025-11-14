@@ -81,8 +81,8 @@ export interface SetupConfig {
 
 const defaultConfig: SetupConfig = {
   isConfigured: false,
-  demoMode: false,
-  companyName: "",
+  demoMode: true, // Enable demo mode by default for easier testing
+  companyName: "BRK Manufacturing",
   companyFeatures: {
     jsonScanner: true,
     toolManager: true,

@@ -48,10 +48,26 @@ export default function SetupWizard({
   initialConfig,
 }: SetupWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  // Use demo config if in demo mode, otherwise use initialConfig
-  const [config, setConfig] = useState<SetupConfig>(
-    isDemoMode ? { ...initialConfig, ...demoConfig } : initialConfig
-  );
+  // Use demo config if demo mode enabled
+  const [config, setConfig] = useState<SetupConfig>(() => {
+    if (initialConfig.demoMode) {
+      return { ...initialConfig, ...demoConfig, demoMode: true };
+    }
+    return initialConfig;
+  });
+
+  // Auto-complete wizard in demo mode
+  useEffect(() => {
+    if (config.demoMode) {
+      console.log('🎭 Demo mode active - auto-completing setup wizard');
+      const timer = setTimeout(() => {
+        const finalConfig = { ...config, ...demoConfig, isConfigured: true, demoMode: true };
+        console.log('✅ Auto-completing setup with demo config:', finalConfig);
+        onComplete(finalConfig);
+      }, 1000); // 1 second delay to show the wizard briefly
+      return () => clearTimeout(timer);
+    }
+  }, [config.demoMode]);
 
   const steps = [
     {
@@ -2032,7 +2048,7 @@ function StorageStep({
           basePath: "../BRK_CNC_CORE/test-data/working_data",
           backupPath: "../BRK_CNC_CORE/test-data/working_data/Backups",
           logsPath: "../BRK_CNC_CORE/test-data/working_data/Logs",
-          tempPath: "../BRK_CNC_CORE/test-data/working_data/Temp",
+          tempPath: "../BRK_CNC_CORE/test-data/working_data",
         },
       });
     }
@@ -2065,7 +2081,7 @@ function StorageStep({
     if (field === "basePath" && config.storage.mode === "simple") {
       updates.storage.backupPath = value + "\\Backups";
       updates.storage.logsPath = value + "\\Logs";
-      updates.storage.tempPath = value + "\\Temp";
+      updates.storage.tempPath = value;
       updates.storage.outputPath = value + "\\Output";
       updates.storage.jsonFoundPath = value + "\\JSON_Found";
       updates.storage.jsonFixedPath = value + "\\JSON_Fixed";

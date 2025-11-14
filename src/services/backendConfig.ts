@@ -10,6 +10,7 @@ export interface BackendConfigPayload {
     excelFiles?: string | null;
   };
   platesPath?: string | null;
+  workingFolder?: string | null;
 }
 
 export interface BackendConfigResponse {
@@ -100,6 +101,10 @@ export async function configureAllBackends(wizardConfig: {
     };
     platesManager: { modelsPath?: string };
   };
+  storage: {
+    basePath?: string;
+    tempPath?: string;
+  };
 }): Promise<{
   jsonScanner?: BackendConfigResponse;
   toolManager?: BackendConfigResponse;
@@ -119,6 +124,7 @@ export async function configureAllBackends(wizardConfig: {
         scanPaths: {
           jsonFiles: wizardConfig.modules.jsonAnalyzer.dataPath || null,
         },
+        workingFolder: wizardConfig.storage.tempPath || wizardConfig.storage.basePath || null,
       });
     } catch (error) {
       console.error("Failed to configure JSONScanner:", error);
@@ -137,6 +143,7 @@ export async function configureAllBackends(wizardConfig: {
             ? wizardConfig.modules.matrixTools.dataPath || null
             : null,
         },
+        workingFolder: wizardConfig.storage.tempPath || wizardConfig.storage.basePath || null,
       });
     } catch (error) {
       console.error("Failed to configure ToolManager:", error);
@@ -150,6 +157,7 @@ export async function configureAllBackends(wizardConfig: {
       results.clampingPlateManager = await configureClampingPlateManager({
         testMode: wizardConfig.demoMode,
         platesPath: wizardConfig.modules.platesManager.modelsPath || null,
+        workingFolder: wizardConfig.storage.tempPath || wizardConfig.storage.basePath || null,
       });
     } catch (error) {
       console.error("Failed to configure ClampingPlateManager:", error);
