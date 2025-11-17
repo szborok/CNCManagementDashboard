@@ -351,7 +351,7 @@ interface LegacyUser {
 // Main App Content Component (authenticated app)
 function AppContent() {
   const { user, logout, isAuthenticated } = useAuth();
-  const { config } = useSetupConfig();
+  const { config: _config } = useSetupConfig();
   const [currentView, setCurrentView] = useState<AppView>("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [theme, setTheme] = useState<"auto" | "light" | "dark">("auto");
@@ -360,19 +360,7 @@ function AppContent() {
   );
   const [highContrast, setHighContrast] = useState(false);
 
-  // Configure backends with setup config on mount
-  useEffect(() => {
-    if (config.isConfigured) {
-      console.log("📡 Sending configuration to backends...");
-      configureAllBackends(config)
-        .then((results) => {
-          console.log("✅ Backends configured:", results);
-        })
-        .catch((error) => {
-          console.error("❌ Failed to configure backends:", error);
-        });
-    }
-  }, [config]);
+    // Configure backends with setup config on mount\n  useEffect(() => {\n    if (config.isConfigured) {\n      console.log(\"📡 Auto-configuring backends with existing setup...\");\n      configureAllBackends(config)\n        .then((results) => {\n          console.log(\"✅ Backends auto-configured successfully:\", results);\n          console.log(\"🎯 System ready - backends active with setup configuration\");\n        })\n        .catch((error) => {\n          console.error(\"❌ Failed to auto-configure backends:\", error);\n          console.warn(\"⚠️  Backends may need manual configuration in admin settings\");\n        });\n    }\n  }, [config]);
 
   // Load settings from localStorage
   useEffect(() => {
@@ -715,9 +703,38 @@ export default function App() {
 
 function AppWithSetup() {
   const { config, isLoading, saveConfig, isFirstTimeSetup } = useSetupConfig();
+  const [isConfiguringBackends, setIsConfiguringBackends] = useState(false);
+  const [backendConfigError, setBackendConfigError] = useState<string | null>(null);
 
-  // No sample data initialization - dashboard uses real backend results only
+  // Handle backend configuration after setup wizard completion
+  const handleSetupComplete = async (newConfig: SetupConfig) => {
+    try {
+      setIsConfiguringBackends(true);
+      setBackendConfigError(null);
+      
+      console.log('🎯 Setup wizard completed, configuring backends...');
+      
+      // 1. Save the configuration
+      const saved = await saveConfig(newConfig);
+      
+      if (saved) {
+        // 2. Configure all backends with the new settings
+        console.log('🔧 Configuring backends with setup wizard settings...');
+        await configureAllBackends(newConfig);
+        
+        console.log('✅ Setup complete! System ready for use.');
+      } else {
+        throw new Error('Failed to save configuration');
+      }
+    } catch (error) {
+      console.error('❌ Setup configuration failed:', error);
+      setBackendConfigError(error instanceof Error ? error.message : 'Configuration failed');
+    } finally {
+      setIsConfiguringBackends(false);
+    }
+  };
 
+  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -731,10 +748,48 @@ function AppWithSetup() {
     );
   }
 
-  if (isFirstTimeSetup) {
-    return <SetupWizard initialConfig={config} onComplete={saveConfig} />;
+  // Backend configuration in progress
+  if (isConfiguringBackends) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Configuring System
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            Setting up backends and applying your configuration...
+          </p>
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              This may take a few moments while we configure the CNC modules.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
+  // Show setup wizard if not configured or if there was a backend config error
+  if (isFirstTimeSetup || backendConfigError) {
+    return (
+      <div>
+        {backendConfigError && (
+          <div className="bg-red-50 border border-red-200 p-4 mb-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-red-700 font-medium">Configuration Error: {backendConfigError}</span>
+            </div>
+          </div>
+        )}
+        <SetupWizard initialConfig={config} onComplete={handleSetupComplete} />
+      </div>
+    );
+  }
+
+  // System is configured - show the main application with login flow
   return <AppContent />;
 }
 

@@ -164,9 +164,27 @@ export function useSetupConfig() {
 
   const loadConfig = async () => {
     try {
+      // 1. First check if filesystem config exists via backend
+      try {
+        const response = await fetch('http://localhost:3001/api/config');
+        if (response.ok) {
+          const systemConfig = await response.json();
+          if (systemConfig && systemConfig.isConfigured) {
+            console.log("✅ Loaded config from filesystem (via backend)");
+            setConfig({ ...defaultConfig, ...systemConfig });
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch (err) {
+        console.log("⚠️ Filesystem config not found, checking localStorage");
+      }
+
+      // 2. Fall back to localStorage only if no filesystem config
       const savedConfig = localStorage.getItem("cncDashboardConfig");
       if (savedConfig) {
         const parsedConfig = JSON.parse(savedConfig);
+        console.log("⚠️ Using localStorage config (consider migrating to filesystem)");
         setConfig({ ...defaultConfig, ...parsedConfig });
       }
     } catch (error) {
@@ -180,21 +198,43 @@ export function useSetupConfig() {
     try {
       console.log("💾 Saving configuration and processing setup...");
 
-      // 1. Save configuration to localStorage
-      localStorage.setItem("cncDashboardConfig", JSON.stringify(newConfig));
+      // Mark as configured when saving
+      const configWithStatus = {
+        ...newConfig,
+        isConfigured: true,
+        configVersion: "1.0.0"
+      };
 
-      // 2. Process the setup (create files, directories, sample data)
-      const processor = new SetupProcessor(newConfig);
+      // 1. Save configuration to localStorage (for Dashboard)
+      localStorage.setItem("cncDashboardConfig", JSON.stringify(configWithStatus));
+
+      // 2. Save configuration to filesystem (for backend services)
+      try {
+        const configData = JSON.stringify(configWithStatus, null, 2);
+        const blob = new Blob([configData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'brk-cnc-system.config.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        console.log("✅ Configuration file downloaded - place it in your BRK_CNC_CORE folder");
+      } catch (err) {
+        console.warn("⚠️ Could not download config file", err);
+      }
+
+      // 3. Process the setup (create files, directories, sample data)
+      const processor = new SetupProcessor(configWithStatus);
       const result = await processor.processSetup();
 
       if (result.success) {
         console.log("✅ Setup processing completed:", result.message);
         console.log("📋 Details:", result.details);
 
-        // 3. Update state
-        setConfig(newConfig);
+        // 4. Update state with configured flag
+        setConfig(configWithStatus);
 
-        // 4. Show success notification (could be enhanced with a toast notification)
+        // 5. Show success notification (could be enhanced with a toast notification)
         if (result.details) {
           console.log(
             "📁 Directories created:",
@@ -211,7 +251,7 @@ export function useSetupConfig() {
       } else {
         console.error("❌ Setup processing failed:", result.message);
         // Still save config but show warning
-        setConfig(newConfig);
+        setConfig(configWithStatus);
         return false;
       }
     } catch (error) {

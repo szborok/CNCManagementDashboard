@@ -16,5 +16,6 @@ export default defineConfig({
   server: {
     port: 3000,
     open: false, // start-all.js handles browser opening
+    strictPort: true, // Exit if port is in use instead of trying another
   },
 });

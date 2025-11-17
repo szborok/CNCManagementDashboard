@@ -36,7 +36,7 @@ import {
 import { SetupConfig } from "../hooks/useSetupConfig";
 import { SetupValidation } from "../utils/setupValidation";
 import ValidationFeedback from "./ValidationFeedback";
-import { isDemoMode, demoConfig } from "../config/demoConfig";
+import { demoConfig } from "../config/demoConfig";
 
 interface SetupWizardProps {
   onComplete: (config: SetupConfig) => void;
