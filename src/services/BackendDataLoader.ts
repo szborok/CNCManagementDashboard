@@ -78,19 +78,38 @@ export class BackendDataLoader {
   }
 
   /**
-   * Load JSONScanner results from result files
+   * Load JSONScanner results from backend API
    */
   static async loadJSONScannerData(): Promise<JSONScannerResult[] | null> {
     try {
-      // In a real implementation, this would use the configured path from setup
-      // For now, check localStorage for uploaded/imported data
+      // First try to fetch from backend API
+      try {
+        const response = await fetch("http://localhost:3001/api/projects", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.projects && data.projects.length > 0) {
+            // Cache in localStorage
+            localStorage.setItem("jsonScannerResults", JSON.stringify(data.projects));
+            console.log(`✅ Loaded ${data.projects.length} projects from JSONScanner API`);
+            return data.projects;
+          }
+        }
+      } catch (apiError) {
+        console.warn("JSONScanner API not available, falling back to cache");
+      }
+
+      // Fall back to localStorage cache
       const storedData = localStorage.getItem("jsonScannerResults");
       if (storedData) {
         return JSON.parse(storedData);
       }
 
       console.warn(
-        "JSONScanner results not found. Please run JSONScanner to generate results or import result files."
+        "JSONScanner results not found. Please run JSONScanner to generate results."
       );
       return null;
     } catch (error) {
@@ -100,11 +119,69 @@ export class BackendDataLoader {
   }
 
   /**
-   * Load ToolManager results from consolidated report
+   * Load ToolManager results from backend API
    * Handles both new format {tools: [...]} and old format {matrixTools: [], nonMatrixTools: [], reportInfo: {...}}
    */
   static async loadToolManagerData(): Promise<ToolManagerResult | null> {
     try {
+      // First try to fetch from backend API
+      try {
+        const response = await fetch("http://localhost:3002/api/tools", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Cache in localStorage
+          localStorage.setItem("toolManagerResults", JSON.stringify(data));
+          console.log(`✅ Loaded tool data from ToolManager API`);
+          
+          // Fall through to parsing logic below
+          const parsed = data;
+          
+          // Check if it's the new format {tools: [...]}
+          if (parsed.tools && !parsed.matrixTools && !parsed.nonMatrixTools) {
+            console.log("📦 Converting new ToolManager format to legacy format for backward compatibility");
+            
+            // Convert new format to legacy format
+            const matrixTools = parsed.tools.filter((t: any) => t.isMatrix);
+            const nonMatrixTools = parsed.tools.filter((t: any) => !t.isMatrix);
+            
+            return {
+              reportInfo: {
+                generatedAt: new Date().toISOString(),
+                summary: {
+                  matrixToolsUsed: matrixTools.length,
+                  nonMatrixToolsUsed: nonMatrixTools.length,
+                  jsonFilesProcessed: 0 // Not available in new format
+                }
+              },
+              matrixTools: matrixTools.map((t: any) => ({
+                toolName: t.name,
+                totalUsageTime: t.usageTime || 0,
+                usageCount: t.usageCount || 0,
+                projectCount: t.projectCount || 0,
+                status: t.status.toUpperCase()
+              })),
+              nonMatrixTools: nonMatrixTools.map((t: any) => ({
+                toolName: t.name,
+                totalUsageTime: t.usageTime || 0,
+                usageCount: t.usageCount || 0,
+                projectCount: t.projectCount || 0,
+                status: t.status.toUpperCase()
+              }))
+            };
+          }
+          
+          // Already in legacy format
+          return parsed;
+        }
+      } catch (apiError) {
+        console.warn("ToolManager API not available, falling back to cache");
+      }
+
+      // Fall back to localStorage cache
       const storedData = localStorage.getItem("toolManagerResults");
       if (storedData) {
         const parsed = JSON.parse(storedData);
@@ -148,7 +225,7 @@ export class BackendDataLoader {
       }
 
       console.warn(
-        "ToolManager results not found. Please run ToolManager to generate results or import result files."
+        "ToolManager results not found. Please run ToolManager to generate results."
       );
       return null;
     } catch (error) {
@@ -158,10 +235,29 @@ export class BackendDataLoader {
   }
 
   /**
-   * Load ClampingPlateManager inventory
+   * Load ClampingPlateManager inventory from backend API
    */
   static async loadClampingPlateData(): Promise<ClampingPlateResult | null> {
     try {
+      // First try to fetch from backend API
+      try {
+        const response = await fetch("http://localhost:3003/api/plates", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Cache in localStorage
+          localStorage.setItem("clampingPlateResults", JSON.stringify(data));
+          console.log(`✅ Loaded ${data.plates?.length || 0} plates from ClampingPlateManager API`);
+          return data;
+        }
+      } catch (apiError) {
+        console.warn("ClampingPlateManager API not available, falling back to cache");
+      }
+
+      // Fall back to localStorage cache
       const storedData = localStorage.getItem("clampingPlateResults");
       if (storedData) {
         return JSON.parse(storedData);

@@ -257,20 +257,6 @@ function WorkingLoginPage() {
           </form>
         </div>
 
-        {/* Setup Wizard Access */}
-        <div className="text-center mt-6">
-          <button
-            onClick={() => {
-              console.log('🔄 Clearing all localStorage');
-              localStorage.clear();
-              window.location.href = '/?reset=true';
-            }}
-            className="block w-full text-sm text-blue-600 hover:text-blue-800 underline font-medium"
-          >
-            🔧 Reset & Run Setup Wizard
-          </button>
-        </div>
-
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">Powered by BRK Spectrum</p>
@@ -282,8 +268,10 @@ function WorkingLoginPage() {
 
 export interface Plate {
   id: string;
+  plateNumber?: string;
   name?: string;
   shelf: string;
+  boxSize?: string;
   previewImage: string;
   xtFile: string;
   health: "new" | "used" | "locked";

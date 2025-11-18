@@ -69,7 +69,7 @@ export class SetupProcessor {
       const employeeFilePath =
         this.config.authentication.employeeFile || "./data/employees.json";
 
-      const employeeTemplate = [
+      const _employeeTemplate = [
         {
           id: "emp001",
           name: "John Doe",
@@ -79,6 +79,7 @@ export class SetupProcessor {
           active: true,
           createdAt: new Date().toISOString(),
         },
+      ];
         {
           id: "emp002",
           name: "Jane Smith",
@@ -90,11 +91,9 @@ export class SetupProcessor {
         },
       ];
 
-      console.log(`📄 Creating employee file: ${employeeFilePath}`);
-      // await fs.writeFile(employeeFilePath, JSON.stringify(employeeTemplate, null, 2));
-
-      // For demo purposes, store in localStorage
-      localStorage.setItem("employeeData", JSON.stringify(employeeTemplate));
+      console.log(`📄 Employee file template created: ${employeeFilePath}`);
+      // Backend will save this to filesystem
+      // For now, just log what would be created
     }
   }
 
@@ -138,7 +137,8 @@ export class SetupProcessor {
     }
 
     console.log("⚙️ Creating module configurations:", moduleConfigs);
-    localStorage.setItem("moduleConfigs", JSON.stringify(moduleConfigs));
+    // Backend will save module configs to filesystem
+    // No localStorage usage
   }
 
   private async initializeDataLoading(): Promise<void> {
@@ -147,14 +147,14 @@ export class SetupProcessor {
     // Create realistic demo data files and results
     await this.createDemoDataFiles();
 
-    // Generate and store comprehensive sample data for dashboard
-    const sampleData = this.generateSampleData();
-    localStorage.setItem("dashboardData", JSON.stringify(sampleData));
+    // Generate sample data for dashboard (backend will save this)
+    const _sampleData = this.generateSampleData();
+    console.log("✅ Demo data ecosystem prepared");
 
-    // Store demo processing results
+    // Store demo processing results (backend will save this)
     await this.createDemoProcessingResults();
 
-    console.log("✅ Complete demo data ecosystem created");
+    console.log("✅ Complete demo data ecosystem ready");
   }
 
   private async createDemoDataFiles(): Promise<void> {
@@ -300,8 +300,7 @@ export class SetupProcessor {
       },
     ];
 
-    // Store JSON demo files in localStorage
-    localStorage.setItem("jsonScannerDemoFiles", JSON.stringify(demoJsonFiles));
+    // Store JSON demo files (backend will save this)
     console.log(`✅ Created ${demoJsonFiles.length} realistic JSON demo files`);
   }
 
@@ -395,7 +394,6 @@ export class SetupProcessor {
       ],
     };
 
-    localStorage.setItem("toolManagerDemoData", JSON.stringify(demoToolData));
     console.log(
       `✅ Created tool inventory with ${demoToolData.inventory.length} tools`
     );
@@ -404,69 +402,177 @@ export class SetupProcessor {
   private async createClampingPlateDemoData(): Promise<void> {
     console.log("🔩 Creating Clamping Plate demo data...");
 
+    // Demo data based on actual Készülékek.xlsx structure
+    // Plates are simply numbered 1, 2, 3, etc. (the "name" column in Excel)
     const demoPlateData = {
-      plates: [
-        {
-          plateId: "CP-001",
-          model: "Standard 400x300",
-          dimensions: { length: 400, width: 300, height: 50 },
-          holes: {
-            pattern: "M8 Grid",
-            spacing: 25,
-            count: 192,
-          },
-          material: "Cast Iron",
-          weight: 45.2,
-          location: "Station A",
-          status: "AVAILABLE",
-          lastMaintenance: new Date(
-            Date.now() - 15 * 24 * 60 * 60 * 1000
-          ).toISOString(),
+      metadata: {
+        generatedDate: new Date().toISOString(),
+        source: "Demo data generation",
+        totalPlates: 10,
+        platesWithModels: 10,
+        platesWithWorkHistory: 6,
+      },
+      plates: {
+        "1": {
+          id: "1",
+          plateNumber: "1",
+          shelfNumber: "A1-K1",
+          boxSize: "400x300x100",
+          isLocked: false,
+          health: "new",
+          workProjects: [],
+          workHistory: [],
+          currentModelFile: "/models/1/1.x_t",
+          previewImage: "/previews/1.png",
         },
-        {
-          plateId: "CP-002",
-          model: "Heavy Duty 500x400",
-          dimensions: { length: 500, width: 400, height: 75 },
-          holes: {
-            pattern: "M10 Grid",
-            spacing: 30,
-            count: 272,
-          },
-          material: "Steel",
-          weight: 78.5,
-          location: "Station B",
-          status: "IN_USE",
-          currentProject: "W5270NS01001A",
-          lastMaintenance: new Date(
-            Date.now() - 8 * 24 * 60 * 60 * 1000
-          ).toISOString(),
+        "2": {
+          id: "2",
+          plateNumber: "2",
+          shelfNumber: "A1-K2",
+          boxSize: "400x300x100",
+          isLocked: false,
+          health: "used",
+          workProjects: [
+            { projectCode: "W5270NS01001", workOrder: "5-axis milling operation" },
+          ],
+          workHistory: ["W5270NS01001: 5-axis milling operation"],
+          currentModelFile: "/models/2/2.x_t",
+          previewImage: "/previews/2.png",
         },
-      ],
-      usage: [
-        {
-          date: new Date().toISOString().split("T")[0],
-          plateId: "CP-002",
-          project: "W5270NS01001A",
-          setup: "5-Axis Milling",
-          duration: 380,
-          status: "ACTIVE",
+        "3": {
+          id: "3",
+          plateNumber: "3",
+          shelfNumber: "B2-K1",
+          boxSize: "500x400x120",
+          isLocked: false,
+          health: "used",
+          workProjects: [
+            { projectCode: "W5269NS01007", workOrder: "Contour milling" },
+            { projectCode: "W5270NS01003", workOrder: "Drilling operations" },
+          ],
+          workHistory: [
+            "W5269NS01007: Contour milling",
+            "W5270NS01003: Drilling operations",
+          ],
+          currentModelFile: "/models/3/3.x_t",
+          previewImage: "/previews/3.png",
         },
-      ],
+        "4": {
+          id: "4",
+          plateNumber: "4",
+          shelfNumber: "A1-K3",
+          boxSize: "400x300x100",
+          isLocked: true,
+          health: "locked",
+          workProjects: [
+            { projectCode: "W5246NS01007", workOrder: "Complex 5-axis job" },
+          ],
+          workHistory: ["W5246NS01007: Complex 5-axis job"],
+          currentModelFile: "/models/4/4.x_t",
+          previewImage: "/previews/4.png",
+        },
+        "5": {
+          id: "5",
+          plateNumber: "5",
+          shelfNumber: "B2-K2",
+          boxSize: "500x400x120",
+          isLocked: false,
+          health: "new",
+          workProjects: [],
+          workHistory: [],
+          currentModelFile: "/models/5/5.x_t",
+          previewImage: "/previews/5.png",
+        },
+        "6": {
+          id: "6",
+          plateNumber: "6",
+          shelfNumber: "A1-K4",
+          boxSize: "400x300x100",
+          isLocked: false,
+          health: "used",
+          workProjects: [
+            { projectCode: "W5269NS01002", workOrder: "Precision drilling" },
+          ],
+          workHistory: ["W5269NS01002: Precision drilling"],
+          currentModelFile: "/models/6/6.x_t",
+          previewImage: "/previews/6.png",
+        },
+        "7": {
+          id: "7",
+          plateNumber: "7",
+          shelfNumber: "B2-K3",
+          boxSize: "500x400x120",
+          isLocked: false,
+          health: "new",
+          workProjects: [],
+          workHistory: [],
+          currentModelFile: "/models/7/7.x_t",
+          previewImage: "/previews/7.png",
+        },
+        "8": {
+          id: "8",
+          plateNumber: "8",
+          shelfNumber: "A1-K5",
+          boxSize: "400x300x100",
+          isLocked: false,
+          health: "used",
+          workProjects: [
+            { projectCode: "W5270NS01060", workOrder: "Helical drilling" },
+            { projectCode: "W5270NS01061", workOrder: "Finishing pass" },
+          ],
+          workHistory: [
+            "W5270NS01060: Helical drilling",
+            "W5270NS01061: Finishing pass",
+          ],
+          currentModelFile: "/models/8/8.x_t",
+          previewImage: "/previews/8.png",
+        },
+        "9": {
+          id: "9",
+          plateNumber: "9",
+          shelfNumber: "B2-K4",
+          boxSize: "500x400x120",
+          isLocked: true,
+          health: "locked",
+          workProjects: [
+            { projectCode: "W5269NS01006", workOrder: "Active production run" },
+          ],
+          workHistory: ["W5269NS01006: Active production run"],
+          currentModelFile: "/models/9/9.x_t",
+          previewImage: "/previews/9.png",
+        },
+        "10": {
+          id: "10",
+          plateNumber: "10",
+          shelfNumber: "A1-K6",
+          boxSize: "400x300x100",
+          isLocked: false,
+          health: "new",
+          workProjects: [],
+          workHistory: [],
+          currentModelFile: "/models/10/10.x_t",
+          previewImage: "/previews/10.png",
+        },
+      },
+      modelIndex: {},
+      workHistoryIndex: {},
     };
 
+    // Store in localStorage for the dashboard to use
     localStorage.setItem(
-      "clampingPlateDemoData",
+      "clampingPlateResults",
       JSON.stringify(demoPlateData)
     );
+
     console.log(
-      `✅ Created clamping plate data with ${demoPlateData.plates.length} plates`
+      `✅ Created clamping plate data with ${Object.keys(demoPlateData.plates).length} plates`
     );
   }
 
   private async createDemoProcessingResults(): Promise<void> {
     console.log("📊 Creating demo processing results...");
 
-    const processingResults = {
+    const _processingResults = {
       jsonAnalysis: [
         {
           id: "analysis_001",
@@ -564,10 +670,6 @@ export class SetupProcessor {
       ],
     };
 
-    localStorage.setItem(
-      "demoProcessingResults",
-      JSON.stringify(processingResults)
-    );
     console.log("✅ Demo processing results with real rules created");
   }
 

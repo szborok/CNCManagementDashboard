@@ -58,19 +58,31 @@ export default function JSONResultsAll() {
   const loadResults = async () => {
     setIsLoading(true);
     try {
-      const storedData = localStorage.getItem("jsonScannerResults");
-      if (storedData) {
-        const data = JSON.parse(storedData);
-        setResults(Array.isArray(data) ? data : []);
+      // Fetch from JSONScanner backend
+      const response = await fetch("http://localhost:3001/api/projects");
+      if (response.ok) {
+        const data = await response.json();
+        // Transform backend format to UI format
+        const transformedResults = data.projects.map((project: any) => ({
+          id: project.id,
+          filename: project.name,
+          processedAt: project.timestamp,
+          results: {
+            rulesApplied: project.rulesApplied || [],
+            violations: project.violations || [],
+          },
+          status: project.status || "unknown",
+        }));
+        setResults(transformedResults);
         console.log(
-          `✅ Loaded ${data.length} JSON analysis results from localStorage`
+          `✅ Loaded ${transformedResults.length} JSON analysis results from JSONScanner backend`
         );
       } else {
-        console.log("ℹ️ No JSON Scanner results found");
+        console.error("Failed to fetch from backend:", response.statusText);
         setResults([]);
       }
     } catch (error) {
-      console.error("Failed to load JSON results:", error);
+      console.error("Failed to load JSON results from backend:", error);
       setResults([]);
     } finally {
       setIsLoading(false);
@@ -78,28 +90,7 @@ export default function JSONResultsAll() {
   };
 
   const handleRefresh = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch fresh data from demo-data file
-      const response = await fetch("/demo-data/jsonscanner-results.json");
-      if (response.ok) {
-        const freshData = await response.json();
-        // Update localStorage with fresh data
-        localStorage.setItem("jsonScannerResults", JSON.stringify(freshData));
-        setResults(Array.isArray(freshData) ? freshData : []);
-        console.log(
-          `✅ Refreshed ${freshData.length} JSON analysis results from demo-data`
-        );
-      } else {
-        console.error("Failed to fetch fresh data");
-        loadResults(); // Fallback to localStorage
-      }
-    } catch (error) {
-      console.error("Failed to refresh data:", error);
-      loadResults(); // Fallback to localStorage
-    } finally {
-      setIsLoading(false);
-    }
+    await loadResults();
   };
 
   const filteredResults = results.filter(
@@ -317,13 +308,19 @@ export default function JSONResultsAll() {
       {/* Detail Modal */}
       {selectedResult && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-3xl w-full max-h-[80vh] overflow-auto">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>{selectedResult.filename}</CardTitle>
-                  <CardDescription className="mt-2">
-                    Processed: {formatDate(selectedResult.processedAt)}
+          <Card className="max-w-4xl w-full max-h-[85vh] flex flex-col bg-white shadow-xl">
+            <CardHeader className="border-b">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <CardTitle className="text-xl">{selectedResult.filename}</CardTitle>
+                    {getStatusBadge(selectedResult.status)}
+                  </div>
+                  <CardDescription className="mt-2 flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(selectedResult.processedAt)}
+                    </span>
                   </CardDescription>
                 </div>
                 <Button
@@ -331,64 +328,66 @@ export default function JSONResultsAll() {
                   size="sm"
                   onClick={() => setSelectedResult(null)}
                 >
-                  Close
+                  ✕
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Status */}
-              <div>
-                <h3 className="font-semibold mb-2">Status</h3>
-                {getStatusBadge(selectedResult.status)}
-              </div>
-
+            <CardContent className="overflow-auto flex-1 p-6 space-y-6">
               {/* Rules Applied */}
               <div>
-                <h3 className="font-semibold mb-2">
-                  Rules Applied ({selectedResult.results.rulesApplied.length})
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Quality Rules Applied ({selectedResult.results.rulesApplied.length})
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedResult.results.rulesApplied.map((rule, idx) => (
-                    <Badge key={idx} variant="secondary">
-                      {rule}
-                    </Badge>
-                  ))}
-                </div>
+                {selectedResult.results.rulesApplied.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedResult.results.rulesApplied.map((rule, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        ✓ {rule}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No rules applied</p>
+                )}
               </div>
 
               {/* Violations */}
-              {selectedResult.results.violations.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2">
-                    Violations ({selectedResult.results.violations.length})
-                  </h3>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Violations ({selectedResult.results.violations.length})
+                </h3>
+                {selectedResult.results.violations.length > 0 ? (
                   <div className="space-y-3">
                     {selectedResult.results.violations.map((violation, idx) => (
                       <div
                         key={idx}
-                        className="border border-red-200 bg-red-50 rounded-lg p-4"
+                        className="border border-red-200 bg-red-50 rounded-md p-4"
                       >
-                        <div className="font-medium text-red-900 mb-1">
-                          {violation.rule}
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="font-medium text-red-900 text-sm">
+                            {violation.rule}
+                          </div>
+                          <Badge variant="destructive" className="text-xs">
+                            {violation.severity || "error"}
+                          </Badge>
                         </div>
                         <div className="text-sm text-red-700 mb-2">
                           {violation.message}
                         </div>
-                        <div className="text-xs text-red-600">
-                          📍 {violation.location}
-                        </div>
+                        {violation.location && (
+                          <div className="text-xs text-red-600 font-mono">
+                            📍 {violation.location}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* Raw Data */}
-              <div>
-                <h3 className="font-semibold mb-2">Raw Data</h3>
-                <pre className="bg-gray-100 p-4 rounded-lg text-xs overflow-auto">
-                  {JSON.stringify(selectedResult, null, 2)}
-                </pre>
+                ) : (
+                  <div className="flex items-center gap-2 text-green-700 bg-green-50 p-4 rounded-md">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="text-sm font-medium">No violations found - all checks passed</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

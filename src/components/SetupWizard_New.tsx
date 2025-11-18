@@ -56,18 +56,9 @@ export default function SetupWizard({
     return initialConfig;
   });
 
-  // Auto-complete wizard in demo mode
-  useEffect(() => {
-    if (config.demoMode) {
-      console.log('🎭 Demo mode active - auto-completing setup wizard');
-      const timer = setTimeout(() => {
-        const finalConfig = { ...config, ...demoConfig, isConfigured: true, demoMode: true };
-        console.log('✅ Auto-completing setup with demo config:', finalConfig);
-        onComplete(finalConfig);
-      }, 1000); // 1 second delay to show the wizard briefly
-      return () => clearTimeout(timer);
-    }
-  }, [config.demoMode]);
+  // Auto-complete wizard is DISABLED - user must manually complete setup
+  // Even in demo mode, they need to click through wizard steps
+  // This prevents accidental auto-completion after reset
 
   const steps = [
     {

@@ -48,6 +48,33 @@ export interface DashboardData {
 import { BackendDataLoader } from "./BackendDataLoader";
 
 export class DashboardDataService {
+  /**
+   * Load dashboard data directly from backend APIs
+   * This is the new entry point for fetching live data
+   */
+  static async loadFromBackends(): Promise<DashboardData | null> {
+    try {
+      // This will fetch from APIs and cache results
+      const backendData = await BackendDataLoader.generateDashboardFromBackends();
+      if (backendData) {
+        // Save it to localStorage for caching
+        localStorage.setItem("dashboardData", JSON.stringify(backendData));
+        return backendData;
+      }
+
+      // Fall back to stored dashboard data
+      const storedData = localStorage.getItem("dashboardData");
+      if (storedData) {
+        return JSON.parse(storedData);
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Failed to load from backends:", error);
+      return null;
+    }
+  }
+
   static async loadDashboardData(): Promise<DashboardData | null> {
     try {
       // First, try to generate from backend data

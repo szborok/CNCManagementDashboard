@@ -17,5 +17,11 @@ export default defineConfig({
     port: 3000,
     open: false, // start-all.js handles browser opening
     strictPort: true, // Exit if port is in use instead of trying another
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3004', // Dashboard backend
+        changeOrigin: true,
+      },
+    },
   },
 });

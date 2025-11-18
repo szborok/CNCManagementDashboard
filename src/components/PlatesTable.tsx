@@ -56,8 +56,10 @@ const loadRealPlateData = (): Plate[] => {
 
           return {
             id: backendPlate.id,
+            plateNumber: backendPlate.plateNumber,
             name: `Plate ${backendPlate.plateNumber}`,
             shelf: backendPlate.shelfNumber || backendPlate.shelf || "Unknown",
+            boxSize: backendPlate.boxSize,
             previewImage: backendPlate.previewImage || "/placeholder-plate.png",
             xtFile: backendPlate.currentModelFile || "",
             health,
@@ -310,15 +312,19 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Preview</TableHead>
                   <TableHead>Plate Info</TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Preview
-                  </TableHead>
                   <TableHead className="hidden lg:table-cell">
                     Last Work
                   </TableHead>
+                  <TableHead className="hidden xl:table-cell">
+                    Notes
+                  </TableHead>
                   <TableHead className="hidden sm:table-cell">
                     Modified
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Box Size
                   </TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -331,22 +337,17 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
                     onClick={() => setSelectedPlate(plate)}
                   >
                     <TableCell>
-                      <div>
-                        <div className="font-mono">{plate.id}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {plate.name || "Unnamed Plate"}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Shelf: {plate.shelf}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
                       <ImageWithFallback
                         src={plate.previewImage}
                         alt={`Preview of ${plate.id}`}
-                        className="w-12 h-12 object-cover rounded"
+                        className="w-20 h-20 object-cover rounded"
                       />
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-mono font-semibold">{plate.plateNumber || plate.id}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {plate.shelf}
+                      </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       <div>
@@ -358,12 +359,22 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
                         </div>
                       </div>
                     </TableCell>
+                    <TableCell className="hidden xl:table-cell">
+                      <div className="text-sm text-muted-foreground max-w-[200px] truncate">
+                        {plate.notes || "-"}
+                      </div>
+                    </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <div className="text-sm">
                         {plate.lastModifiedDate.toLocaleDateString()}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {plate.lastModifiedDate.toLocaleTimeString()}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="text-sm">
+                        {plate.boxSize || "-"}
                       </div>
                     </TableCell>
                     <TableCell>

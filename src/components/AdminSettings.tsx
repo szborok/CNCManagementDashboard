@@ -1224,15 +1224,25 @@ export default function AdminSettings({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
+                onClick={async () => {
                   if (
                     confirm(
                       "Are you sure you want to reset all configuration and restart the setup wizard? This action cannot be undone."
                     )
                   ) {
-                    resetConfig();
-                    // Force page reload to restart the setup wizard
-                    window.location.reload();
+                    // Reset backend config file first
+                    const success = await resetConfig();
+                    
+                    if (success) {
+                      // Clear ALL localStorage including auth tokens
+                      localStorage.clear();
+                      
+                      // Clear session storage too
+                      sessionStorage.clear();
+                      
+                      // Force hard reload to clear all React state
+                      window.location.href = '/';
+                    }
                   }
                 }}
                 className="border-yellow-300 text-yellow-700 hover:bg-yellow-100 dark:border-yellow-600 dark:text-yellow-300 dark:hover:bg-yellow-900/30"
