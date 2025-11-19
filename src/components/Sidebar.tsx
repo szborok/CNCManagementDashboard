@@ -24,7 +24,6 @@ import {
   Archive,
   FolderOpen,
   Target,
-  AlertCircle,
 } from "lucide-react";
 import { AppView } from "../App";
 import { useState } from "react";
@@ -276,7 +275,7 @@ export default function Sidebar({
                   onClick={() => onViewChange("available-tools")}
                 >
                   <Target className="h-3 w-3 mr-2" />
-                  Currently Available
+                  Today's Matrix Tools
                 </Button>
                 <Button
                   variant={
@@ -287,42 +286,29 @@ export default function Sidebar({
                   onClick={() => onViewChange("remaining-tools")}
                 >
                   <Archive className="h-3 w-3 mr-2" />
-                  Remaining Tools
-                </Button>
-                {user.isAdmin && (
-                  <Button
-                    variant={
-                      currentView === "non-matrix-tools" ? "default" : "ghost"
-                    }
-                    size="sm"
-                    className="w-full justify-start"
-                    onClick={() => onViewChange("non-matrix-tools")}
-                  >
-                    <AlertCircle className="h-3 w-3 mr-2" />
-                    All Tool Usage
-                  </Button>
-                )}
-                <Button
-                  variant={
-                    currentView === "projects-by-tools" ? "default" : "ghost"
-                  }
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => onViewChange("projects-by-tools")}
-                >
-                  <FolderOpen className="h-3 w-3 mr-2" />
-                  Projects by Tools
+                  Remaining Matrix Tools
                 </Button>
                 <Button
                   variant={
-                    currentView === "tools-by-projects" ? "default" : "ghost"
+                    currentView === "non-matrix-tools" ? "default" : "ghost"
                   }
                   size="sm"
                   className="w-full justify-start"
-                  onClick={() => onViewChange("tools-by-projects")}
+                  onClick={() => onViewChange("non-matrix-tools")}
                 >
-                  <Archive className="h-3 w-3 mr-2" />
-                  Tools by Projects
+                  <Wrench className="h-3 w-3 mr-2" />
+                  All Tool Usage
+                </Button>
+                <Button
+                  variant={
+                    currentView === "my-matrix-tools" ? "default" : "ghost"
+                  }
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => onViewChange("my-matrix-tools")}
+                >
+                  <Clock className="h-3 w-3 mr-2" />
+                  My Matrix Tools
                 </Button>
               </div>
             )}

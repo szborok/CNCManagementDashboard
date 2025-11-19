@@ -339,7 +339,7 @@ interface LegacyUser {
 // Main App Content Component (authenticated app)
 function AppContent() {
   const { user, logout, isAuthenticated } = useAuth();
-  const { config: _config } = useSetupConfig();
+  const { config } = useSetupConfig();
   const [currentView, setCurrentView] = useState<AppView>("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [theme, setTheme] = useState<"auto" | "light" | "dark">("auto");
@@ -348,7 +348,21 @@ function AppContent() {
   );
   const [highContrast, setHighContrast] = useState(false);
 
-    // Configure backends with setup config on mount\n  useEffect(() => {\n    if (config.isConfigured) {\n      console.log(\"📡 Auto-configuring backends with existing setup...\");\n      configureAllBackends(config)\n        .then((results) => {\n          console.log(\"✅ Backends auto-configured successfully:\", results);\n          console.log(\"🎯 System ready - backends active with setup configuration\");\n        })\n        .catch((error) => {\n          console.error(\"❌ Failed to auto-configure backends:\", error);\n          console.warn(\"⚠️  Backends may need manual configuration in admin settings\");\n        });\n    }\n  }, [config]);
+  // Configure backends with setup config on mount
+  useEffect(() => {
+    if (config.isConfigured) {
+      console.log("📡 Auto-configuring backends with existing setup...");
+      configureAllBackends(config)
+        .then((results) => {
+          console.log("✅ Backends auto-configured successfully:", results);
+          console.log("🎯 System ready - backends active with setup configuration");
+        })
+        .catch((error) => {
+          console.error("❌ Failed to auto-configure backends:", error);
+          console.warn("⚠️  Backends may need manual configuration in admin settings");
+        });
+    }
+  }, [config]);
 
   // Load settings from localStorage
   useEffect(() => {
@@ -459,17 +473,26 @@ function AppContent() {
   }
 
   return (
-    <div className="h-screen bg-background flex overflow-hidden">
-      <Sidebar
-        user={legacyUser}
-        currentView={currentView}
-        onViewChange={(view: string) => setCurrentView(view as AppView)}
-        isOpen={isSidebarOpen}
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        onLogout={logout}
-      />
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      {/* Demo Mode Banner */}
+      {config.demoMode && (
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 text-sm font-medium shadow-md flex items-center justify-center gap-2 z-50">
+          <span>🚀</span>
+          <span>Demo Mode - Using test data for demonstration</span>
+        </div>
+      )}
+      
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar
+          user={legacyUser}
+          currentView={currentView}
+          onViewChange={(view: string) => setCurrentView(view as AppView)}
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          onLogout={logout}
+        />
 
-      <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto">
         {/* Main Content with Role-based Access Control */}
         <div className="p-4 lg:p-6 w-full">
           {/* Removed top navigation bar - all navigation now in sidebar */}
@@ -668,7 +691,8 @@ function AppContent() {
             </AdminRoute>
           )}
         </div>
-      </main>
+        </main>
+      </div>
 
       <Toaster />
     </div>

@@ -5,6 +5,7 @@
 
 export interface BackendConfigPayload {
   testMode: boolean;
+  autoRun?: boolean;
   scanPaths?: {
     jsonFiles?: string | null;
     excelFiles?: string | null;
@@ -105,6 +106,11 @@ export async function configureAllBackends(wizardConfig: {
     basePath?: string;
     tempPath?: string;
   };
+  features?: {
+    autoScan?: {
+      enabled: boolean;
+    };
+  };
 }): Promise<{
   jsonScanner?: BackendConfigResponse;
   toolManager?: BackendConfigResponse;
@@ -121,6 +127,7 @@ export async function configureAllBackends(wizardConfig: {
     try {
       results.jsonScanner = await configureJSONScanner({
         testMode: wizardConfig.demoMode,
+        autoRun: wizardConfig.features?.autoScan?.enabled ?? true,
         scanPaths: {
           jsonFiles: wizardConfig.modules.jsonAnalyzer.dataPath || null,
         },
@@ -137,6 +144,7 @@ export async function configureAllBackends(wizardConfig: {
     try {
       results.toolManager = await configureToolManager({
         testMode: wizardConfig.demoMode,
+        autoRun: wizardConfig.features?.autoScan?.enabled ?? true,
         scanPaths: {
           jsonFiles: wizardConfig.modules.jsonAnalyzer.dataPath || null,
           excelFiles: wizardConfig.modules.matrixTools.features.excelProcessing

@@ -324,7 +324,7 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
                   <TableHead className="hidden lg:table-cell">
                     Last Work
                   </TableHead>
-                  <TableHead className="hidden xl:table-cell">
+                  <TableHead className="hidden lg:table-cell">
                     Notes
                   </TableHead>
                   <TableHead className="hidden sm:table-cell">
@@ -343,31 +343,31 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
                     className="cursor-pointer hover:bg-muted/50 h-16"
                     onClick={() => setSelectedPlate(plate)}
                   >
-                    <TableCell>
+                    <TableCell className="pr-2">
                       <ImageWithFallback
-                        src={plate.previewImage}
+                        src={`http://localhost:3003/api/previews/${plate.previewImage}`}
                         alt={`Preview of ${plate.id}`}
-                        className="w-20 h-20 object-cover rounded"
+                        className="w-40 h-40 object-contain rounded"
                       />
                     </TableCell>
-                    <TableCell>
-                      <div className="font-mono font-semibold">{plate.plateNumber || plate.id}</div>
+                    <TableCell className="pl-2">
+                      <div className="font-mono font-semibold">ID: {plate.plateNumber || plate.id}</div>
                       <div className="text-xs text-muted-foreground">
-                        {plate.shelf}
+                        Shelf: {plate.shelf}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell">
+                    <TableCell className="hidden lg:table-cell max-w-[140px]">
                       <div>
-                        <div className="font-mono text-sm">
+                        <div className="font-mono text-sm truncate">
                           {plate.lastWorkName || "No previous work"}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-muted-foreground truncate">
                           by {plate.lastModifiedBy}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden xl:table-cell">
-                      <div className="text-sm text-muted-foreground max-w-[200px] truncate">
+                    <TableCell className="hidden lg:table-cell max-w-[70px]">
+                      <div className="text-sm text-muted-foreground truncate">
                         {plate.notes || "-"}
                       </div>
                     </TableCell>

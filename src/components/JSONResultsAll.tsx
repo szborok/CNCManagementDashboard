@@ -155,6 +155,11 @@ export default function JSONResultsAll() {
           <p className="text-gray-600 mt-1">
             View all processed CNC program files and their analysis results
           </p>
+          {results.length > 0 && results[0].processedAt && (
+            <p className="text-sm text-gray-500 mt-1">
+              Data from: {formatDate(results[0].processedAt)}
+            </p>
+          )}
         </div>
         <Button onClick={handleRefresh} variant="outline" size="sm">
           <RefreshCw className="h-4 w-4 mr-2" />

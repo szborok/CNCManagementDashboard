@@ -177,6 +177,40 @@ const ToolManager: React.FC<ToolManagerProps> = ({
     return fullToolName.substring(0, lastUnderscoreIndex);
   };
 
+  // Helper function to extract diameter from tool name (after underscore, before L)
+  const extractDiameter = (fullToolName: string): string => {
+    const parts = fullToolName.split("_");
+    if (parts.length < 2) return "";
+    
+    // Extract diameter from specs like "H100M16L100" -> "16" (M16 = diameter 16mm)
+    const specs = parts[1];
+    const diameterMatch = specs.match(/[MFH](\d+(?:\.\d+)?)/);
+    return diameterMatch ? `Ø${diameterMatch[1]}` : "";
+  };
+
+  // Helper function to get tool image path
+  const getToolImagePath = (toolType: string): string => {
+    // Map tool type to manufacturer folder and image file
+    const manufacturers: Record<string, string> = {
+      "GUH": "GUH",
+      "TGT": "TGT",
+      "FRA": "FRA",
+      "AURA": "AURA",
+    };
+
+    // Find manufacturer from tool type prefix
+    const manufacturer = Object.keys(manufacturers).find(key => toolType.startsWith(key));
+    
+    if (!manufacturer) {
+      return ""; // No image available
+    }
+
+    // Construct image filename - try with tool type code
+    const filename = `${toolType}.JPG`; // Most images are .JPG
+    
+    return `http://localhost:3002/api/tool-images/${manufacturer}/${filename}`;
+  };
+
   // Helper function to group tools by type and aggregate usage
   const groupToolsByType = (tools: BackendTool[]) => {
     const grouped = new Map<
@@ -410,9 +444,26 @@ const ToolManager: React.FC<ToolManagerProps> = ({
                           ) : (
                             <ChevronRight className="h-4 w-4 text-gray-400" />
                           )}
-                          <Wrench className="h-5 w-5 text-muted-foreground" />
+                          {getToolImagePath(group.toolType) ? (
+                            <img
+                              src={getToolImagePath(group.toolType)}
+                              alt={group.toolType}
+                              className="w-16 h-16 object-contain rounded"
+                              onError={(e) => {
+                                // Fallback to icon if image fails to load
+                                (e.target as HTMLImageElement).style.display = "none";
+                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
+                              }}
+                            />
+                          ) : null}
+                          <Wrench className="h-5 w-5 text-muted-foreground hidden" />
                           <div>
-                            <h3 className="font-medium">{group.toolType}</h3>
+                            <div className="flex items-baseline gap-3">
+                              <span className="text-lg font-semibold text-blue-600">
+                                {extractDiameter(group.instances[0]?.toolName || "")}
+                              </span>
+                              <h3 className="font-medium font-mono">{group.toolType}</h3>
+                            </div>
                             <p className="text-sm text-muted-foreground">
                               {group.instanceCount} instance
                               {group.instanceCount !== 1 ? "s" : ""} • Found in{" "}
