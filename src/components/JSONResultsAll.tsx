@@ -368,7 +368,7 @@ export default function JSONResultsAll() {
                             {violation.rule}
                           </div>
                           <Badge variant="destructive" className="text-xs">
-                            {violation.severity || "error"}
+                            {"error"}
                           </Badge>
                         </div>
                         <div className="text-sm text-red-700 mb-2">

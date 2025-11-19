@@ -22,6 +22,7 @@ import { Search, Filter, SortAsc, SortDesc } from "lucide-react";
 import { LegacyUser, Plate } from "../App";
 import PlateDetailModal from "./PlateDetailModal";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { BackendDataLoader } from "../services/BackendDataLoader";
 
 interface PlatesTableProps {
   user: LegacyUser;
@@ -174,7 +175,11 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
 
   // Load real plate data on mount and when localStorage changes
   useEffect(() => {
-    const loadPlates = () => {
+    const loadPlates = async () => {
+      // First try to load from API to populate cache
+      await BackendDataLoader.loadClampingPlateData();
+      
+      // Then load from localStorage (now populated by API)
       const realPlates = loadRealPlateData();
       console.log(`Loaded ${realPlates.length} plates from backend`);
       setPlates(realPlates);
@@ -185,7 +190,9 @@ export default function PlatesTable({ user, filter }: PlatesTableProps) {
     // Listen for storage changes (when setup wizard loads data)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "clampingPlateResults") {
-        loadPlates();
+        const realPlates = loadRealPlateData();
+        console.log(`Updated ${realPlates.length} plates from storage change`);
+        setPlates(realPlates);
       }
     };
 

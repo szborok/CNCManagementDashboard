@@ -3203,7 +3203,7 @@ function ValidationStep({
     addLog("🎉 Launching dashboard...");
     
     // Call the original onComplete to navigate to dashboard
-    onComplete(config);
+    onComplete();
   };
 
   const runFeatureTest = async (testId: string) => {

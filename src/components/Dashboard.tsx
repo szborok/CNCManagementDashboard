@@ -54,6 +54,7 @@ export default function Dashboard({ user }: DashboardProps) {
     loadDashboardData();
   }, []); // Load data on mount
 
+  // @ts-expect-error - Unused function kept for future API status checking
   const _checkAPIStatus = async () => {
     const status = {
       jsonScanner: false,
@@ -76,7 +77,7 @@ export default function Dashboard({ user }: DashboardProps) {
     }
 
     try {
-      await platesManagerAPI.getHealth();
+      await platesManagerAPI.getPlates();
       status.platesManager = true;
     } catch {
       void 0; // Silently fail

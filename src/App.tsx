@@ -695,7 +695,7 @@ function AppWithSetup() {
   const [backendConfigError, setBackendConfigError] = useState<string | null>(null);
 
   // Handle backend configuration after setup wizard completion
-  const handleSetupComplete = async (newConfig: SetupConfig) => {
+  const handleSetupComplete = async (newConfig: any) => {
     try {
       setIsConfiguringBackends(true);
       setBackendConfigError(null);

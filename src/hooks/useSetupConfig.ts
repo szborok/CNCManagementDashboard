@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SetupProcessor } from "../services/SetupProcessor";
+// SetupProcessor import removed - demo mode handled by SetupWizard paths
 
 export interface SetupConfig {
   isConfigured: boolean;
@@ -206,35 +206,27 @@ export function useSetupConfig() {
         configVersion: "1.0.0"
       };
 
-      // Process the setup (create files, directories, sample data)
-      const processor = new SetupProcessor(configWithStatus);
-      const result = await processor.processSetup();
+      // Setup processing removed - demo mode handled by SetupWizard paths
+      console.log("✅ Setup configuration saved");
 
-      if (result.success) {
-        console.log("✅ Setup processing completed:", result.message);
+      // Save to backend filesystem
+      const saveResponse = await fetch('/api/config/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(configWithStatus)
+      });
 
-        // Save to backend filesystem
-        const saveResponse = await fetch('/api/config/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(configWithStatus)
-        });
-
-        if (saveResponse.ok) {
-          console.log("✅ Config saved to backend filesystem");
-          
-          // Mark setup wizard as completed
-          localStorage.setItem('setupWizardCompleted', 'true');
-          console.log("✅ Setup wizard completion flag set");
-          
-          setConfig(configWithStatus);
-          return true;
-        } else {
-          console.error("❌ Failed to save config to backend");
-          return false;
-        }
+      if (saveResponse.ok) {
+        console.log("✅ Config saved to backend filesystem");
+        
+        // Mark setup wizard as completed
+        localStorage.setItem('setupWizardCompleted', 'true');
+        console.log("✅ Setup wizard completion flag set");
+        
+        setConfig(configWithStatus);
+        return true;
       } else {
-        console.error("❌ Setup processing failed:", result.message);
+        console.error("❌ Failed to save config to backend");
         return false;
       }
     } catch (error) {

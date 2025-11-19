@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import { BackendDataLoader } from "../services/BackendDataLoader";
 
 interface BackendTool {
   toolName: string;
@@ -71,9 +72,22 @@ const ToolManager: React.FC<ToolManagerProps> = ({
     loadToolData();
   }, []);
 
-  const loadToolData = () => {
+  const loadToolData = async () => {
     setIsLoading(true);
     try {
+      // First try to load from backend API (this will also update localStorage)
+      const toolManagerData = await BackendDataLoader.loadToolManagerData();
+      if (toolManagerData) {
+        setToolData(toolManagerData);
+        console.log(
+          `✅ Loaded ${
+            toolManagerData.matrixTools.length + toolManagerData.nonMatrixTools.length
+          } tools from ToolManager backend`
+        );
+        return;
+      }
+
+      // Fall back to localStorage
       const storedData = localStorage.getItem("toolManagerResults");
       if (storedData) {
         const data = JSON.parse(storedData);
@@ -81,7 +95,7 @@ const ToolManager: React.FC<ToolManagerProps> = ({
         console.log(
           `✅ Loaded ${
             data.matrixTools.length + data.nonMatrixTools.length
-          } tools from ToolManager`
+          } tools from localStorage cache`
         );
       } else {
         console.log("ℹ️ No ToolManager results found");
@@ -98,22 +112,23 @@ const ToolManager: React.FC<ToolManagerProps> = ({
   const handleRefresh = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/demo-data/toolmanager-results.json");
-      if (response.ok) {
-        const freshData = await response.json();
-        localStorage.setItem("toolManagerResults", JSON.stringify(freshData));
-        setToolData(freshData);
+      // Force reload from backend API
+      const toolManagerData = await BackendDataLoader.loadToolManagerData();
+      if (toolManagerData) {
+        setToolData(toolManagerData);
         console.log(
           `✅ Refreshed ${
-            freshData.matrixTools.length + freshData.nonMatrixTools.length
-          } tools from demo-data`
+            toolManagerData.matrixTools.length + toolManagerData.nonMatrixTools.length
+          } tools from ToolManager backend`
         );
       } else {
-        loadToolData();
+        console.log("⚠️ No tool data available from backend");
+        setToolData(null);
       }
     } catch (error) {
       console.error("Failed to refresh tool data:", error);
-      loadToolData();
+      // Try to fall back to existing data
+      await loadToolData();
     } finally {
       setIsLoading(false);
     }
