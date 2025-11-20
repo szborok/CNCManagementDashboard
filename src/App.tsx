@@ -492,10 +492,39 @@ function AppContent() {
           onLogout={logout}
         />
 
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto bg-muted/30">
         {/* Main Content with Role-based Access Control */}
         <div className="p-4 lg:p-6 w-full">
-          {/* Removed top navigation bar - all navigation now in sidebar */}
+          {/* Page Title Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-foreground">
+              {currentView === "dashboard" && "Dashboard"}
+              {currentView === "all-auto-results" && "All Auto Results"}
+              {currentView === "my-auto-results" && "My Auto Results"}
+              {currentView === "my-manual-results" && "My Manual Results"}
+              {currentView === "manual-check" && "Manual Check"}
+              {currentView === "manual-upload" && "Manual Upload"}
+              {currentView === "all-plates" && "All Plates"}
+              {currentView === "new-plates" && "New Plates"}
+              {currentView === "used-plates" && "Used Plates"}
+              {currentView === "locked-plates" && "Locked Plates"}
+              {currentView === "free-plates" && "Free Plates"}
+              {currentView === "in-use-plates" && "In Use Plates"}
+              {currentView === "ongoing-work" && "Ongoing Work"}
+              {currentView === "history" && "History"}
+              {currentView === "create-work-order" && "Create Work Order"}
+              {currentView === "all-tool-usage" && "All Tool Usage"}
+              {currentView === "tool-details" && "Tool Details"}
+              {currentView === "available-tools" && "Available Tools"}
+              {currentView === "remaining-tools" && "Remaining Tools"}
+              {currentView === "non-matrix-tools" && "Non-Matrix Tools"}
+              {currentView === "projects-by-tools" && "Projects by Tools"}
+              {currentView === "tools-by-projects" && "Tools by Projects"}
+              {currentView === "settings" && "Settings"}
+              {currentView === "admin-settings" && "Admin Settings"}
+            </h1>
+          </div>
+
           {currentView === "dashboard" && (
             <ProtectedRoute>
               <Dashboard user={legacyUser} />

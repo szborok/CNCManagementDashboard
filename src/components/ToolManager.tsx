@@ -189,8 +189,7 @@ const ToolManager: React.FC<ToolManagerProps> = ({
   };
 
   // Helper function to get tool image path
-  const getToolImagePath = (toolType: string): string => {
-    // Map tool type to manufacturer folder and image file
+  const getToolImagePath = (toolType: string) => {
     const manufacturers: Record<string, string> = {
       "GUH": "GUH",
       "TGT": "TGT",
@@ -205,8 +204,14 @@ const ToolManager: React.FC<ToolManagerProps> = ({
       return ""; // No image available
     }
 
-    // Construct image filename - try with tool type code
-    const filename = `${toolType}.JPG`; // Most images are .JPG
+    // Strip common suffixes from tool type (e.g., TGT-VLM42-L → TGT-VLM42)
+    const baseToolType = toolType.replace(/(-L|-AF\d+|-R\d+|-\d+R\d+)$/i, '');
+    
+    // Try multiple extensions in order of likelihood
+    const extensions = ['.JPG', '.jpg', '.jfif', '.gif', '.png', '.jpeg'];
+    
+    // Return first extension - browser will try and fallback to wrench icon if 404
+    const filename = `${baseToolType}${extensions[0]}`;
     
     return `http://localhost:3002/api/tool-images/${manufacturer}/${filename}`;
   };

@@ -76,6 +76,7 @@ export default function Sidebar({
   const [expandedApps, setExpandedApps] = useState<string[]>([
     "analyzer",
     "plates",
+    "tools",
   ]);
 
   const toggleApp = (appId: string) => {
@@ -112,7 +113,7 @@ export default function Sidebar({
         fixed top-0 left-0 z-40 h-full bg-sidebar border-r border-sidebar-border
         transition-all duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-        ${isOpen ? "w-64" : "lg:w-16"}
+        w-64
         lg:relative lg:translate-x-0
         flex flex-col
       `}
@@ -200,7 +201,9 @@ export default function Sidebar({
                     currentView === "all-auto-results" ? "default" : "ghost"
                   }
                   size="sm"
-                  className="w-full justify-start"
+                  className={`w-full justify-start ${
+                    currentView === "all-auto-results" ? "bg-primary text-primary-foreground" : ""
+                  }`}
                   onClick={() => onViewChange("all-auto-results")}
                 >
                   <FolderOpen className="h-3 w-3 mr-2" />
@@ -211,7 +214,9 @@ export default function Sidebar({
                     currentView === "my-auto-results" ? "default" : "ghost"
                   }
                   size="sm"
-                  className="w-full justify-start"
+                  className={`w-full justify-start ${
+                    currentView === "my-auto-results" ? "bg-primary text-primary-foreground" : ""
+                  }`}
                   onClick={() => onViewChange("my-auto-results")}
                 >
                   <Archive className="h-3 w-3 mr-2" />
@@ -233,7 +238,9 @@ export default function Sidebar({
                     currentView === "manual-upload" ? "default" : "ghost"
                   }
                   size="sm"
-                  className="w-full justify-start"
+                  className={`w-full justify-start ${
+                    currentView === "manual-upload" ? "bg-primary text-primary-foreground" : ""
+                  }`}
                   onClick={() => onViewChange("manual-upload")}
                 >
                   <Upload className="h-3 w-3 mr-2" />
@@ -268,11 +275,13 @@ export default function Sidebar({
               <div className="ml-6 space-y-1">
                 <Button
                   variant={
-                    currentView === "available-tools" ? "default" : "ghost"
+                    currentView === "tool-details" ? "default" : "ghost"
                   }
                   size="sm"
-                  className="w-full justify-start"
-                  onClick={() => onViewChange("available-tools")}
+                  className={`w-full justify-start ${
+                    currentView === "tool-details" ? "bg-primary text-primary-foreground" : ""
+                  }`}
+                  onClick={() => onViewChange("tool-details")}
                 >
                   <Target className="h-3 w-3 mr-2" />
                   Today's Matrix Tools
@@ -340,7 +349,9 @@ export default function Sidebar({
                 <Button
                   variant={currentView === "all-plates" ? "default" : "ghost"}
                   size="sm"
-                  className="w-full justify-start"
+                  className={`w-full justify-start ${
+                    currentView === "all-plates" ? "bg-primary text-primary-foreground" : ""
+                  }`}
                   onClick={() => onViewChange("all-plates")}
                 >
                   All Plates
