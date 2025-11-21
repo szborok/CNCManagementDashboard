@@ -310,7 +310,12 @@ export type AppView =
   | "my-auto-results"
   | "my-manual-results"
   | "manual-upload"
+  | "manual-check"
+  // Clamping Plates views
+  | "create-work-order"
   // Matrix Tools Manager views
+  | "all-tool-usage"
+  | "tool-details"
   | "available-tools"
   | "remaining-tools"
   | "non-matrix-tools"

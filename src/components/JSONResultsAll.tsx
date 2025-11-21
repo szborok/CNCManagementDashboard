@@ -27,10 +27,31 @@ import {
   Eye,
   Calendar,
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+
+interface RuleDetail {
+  name: string;
+  description: string;
+  shouldRun: boolean;
+  run: boolean;
+  passed: boolean | null;
+  failureType: string;
+  violationCount: number;
+  failures: Array<{
+    item?: string;
+    type?: string;
+    message?: string;
+    ncFile?: string;
+    program?: string;
+  }>;
+  status: string;
+}
 
 interface JSONScanResult {
   id: string;
   filename: string;
+  machine: string | null;
+  operator: string | null;
   processedAt: string;
   results: {
     rulesApplied: string[];
@@ -39,11 +60,13 @@ interface JSONScanResult {
       message: string;
       location: string;
     }>;
+    rules?: RuleDetail[];
   };
   status: "passed" | "failed" | "warning";
 }
 
 export default function JSONResultsAll() {
+  const { user } = useAuth();
   const [results, setResults] = useState<JSONScanResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -66,6 +89,8 @@ export default function JSONResultsAll() {
         const transformedResults = data.projects.map((project: any) => ({
           id: project.id,
           filename: project.name,
+          machine: project.machine || null,
+          operator: project.operator || null,
           processedAt: project.timestamp,
           results: {
             rulesApplied: project.rulesApplied || [],
@@ -89,11 +114,38 @@ export default function JSONResultsAll() {
     }
   };
 
+  const loadDetailedResults = async (projectId: string) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/analysis/${projectId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      }
+    } catch (error) {
+      console.error("Failed to load detailed results:", error);
+    }
+    return null;
+  };
+
+  const handleViewDetails = async (result: JSONScanResult) => {
+    const detailed = await loadDetailedResults(result.id);
+    if (detailed && detailed.results?.rules) {
+      setSelectedResult({ ...result, results: { ...result.results, rules: detailed.results.rules } });
+    } else {
+      setSelectedResult(result);
+    }
+  };
+
   const handleRefresh = async () => {
     await loadResults();
   };
 
-  const filteredResults = results.filter(
+  // Filter by logged-in user's username (operator field matches username)
+  const userFilteredResults = user?.role === 'admin' 
+    ? results 
+    : results.filter(result => result.operator?.toLowerCase() === user?.username?.toLowerCase());
+
+  const filteredResults = userFilteredResults.filter(
     (result) =>
       result.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
       result.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -176,7 +228,7 @@ export default function JSONResultsAll() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{results.length}</div>
+            <div className="text-2xl font-bold">{userFilteredResults.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -187,7 +239,7 @@ export default function JSONResultsAll() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {results.filter((r) => r.status === "passed").length}
+              {userFilteredResults.filter((r) => r.status === "passed").length}
             </div>
           </CardContent>
         </Card>
@@ -199,7 +251,7 @@ export default function JSONResultsAll() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {results.filter((r) => r.status === "warning").length}
+              {userFilteredResults.filter((r) => r.status === "warning").length}
             </div>
           </CardContent>
         </Card>
@@ -211,7 +263,7 @@ export default function JSONResultsAll() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {results.filter((r) => r.status === "failed").length}
+              {userFilteredResults.filter((r) => r.status === "failed").length}
             </div>
           </CardContent>
         </Card>
@@ -244,8 +296,10 @@ export default function JSONResultsAll() {
             <div className="text-center py-12">
               <FileJson className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600">
-                {results.length === 0
-                  ? "No JSON analysis results found. Run the JSONScanner backend to generate results."
+                {userFilteredResults.length === 0
+                  ? user?.role === 'admin' 
+                    ? "No JSON analysis results found. Run the JSONScanner backend to generate results."
+                    : "No JSON analysis results found for your user account."
                   : "No results match your search."}
               </p>
             </div>
@@ -254,9 +308,10 @@ export default function JSONResultsAll() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Filename</TableHead>
+                  <TableHead>Machine</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Rules Applied</TableHead>
-                  <TableHead>Violations</TableHead>
+                  <TableHead>Programmer</TableHead>
                   <TableHead>Processed</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -270,6 +325,11 @@ export default function JSONResultsAll() {
                         {result.filename}
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-gray-700">
+                        {result.machine || "Unknown"}
+                      </span>
+                    </TableCell>
                     <TableCell>{getStatusBadge(result.status)}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
@@ -277,14 +337,9 @@ export default function JSONResultsAll() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {result.results.violations.length > 0 ? (
-                        <Badge variant="destructive">
-                          {result.results.violations.length} violation
-                          {result.results.violations.length !== 1 ? "s" : ""}
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-500 text-sm">None</span>
-                      )}
+                      <span className="text-sm text-gray-700">
+                        {result.operator || "Unknown"}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -296,7 +351,7 @@ export default function JSONResultsAll() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setSelectedResult(result)}
+                        onClick={() => handleViewDetails(result)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         View
@@ -337,60 +392,87 @@ export default function JSONResultsAll() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="overflow-auto flex-1 p-6 space-y-6">
-              {/* Rules Applied */}
+            <CardContent className="overflow-auto flex-1 p-6">
+              {/* Rules Table */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Quality Rules Applied ({selectedResult.results.rulesApplied.length})
+                  Quality Rules Evaluation
                 </h3>
-                {selectedResult.results.rulesApplied.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedResult.results.rulesApplied.map((rule, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
-                        ✓ {rule}
-                      </Badge>
-                    ))}
-                  </div>
+                {selectedResult.results.rules && selectedResult.results.rules.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Rule Name</TableHead>
+                        <TableHead>Result</TableHead>
+                        <TableHead>Failed Items</TableHead>
+                        <TableHead>Reason / Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedResult.results.rules.map((rule, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="font-medium">
+                            <div className="text-sm">{rule.name}</div>
+                            <div className="text-xs text-gray-500">{rule.description}</div>
+                          </TableCell>
+                          <TableCell>
+                            {!rule.shouldRun ? (
+                              <Badge variant="outline" className="bg-gray-100">
+                                Skipped
+                              </Badge>
+                            ) : rule.passed === null ? (
+                              <Badge variant="outline">N/A</Badge>
+                            ) : rule.passed ? (
+                              <Badge className="bg-green-100 text-green-800">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Pass
+                              </Badge>
+                            ) : (
+                              <Badge variant="destructive">
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Fail
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {!rule.shouldRun || rule.passed === null ? (
+                              <span className="text-xs text-gray-400">-</span>
+                            ) : !rule.passed && rule.failures && rule.failures.length > 0 ? (
+                              <div className="text-xs font-mono space-y-1">
+                                {rule.failures.map((failure, fIdx) => (
+                                  <div key={fIdx} className="text-red-700">
+                                    {failure.ncFile || failure.program || failure.item || "Item " + (fIdx + 1)}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-green-600">None</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {!rule.shouldRun ? (
+                              <span className="text-xs text-gray-600">Rule not applicable for this project</span>
+                            ) : rule.passed === null ? (
+                              <span className="text-xs text-gray-600">Not evaluated</span>
+                            ) : !rule.passed && rule.failures && rule.failures.length > 0 ? (
+                              <div className="text-xs space-y-1">
+                                {rule.failures.map((failure, fIdx) => (
+                                  <div key={fIdx} className="text-red-700">
+                                    {failure.message || "Violation detected"}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-green-600">All checks passed</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 ) : (
-                  <p className="text-sm text-gray-500">No rules applied</p>
-                )}
-              </div>
-
-              {/* Violations */}
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Violations ({selectedResult.results.violations.length})
-                </h3>
-                {selectedResult.results.violations.length > 0 ? (
-                  <div className="space-y-3">
-                    {selectedResult.results.violations.map((violation, idx) => (
-                      <div
-                        key={idx}
-                        className="border border-red-200 bg-red-50 rounded-md p-4"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="font-medium text-red-900 text-sm">
-                            {violation.rule}
-                          </div>
-                          <Badge variant="destructive" className="text-xs">
-                            {"error"}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-red-700 mb-2">
-                          {violation.message}
-                        </div>
-                        {violation.location && (
-                          <div className="text-xs text-red-600 font-mono">
-                            📍 {violation.location}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-green-700 bg-green-50 p-4 rounded-md">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <span className="text-sm font-medium">No violations found - all checks passed</span>
+                  <div className="text-center py-8 text-gray-500">
+                    <p>Loading detailed rule information...</p>
                   </div>
                 )}
               </div>

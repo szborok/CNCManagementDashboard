@@ -19,28 +19,17 @@
     "lastName": "Smith",
     "email": "john.smith@company.com",
     "department": "Production",
-    "profilePicture": "./assets/profiles/john-smith.jpg"
+    "profilePicture": "./assets/profiles/operator.jpg"
   },
   {
-    "id": "operator2",
-    "username": "jane.doe",
-    "password": "jane123",
-    "role": "user",
+    "id": "manager1",
+    "username": "manager",
+    "password": "manager123",
+    "role": "admin",
     "firstName": "Jane",
     "lastName": "Doe",
     "email": "jane.doe@company.com",
-    "department": "Quality Control",
-    "profilePicture": "./assets/profiles/jane-doe.jpg"
-  },
-  {
-    "id": "supervisor1",
-    "username": "mike.wilson",
-    "password": "mike123",
-    "role": "user",
-    "firstName": "Mike",
-    "lastName": "Wilson",
-    "email": "mike.wilson@company.com",
-    "department": "Production",
-    "profilePicture": "./assets/profiles/mike-wilson.jpg"
+    "department": "Management",
+    "profilePicture": "./assets/profiles/manager.jpg"
   }
 ]

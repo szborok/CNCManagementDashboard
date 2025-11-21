@@ -40,29 +40,69 @@ class AuthService {
   private readonly USER_KEY = 'cnc_user_data';
   private readonly API_BASE_URL = 'http://localhost:8080'; // Will be configurable via env in production
 
-  // Simulated users for development (in production, this would be handled by backend)
-  private readonly mockUsers: User[] = [
-    {
-      id: '1',
-      username: 'admin',
-      email: 'admin@cnc.local',
-      role: 'admin',
-      department: 'Management',
-      permissions: ['read', 'write', 'delete', 'manage_users', 'emergency_stop', 'system_config'],
-      lastLogin: new Date().toISOString(),
-      isActive: true
-    },
-    {
-      id: '2',
-      username: 'user',
-      email: 'user@cnc.local',
-      role: 'user',
-      department: 'Production',
-      permissions: ['read', 'operate_machine', 'basic_reports'],
-      lastLogin: new Date().toISOString(),
-      isActive: true
+  // Users loaded from template file
+  private mockUsers: User[] = [];
+  private mockPasswords: { [key: string]: string } = {};
+  private employeesLoaded: Promise<void>;
+
+  constructor() {
+    this.employeesLoaded = this.loadEmployees();
+  }
+
+  /**
+   * Load employees from test data (demo mode) or template file (production setup)
+   */
+  private async loadEmployees(): Promise<void> {
+    try {
+      // Try loading from test-data folder first (demo mode with real employee data)
+      let response = await fetch('/test-data/source_data/employees.json');
+      let source = 'demo data';
+      
+      if (!response.ok) {
+        // Fallback to template file (production setup)
+        response = await fetch('/config/employees.template.json');
+        source = 'template';
+      }
+      
+      if (response.ok) {
+        const employees = await response.json();
+        this.mockUsers = employees.map((emp: any) => ({
+          id: emp.id,
+          username: emp.username,
+          email: emp.email,
+          role: emp.role,
+          department: emp.department,
+          permissions: emp.role === 'admin' 
+            ? ['read', 'write', 'delete', 'manage_users', 'emergency_stop', 'system_config']
+            : ['read', 'operate_machine', 'basic_reports'],
+          lastLogin: new Date().toISOString(),
+          isActive: true
+        }));
+        // Store passwords separately
+        employees.forEach((emp: any) => {
+          this.mockPasswords[emp.username] = emp.password;
+        });
+        console.log(`✅ Loaded ${this.mockUsers.length} employees from ${source}`);
+      }
+    } catch (error) {
+      console.error('Failed to load employees:', error);
+      // Fallback to default admin user
+      this.mockUsers = [
+        {
+          id: 'admin',
+          username: 'admin',
+          email: 'admin@cnc.local',
+          role: 'admin',
+          department: 'Management',
+          permissions: ['read', 'write', 'delete', 'manage_users', 'emergency_stop', 'system_config'],
+          lastLogin: new Date().toISOString(),
+          isActive: true
+        }
+      ];
+      this.mockPasswords['admin'] = 'admin123';
+      console.log('⚠️ Using fallback admin account');
     }
-  ];
+  }
 
   /**
    * Authenticate user with credentials
@@ -71,14 +111,11 @@ class AuthService {
     try {
       console.log('🔐 Login attempt:', { username: credentials.username, hasPassword: !!credentials.password });
       
+      // Wait for employees to be loaded
+      await this.employeesLoaded;
+
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
-
-      // Simple password mapping for demo
-      const validCredentials: { [key: string]: string } = {
-        'admin': 'admin123',
-        'user': 'user123'
-      };
 
       // In production, this would be a real API call
       const user = this.mockUsers.find(u => 
@@ -95,7 +132,7 @@ class AuthService {
       }
 
       // Check password
-      if (validCredentials[credentials.username] !== credentials.password) {
+      if (this.mockPasswords[credentials.username] !== credentials.password) {
         console.error('❌ Invalid password for user:', credentials.username);
         return {
           success: false,
@@ -331,5 +368,8 @@ class AuthService {
 }
 
 // Export singleton instance
-export const authService = new AuthService();
+// Create singleton instance
+const authServiceInstance = new AuthService();
+
+export const authService = authServiceInstance;
 export type { User, LoginCredentials, AuthResponse };
