@@ -81,8 +81,8 @@ export default function JSONResultsAll() {
   const loadResults = async () => {
     setIsLoading(true);
     try {
-      // Fetch from JSONScanner backend
-      const response = await fetch("http://localhost:3001/api/projects");
+      // Fetch from JSONAnalyzer backend
+      const response = await fetch("http://localhost:3005/api/projects");
       if (response.ok) {
         const data = await response.json();
         // Transform backend format to UI format
@@ -116,7 +116,7 @@ export default function JSONResultsAll() {
 
   const loadDetailedResults = async (projectId: string) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/analysis/${projectId}`);
+      const response = await fetch(`http://localhost:3005/api/analysis/${projectId}`);
       if (response.ok) {
         const data = await response.json();
         return data;
