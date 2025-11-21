@@ -7,6 +7,7 @@ import Dashboard from "./components/Dashboard";
 import PlatesTable from "./components/PlatesTable";
 import ScannerResults from "./components/ScannerResults";
 import JSONResultsAll from "./components/JSONResultsAll";
+import JSONManualUpload from "./components/JSONManualUpload";
 import ToolManager from "./components/ToolManager";
 import Settings from "./components/Settings";
 import AdminSettings from "./components/AdminSettings";
@@ -629,11 +630,7 @@ function AppContent() {
           {currentView === "manual-upload" && (
             <ProtectedRoute>
               <div className="p-6">
-                <h1 className="text-2xl font-bold mb-4">Manual Upload</h1>
-                <p className="text-gray-600">
-                  This page will allow you to manually upload JSON files for
-                  analysis.
-                </p>
+                <JSONManualUpload />
               </div>
             </ProtectedRoute>
           )}

@@ -52,6 +52,7 @@ interface JSONScanResult {
   filename: string;
   machine: string | null;
   operator: string | null;
+  scanType: "auto" | "manual";
   processedAt: string;
   results: {
     rulesApplied: string[];
@@ -70,6 +71,12 @@ export default function JSONResultsAll() {
   const [results, setResults] = useState<JSONScanResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [scanTypeFilter, setScanTypeFilter] = useState<"all" | "auto" | "manual">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "passed" | "failed" | "warning">("all");
+  const [machineFilter, setMachineFilter] = useState<string>("all");
+  const [programmerFilter, setProgrammerFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
   const [selectedResult, setSelectedResult] = useState<JSONScanResult | null>(
     null
   );
@@ -87,14 +94,15 @@ export default function JSONResultsAll() {
         const data = await response.json();
         // Transform backend format to UI format
         const transformedResults = data.projects.map((project: any) => ({
-          id: project.id,
-          filename: project.name,
+          id: project.id || '',
+          filename: project.filename || '',
           machine: project.machine || null,
           operator: project.operator || null,
-          processedAt: project.timestamp,
+          scanType: project.scanType || 'auto',
+          processedAt: project.processedAt || '',
           results: {
-            rulesApplied: project.rulesApplied || [],
-            violations: project.violations || [],
+            rulesApplied: project.results?.rulesApplied || [],
+            violations: project.results?.violations || [],
           },
           status: project.status || "unknown",
         }));
@@ -140,16 +148,40 @@ export default function JSONResultsAll() {
     await loadResults();
   };
 
+  // Get unique values for filters
+  const uniqueMachines = Array.from(new Set(results.map(r => r.machine).filter((m): m is string => m !== null && m !== undefined)));
+  const uniqueProgrammers = Array.from(new Set(results.map(r => r.operator).filter((p): p is string => p !== null && p !== undefined)));
+
   // Filter by logged-in user's username (operator field matches username)
   const userFilteredResults = user?.role === 'admin' 
     ? results 
     : results.filter(result => result.operator?.toLowerCase() === user?.username?.toLowerCase());
 
-  const filteredResults = userFilteredResults.filter(
-    (result) =>
-      result.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      result.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Apply all filters
+  const filteredResults = userFilteredResults.filter((result) => {
+    // Search filter
+    const matchesSearch = result.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          result.id?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Scan type filter
+    const matchesScanType = scanTypeFilter === 'all' || result.scanType === scanTypeFilter;
+    
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || result.status === statusFilter;
+    
+    // Machine filter
+    const matchesMachine = machineFilter === 'all' || result.machine === machineFilter;
+    
+    // Programmer filter
+    const matchesProgrammer = programmerFilter === 'all' || result.operator === programmerFilter;
+    
+    // Date range filter
+    const resultDate = new Date(result.processedAt);
+    const matchesDateFrom = !dateFrom || resultDate >= new Date(dateFrom);
+    const matchesDateTo = !dateTo || resultDate <= new Date(dateTo + 'T23:59:59');
+    
+    return matchesSearch && matchesScanType && matchesStatus && matchesMachine && matchesProgrammer && matchesDateFrom && matchesDateTo;
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -203,7 +235,7 @@ export default function JSONResultsAll() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">All JSON Analysis Results</h1>
+          <h1 className="text-3xl font-bold">All Results</h1>
           <p className="text-gray-600 mt-1">
             View all processed CNC program files and their analysis results
           </p>
@@ -219,59 +251,9 @@ export default function JSONResultsAll() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Total Analyzed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userFilteredResults.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Passed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {userFilteredResults.filter((r) => r.status === "passed").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Warnings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {userFilteredResults.filter((r) => r.status === "warning").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Failed
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {userFilteredResults.filter((r) => r.status === "failed").length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
+      {/* Search and Filters */}
+      <div className="space-y-4">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search by filename or ID..."
@@ -279,6 +261,90 @@ export default function JSONResultsAll() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
           />
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {/* Type Filter */}
+          <select
+            value={scanTypeFilter}
+            onChange={(e) => setScanTypeFilter(e.target.value as any)}
+            className="px-3 py-2 border rounded-md text-sm"
+          >
+            <option value="all">All Types</option>
+            <option value="auto">🤖 Auto</option>
+            <option value="manual">👤 Manual</option>
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+            className="px-3 py-2 border rounded-md text-sm"
+          >
+            <option value="all">All Status</option>
+            <option value="passed">✓ Passed</option>
+            <option value="failed">✗ Failed</option>
+            <option value="warning">⚠ Warning</option>
+          </select>
+
+          {/* Machine Filter */}
+          <select
+            value={machineFilter}
+            onChange={(e) => setMachineFilter(e.target.value)}
+            className="px-3 py-2 border rounded-md text-sm"
+          >
+            <option value="all">All Machines</option>
+            {uniqueMachines.map((machine: string) => (
+              <option key={machine} value={machine}>{machine}</option>
+            ))}
+          </select>
+
+          {/* Programmer Filter */}
+          <select
+            value={programmerFilter}
+            onChange={(e) => setProgrammerFilter(e.target.value)}
+            className="px-3 py-2 border rounded-md text-sm"
+          >
+            <option value="all">All Programmers</option>
+            {uniqueProgrammers.map((programmer: string) => (
+              <option key={programmer} value={programmer}>{programmer}</option>
+            ))}
+          </select>
+
+          {/* Date From */}
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            placeholder="From Date"
+            className="text-sm"
+          />
+
+          {/* Date To */}
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            placeholder="To Date"
+            className="text-sm"
+          />
+
+          {/* Clear Filters */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setScanTypeFilter("all");
+              setStatusFilter("all");
+              setMachineFilter("all");
+              setProgrammerFilter("all");
+              setDateFrom("");
+              setDateTo("");
+              setSearchTerm("");
+            }}
+          >
+            Clear
+          </Button>
         </div>
       </div>
 
@@ -309,6 +375,7 @@ export default function JSONResultsAll() {
                 <TableRow>
                   <TableHead>Filename</TableHead>
                   <TableHead>Machine</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Rules Applied</TableHead>
                   <TableHead>Programmer</TableHead>
@@ -329,6 +396,14 @@ export default function JSONResultsAll() {
                       <span className="text-sm text-gray-700">
                         {result.machine || "Unknown"}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={result.scanType === 'manual' ? 'default' : 'secondary'}
+                        className={result.scanType === 'manual' ? 'bg-purple-100 text-purple-800' : ''}
+                      >
+                        {result.scanType === 'manual' ? '👤 Manual' : '🤖 Auto'}
+                      </Badge>
                     </TableCell>
                     <TableCell>{getStatusBadge(result.status)}</TableCell>
                     <TableCell>
